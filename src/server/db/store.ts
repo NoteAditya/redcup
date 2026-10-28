@@ -311,6 +311,14 @@ function persistFile(): Promise<void> {
   return writeChain;
 }
 
+function toIsoTs(value: unknown): string | null {
+  if (value == null) return null;
+  if (value instanceof Date) return value.toISOString();
+  const d = new Date(String(value));
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
 async function loadFromNeonVersioned(
   sql: NeonQueryFunction<false, false>,
 ): Promise<{ db: Db; updatedAt: string | null }> {
@@ -323,12 +331,12 @@ async function loadFromNeonVersioned(
     const again = await sql`SELECT data, updated_at FROM redcup_store WHERE id = 1`;
     return {
       db: again.length ? ({ ...empty(), ...(again[0].data as Db) } as Db) : db,
-      updatedAt: again.length ? String(again[0].updated_at) : null,
+      updatedAt: again.length ? toIsoTs(again[0].updated_at) : null,
     };
   }
   return {
     db: { ...empty(), ...(rows[0].data as Db) } as Db,
-    updatedAt: String(rows[0].updated_at),
+    updatedAt: toIsoTs(rows[0].updated_at),
   };
 }
 

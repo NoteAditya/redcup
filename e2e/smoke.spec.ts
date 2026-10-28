@@ -32,14 +32,14 @@ async function noConsoleErrors(page: Page) {
 
 
 async function signIn(page: Page, contact: string, password: string) {
-  await page.goto("/login");
-  // Clear any prior session
+  await page.goto("/");
   const signOut = page.getByRole("button", { name: /Sign out/i });
   if (await signOut.count()) {
     await signOut.click();
-    await page.waitForURL(/\/(login)?$/, { timeout: 15_000 }).catch(() => undefined);
-    await page.goto("/login");
+    await page.waitForTimeout(500);
   }
+  await page.goto("/login");
+  await page.locator("#contact").fill("");
   await page.locator("#contact").fill(contact);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: /^Sign in$/i }).click();
@@ -131,10 +131,7 @@ test.describe("RedCup production flows", () => {
     await shot(page, "admin-verification");
 
     // Brand funds bounty (TEST MODE)
-    await page.goto("/login");
-    await page.locator("#contact").fill(brandEmail);
-    await page.getByLabel("Password", { exact: true }).fill(password);
-    await page.getByRole("button", { name: /^Sign in$/i }).click();
+    await signIn(page, brandEmail, password);
     await expect(page).toHaveURL(/\/brand/, { timeout: 30_000 });
     await page.goto("/brand/bounties/new");
     await expect(page.getByText(/TEST MODE/i).first()).toBeVisible();
