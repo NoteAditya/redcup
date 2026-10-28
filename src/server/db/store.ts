@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { nanoid } from "nanoid";
+import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import type {
   ApplicationStatus,
   BrandKyc,
@@ -172,7 +173,7 @@ export type Db = {
   otps: { contact: string; code: string; expiresAt: string }[];
 };
 
-const empty = (): Db => ({
+export const empty = (): Db => ({
   users: [],
   brands: [],
   creators: [],
@@ -190,14 +191,11 @@ const empty = (): Db => ({
 });
 
 function dataDir(): string {
-  // Vercel is read-only except /tmp; local/dev uses ./data
   if (process.env.VERCEL || process.env.DATA_DIR === "/tmp") {
     return "/tmp/redcup-data";
   }
   return path.join(process.cwd(), "data");
 }
-
-const SEED_PATH = path.join(process.cwd(), "data", "seed.json");
 
 function storePath(): string {
   return path.join(dataDir(), "store.json");
@@ -205,30 +203,117 @@ function storePath(): string {
 
 let memory: Db | null = null;
 let writeChain: Promise<void> = Promise.resolve();
+let schemaReady = false;
+let sqlClient: NeonQueryFunction<false, false> | null | undefined;
+
+function getSql(): NeonQueryFunction<false, false> | null {
+  if (sqlClient !== undefined) return sqlClient;
+  const url = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
+  if (!url) {
+    sqlClient = null;
+    return null;
+  }
+  sqlClient = neon(url);
+  return sqlClient;
+}
+
+export function dbMode(): "neon" | "file" {
+  return getSql() ? "neon" : "file";
+}
+
+async function ensureSchema(sql: NeonQueryFunction<false, false>) {
+  if (schemaReady) return;
+  await sql`
+    CREATE TABLE IF NOT EXISTS redcup_store (
+      id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+      data JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `;
+  schemaReady = true;
+}
+
+async function bootstrapAdminIfNeeded(db: Db): Promise<Db> {
+  const email = (process.env.ADMIN_BOOTSTRAP_EMAIL || "").trim().toLowerCase();
+  const password = process.env.ADMIN_BOOTSTRAP_PASSWORD || "";
+  if (!email || !password) return db;
+  if (db.users.some((u) => u.role === "admin")) return db;
+
+  // Lazy import so bcrypt stays server-only and build does not pull crypto incorrectly
+  const bcrypt = await import("bcryptjs");
+  const passwordHash = await bcrypt.hash(password, 10);
+  db.users.push({
+    id: id("usr"),
+    role: "admin",
+    email,
+    phone: null,
+    name: "RedCup Admin",
+    status: "active",
+    passwordHash,
+    createdAt: nowIso(),
+  });
+  return db;
+}
+
+async function loadFromNeon(sql: NeonQueryFunction<false, false>): Promise<Db> {
+  await ensureSchema(sql);
+  const rows = await sql`SELECT data FROM redcup_store WHERE id = 1`;
+  if (!rows.length) {
+    const db = await bootstrapAdminIfNeeded(empty());
+    await sql`INSERT INTO redcup_store (id, data) VALUES (1, ${JSON.stringify(db)}::jsonb)
+              ON CONFLICT (id) DO NOTHING`;
+    return db;
+  }
+  const db = rows[0].data as Db;
+  // Ensure all keys exist for older documents
+  return { ...empty(), ...db };
+}
+
+async function saveToNeon(sql: NeonQueryFunction<false, false>, db: Db) {
+  await ensureSchema(sql);
+  await sql`
+    INSERT INTO redcup_store (id, data, updated_at)
+    VALUES (1, ${JSON.stringify(db)}::jsonb, now())
+    ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = now()
+  `;
+}
+
+async function loadFromFile(): Promise<Db> {
+  try {
+    await fs.mkdir(dataDir(), { recursive: true });
+    const raw = await fs.readFile(storePath(), "utf8");
+    return { ...empty(), ...(JSON.parse(raw) as Db) };
+  } catch {
+    // Empty local store — no fake seed. Admin is bootstrapped when env is set.
+    const db = await bootstrapAdminIfNeeded(empty());
+    await fs.mkdir(dataDir(), { recursive: true });
+    await fs.writeFile(storePath(), JSON.stringify(db, null, 2));
+    return db;
+  }
+}
+
+async function saveToFile(db: Db) {
+  await fs.mkdir(dataDir(), { recursive: true });
+  await fs.writeFile(storePath(), JSON.stringify(db, null, 2));
+}
 
 async function ensure(): Promise<Db> {
   if (memory) return memory;
-  const STORE_PATH = storePath();
-  try {
-    await fs.mkdir(dataDir(), { recursive: true });
-    const raw = await fs.readFile(STORE_PATH, "utf8");
-    memory = JSON.parse(raw) as Db;
-  } catch {
-    try {
-      const seed = await fs.readFile(SEED_PATH, "utf8");
-      memory = JSON.parse(seed) as Db;
-    } catch {
-      memory = empty();
-    }
-    await persist();
+  const sql = getSql();
+  if (sql) {
+    memory = await loadFromNeon(sql);
+  } else {
+    memory = await loadFromFile();
   }
   return memory!;
 }
 
 function persist(): Promise<void> {
   writeChain = writeChain.then(async () => {
-    await fs.mkdir(dataDir(), { recursive: true });
-    await fs.writeFile(storePath(), JSON.stringify(memory, null, 2));
+    if (!memory) return;
+    const sql = getSql();
+    if (sql) await saveToNeon(sql, memory);
+    else await saveToFile(memory);
   });
   return writeChain;
 }
@@ -244,15 +329,16 @@ export async function updateDb<T>(fn: (db: Db) => T | Promise<T>): Promise<T> {
   return result;
 }
 
+/** Force reload from Neon/file (tests / scripts). */
+export function resetMemoryCache() {
+  memory = null;
+  schemaReady = false;
+}
+
 export function id(prefix: string): string {
   return `${prefix}_${nanoid(10)}`;
 }
 
 export function nowIso(): string {
   return new Date().toISOString();
-}
-
-/** When DATABASE_URL is set, Neon is preferred — surface that clearly. */
-export function dbMode(): "file" | "neon-ready" {
-  return process.env.DATABASE_URL ? "neon-ready" : "file";
 }

@@ -124,7 +124,7 @@ export async function fundCampaign(campaignId: string) {
           brandId: brand.id,
           creatorId: null,
           createdAt: nowIso(),
-          note: "Demo funding capture",
+          note: "TEST MODE funding — no real money moved",
         },
         {
           id: id("led"),

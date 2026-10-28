@@ -49,7 +49,7 @@ export function SignUpForm({ defaultRole = "brand" }: { defaultRole?: "brand" | 
         <input id="phone" name="phone" autoComplete="tel" />
       </div>
       <div className="field">
-        <label htmlFor="password">Password (demo sign-in)</label>
+        <label htmlFor="password">Password</label>
         <input id="password" name="password" type="password" required minLength={6} autoComplete="new-password" />
       </div>
       {error && <p className="err">{error}</p>}

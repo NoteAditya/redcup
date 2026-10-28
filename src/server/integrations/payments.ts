@@ -17,7 +17,7 @@ export function paymentConnectState(): { ready: boolean; provider: PaymentProvid
       ready: false,
       provider,
       message:
-        "Connect Razorpay or Cashfree (set keys in Vercel env). Until then, checkout uses a clear demo capture that never moves real money.",
+        "TEST MODE — no real money moves. Connect Razorpay or Cashfree keys in Vercel env for live checkout.",
     };
   }
   return { ready: true, provider };

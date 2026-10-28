@@ -10,7 +10,7 @@ export default function VerifyPage() {
       <div style={{ maxWidth: 480, marginTop: "1rem" }}>
         <ConnectBanner
           provider="Resend or MSG91"
-          message="OTP verification needs RESEND_API_KEY or SMS_API_KEY. Use demo password sign-in until those keys are connected."
+          message="OTP verification needs RESEND_API_KEY or SMS_API_KEY. Use password sign-in until those keys are connected."
         />
       </div>
     </MarketingShell>

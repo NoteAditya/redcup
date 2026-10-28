@@ -19,7 +19,7 @@ export function DraftUploadForm({ applicationId }: { applicationId: string }) {
           const res = await uploadDraft(
             applicationId,
             String(fd.get("caption") || ""),
-            String(fd.get("videoPath") || "uploads/demo-draft.mp4"),
+            String(fd.get("videoPath") || "uploads/draft-pending.mp4"),
           );
           if (!res.ok) setErr(res.error || "Failed");
           else router.refresh();
@@ -33,7 +33,7 @@ export function DraftUploadForm({ applicationId }: { applicationId: string }) {
       </div>
       <div className="field">
         <label htmlFor="videoPath">Video path / URL (upload adapter later)</label>
-        <input id="videoPath" name="videoPath" defaultValue="uploads/demo-draft.mp4" />
+        <input id="videoPath" name="videoPath" defaultValue="uploads/draft-pending.mp4" />
       </div>
       {err && <p className="err">{err}</p>}
       <button className="btn btn-primary" type="submit" disabled={pending}>

@@ -13,7 +13,7 @@ export async function saveCreatorOnboarding(input: {
   whatsapp: string;
   pan: string;
   upi: string;
-  /** Demo metrics until Instagram is connected */
+  /** Self-reported metrics until Instagram is connected */
   followers?: number;
 }) {
   const session = await requireUser(["creator"]);
@@ -55,7 +55,7 @@ export async function saveCreatorOnboarding(input: {
       qualityRating: existing?.qualityRating ?? null,
       fraudFlagsUpheld: 0,
       competitorHistory: existing?.competitorHistory ?? [],
-      // Demo connect until Meta keys exist — marked clearly in UI
+      // Self-reported connect until Meta keys exist — marked clearly in UI
       igConnected: ig.ready ? Boolean(existing?.igConnected) : true,
       tokenValid: ig.ready ? Boolean(existing?.tokenValid) : true,
       refreshedAt: nowIso(),

@@ -83,7 +83,7 @@ export function CreatorOnboardingForm() {
         <input id="upi" name="upi" required placeholder="name@upi" />
       </div>
       <div className="field">
-        <label htmlFor="followers">Followers (demo until Instagram is connected)</label>
+        <label htmlFor="followers">Followers (self-reported until Instagram is connected)</label>
         <input id="followers" name="followers" type="number" min={0} defaultValue={12000} />
       </div>
       {igMsg && (

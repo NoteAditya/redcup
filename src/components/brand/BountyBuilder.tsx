@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createCampaignDraft, fundCampaign, previewEligibleCount } from "@/server/services/campaigns";
 import { formatINR, brandCheckoutTotal, rupeesToPaise } from "@/lib/money";
 import { ConnectBanner } from "@/components/ui/ConnectBanner";
+import { TestModeBanner } from "@/components/ui/TestModeBanner";
 import type { CampaignCriteria } from "@/lib/types";
 
 const PRESETS: { id: string; label: string; criteria: CampaignCriteria }[] = [
@@ -169,12 +170,18 @@ export function BountyBuilder() {
         </div>
         {error && <p className="err">{error}</p>}
         {payMsg && (
-          <div style={{ marginBottom: "0.75rem" }}>
+          <div style={{ marginBottom: "0.75rem", display: "grid", gap: "0.5rem" }}>
+            <TestModeBanner detail={payMsg.message} />
             <ConnectBanner provider={payMsg.provider} message={payMsg.message} />
           </div>
         )}
+        {!payMsg && (
+          <div style={{ marginBottom: "0.75rem" }}>
+            <TestModeBanner />
+          </div>
+        )}
         <button className="btn btn-primary" type="submit" disabled={pending}>
-          {pending ? "Funding…" : "Create and fund (demo if no payment keys)"}
+          {pending ? "Funding…" : "Create and fund (TEST MODE if no payment keys)"}
         </button>
       </form>
       <div className="card">
@@ -188,8 +195,8 @@ export function BountyBuilder() {
           </li>
         </ul>
         <p className="muted" style={{ marginTop: "0.75rem", fontSize: "0.85rem" }}>
-          KYC must be approved before funding succeeds. Without Razorpay/Cashfree keys, RedCup records a clear demo
-          capture and marks the bounty live.
+          KYC must be approved before funding succeeds. Without Razorpay/Cashfree keys, RedCup records a TEST MODE
+          capture (no real money) and marks the bounty live.
         </p>
       </div>
     </div>

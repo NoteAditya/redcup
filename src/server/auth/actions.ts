@@ -135,7 +135,7 @@ export async function requestOtp(contact: string) {
       needsConnect: true as const,
       provider: contact.includes("@") ? "Resend (email OTP)" : "MSG91 / Twilio (SMS OTP)",
       message:
-        "OTP login needs an email or SMS provider key. Use demo password sign-in for now, or add RESEND_API_KEY / SMS_API_KEY.",
+        "OTP login needs an email or SMS provider key. Use password sign-in for now, or add RESEND_API_KEY / SMS_API_KEY.",
     };
   }
   const code = String(Math.floor(100000 + Math.random() * 900000));
