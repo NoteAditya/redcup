@@ -1,0 +1,398 @@
+{
+  "users": [
+    {
+      "id": "usr_TqsS-_kW6B",
+      "role": "admin",
+      "email": "thenoteaditya@gmail.com",
+      "phone": null,
+      "name": "Aditya Admin",
+      "status": "active",
+      "passwordHash": "$2b$10$lEvMRJHttB7KkBwxShHbqOTGvrgiarWZKQ.ZTOovVMYpfXvgX1nIi",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "id": "usr_dvh_LZlip1",
+      "role": "brand",
+      "email": "brand@demo.redcup",
+      "phone": null,
+      "name": "Demo Skincare Co",
+      "status": "active",
+      "passwordHash": "$2b$10$lEvMRJHttB7KkBwxShHbqOTGvrgiarWZKQ.ZTOovVMYpfXvgX1nIi",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "id": "usr_ZhitaNIvIj",
+      "role": "creator",
+      "email": "ananya.beauty@demo.redcup",
+      "phone": null,
+      "name": "Ananya Beauty",
+      "status": "active",
+      "passwordHash": "$2b$10$lEvMRJHttB7KkBwxShHbqOTGvrgiarWZKQ.ZTOovVMYpfXvgX1nIi",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "id": "usr_Mf3FMtRKD3",
+      "role": "creator",
+      "email": "rohiteats@demo.redcup",
+      "phone": null,
+      "name": "Rohit Eats",
+      "status": "active",
+      "passwordHash": "$2b$10$lEvMRJHttB7KkBwxShHbqOTGvrgiarWZKQ.ZTOovVMYpfXvgX1nIi",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "id": "usr_8mc53ubKg3",
+      "role": "creator",
+      "email": "kavyaglow@demo.redcup",
+      "phone": null,
+      "name": "Kavya Glow",
+      "status": "active",
+      "passwordHash": "$2b$10$lEvMRJHttB7KkBwxShHbqOTGvrgiarWZKQ.ZTOovVMYpfXvgX1nIi",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "id": "usr_O9HzgHBOAC",
+      "role": "creator",
+      "email": "ishanano@demo.redcup",
+      "phone": null,
+      "name": "Isha Nano",
+      "status": "active",
+      "passwordHash": "$2b$10$lEvMRJHttB7KkBwxShHbqOTGvrgiarWZKQ.ZTOovVMYpfXvgX1nIi",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    }
+  ],
+  "brands": [
+    {
+      "id": "br_HNWaeYCiG_",
+      "userId": "usr_dvh_LZlip1",
+      "businessName": "Demo Skincare Co",
+      "slug": "demo-skincare",
+      "category": "Beauty",
+      "city": "Mumbai",
+      "gstin": "27AABCU9603R1ZM",
+      "kycStatus": "approved",
+      "website": "https://example.com",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    }
+  ],
+  "creators": [
+    {
+      "id": "cr_F-g8ScHDsU",
+      "userId": "usr_ZhitaNIvIj",
+      "displayName": "Ananya Beauty",
+      "handle": "ananya.beauty",
+      "city": "Delhi",
+      "languages": [
+        "Hindi",
+        "English"
+      ],
+      "categories": [
+        "Beauty",
+        "Skincare"
+      ],
+      "level": "verified",
+      "panMasked": "****1234",
+      "upiMasked": "****upi",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "id": "cr_btg6kmrvzZ",
+      "userId": "usr_Mf3FMtRKD3",
+      "displayName": "Rohit Eats",
+      "handle": "rohiteats",
+      "city": "Mumbai",
+      "languages": [
+        "Hindi",
+        "English"
+      ],
+      "categories": [
+        "Food",
+        "Cafe"
+      ],
+      "level": "verified",
+      "panMasked": "****1234",
+      "upiMasked": "****upi",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "id": "cr_k8KZF5z0tq",
+      "userId": "usr_8mc53ubKg3",
+      "displayName": "Kavya Glow",
+      "handle": "kavyaglow",
+      "city": "Bengaluru",
+      "languages": [
+        "English",
+        "Kannada"
+      ],
+      "categories": [
+        "Beauty",
+        "Lifestyle"
+      ],
+      "level": "verified",
+      "panMasked": "****1234",
+      "upiMasked": "****upi",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "id": "cr_gi9HJkV3x_",
+      "userId": "usr_O9HzgHBOAC",
+      "displayName": "Isha Nano",
+      "handle": "ishanano",
+      "city": "Pune",
+      "languages": [
+        "Hindi"
+      ],
+      "categories": [
+        "Beauty"
+      ],
+      "level": "verified",
+      "panMasked": "****1234",
+      "upiMasked": "****upi",
+      "createdAt": "2026-10-28T14:30:21.354Z"
+    }
+  ],
+  "creatorMetrics": [
+    {
+      "creatorId": "cr_F-g8ScHDsU",
+      "followers": 22000,
+      "accountType": "CREATOR",
+      "accountAgeDays": 400,
+      "mediaCount": 40,
+      "avgReelViews10": 9000,
+      "engagementRate10": 0.042,
+      "audienceCountryPct": {
+        "IN": 82
+      },
+      "audienceCityPct": {
+        "Delhi": 28
+      },
+      "audienceGenderAge": {
+        "female": 62,
+        "male": 38
+      },
+      "niches": [
+        "Beauty",
+        "Skincare"
+      ],
+      "nicheVerified": [
+        "Beauty"
+      ],
+      "languages": [
+        "Hindi",
+        "English"
+      ],
+      "city": "Delhi",
+      "whatsapp": "+919999000000",
+      "pan": "ABCDE1234F",
+      "upi": "ananya.beauty@upi",
+      "redcupScore": 72,
+      "onTimeRate": 0.95,
+      "firstDraftRate": 0.8,
+      "qualityRating": 4.4,
+      "fraudFlagsUpheld": 0,
+      "competitorHistory": [],
+      "igConnected": true,
+      "tokenValid": true,
+      "refreshedAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "creatorId": "cr_btg6kmrvzZ",
+      "followers": 8000,
+      "accountType": "CREATOR",
+      "accountAgeDays": 400,
+      "mediaCount": 40,
+      "avgReelViews10": 4500,
+      "engagementRate10": 0.05,
+      "audienceCountryPct": {
+        "IN": 82
+      },
+      "audienceCityPct": {
+        "Mumbai": 28
+      },
+      "audienceGenderAge": {
+        "female": 62,
+        "male": 38
+      },
+      "niches": [
+        "Food",
+        "Cafe"
+      ],
+      "nicheVerified": [
+        "Food"
+      ],
+      "languages": [
+        "Hindi",
+        "English"
+      ],
+      "city": "Mumbai",
+      "whatsapp": "+919999000000",
+      "pan": "ABCDE1234F",
+      "upi": "rohiteats@upi",
+      "redcupScore": 72,
+      "onTimeRate": 0.95,
+      "firstDraftRate": 0.8,
+      "qualityRating": 4.4,
+      "fraudFlagsUpheld": 0,
+      "competitorHistory": [],
+      "igConnected": true,
+      "tokenValid": true,
+      "refreshedAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "creatorId": "cr_k8KZF5z0tq",
+      "followers": 35000,
+      "accountType": "CREATOR",
+      "accountAgeDays": 400,
+      "mediaCount": 40,
+      "avgReelViews10": 14000,
+      "engagementRate10": 0.031,
+      "audienceCountryPct": {
+        "IN": 82
+      },
+      "audienceCityPct": {
+        "Bengaluru": 28
+      },
+      "audienceGenderAge": {
+        "female": 62,
+        "male": 38
+      },
+      "niches": [
+        "Beauty",
+        "Lifestyle"
+      ],
+      "nicheVerified": [
+        "Beauty"
+      ],
+      "languages": [
+        "English",
+        "Kannada"
+      ],
+      "city": "Bengaluru",
+      "whatsapp": "+919999000000",
+      "pan": "ABCDE1234F",
+      "upi": "kavyaglow@upi",
+      "redcupScore": 72,
+      "onTimeRate": 0.95,
+      "firstDraftRate": 0.8,
+      "qualityRating": 4.4,
+      "fraudFlagsUpheld": 0,
+      "competitorHistory": [],
+      "igConnected": true,
+      "tokenValid": true,
+      "refreshedAt": "2026-10-28T14:30:21.354Z"
+    },
+    {
+      "creatorId": "cr_gi9HJkV3x_",
+      "followers": 4500,
+      "accountType": "CREATOR",
+      "accountAgeDays": 400,
+      "mediaCount": 40,
+      "avgReelViews10": 1800,
+      "engagementRate10": 0.055,
+      "audienceCountryPct": {
+        "IN": 82
+      },
+      "audienceCityPct": {
+        "Pune": 28
+      },
+      "audienceGenderAge": {
+        "female": 62,
+        "male": 38
+      },
+      "niches": [
+        "Beauty"
+      ],
+      "nicheVerified": [
+        "Beauty"
+      ],
+      "languages": [
+        "Hindi"
+      ],
+      "city": "Pune",
+      "whatsapp": "+919999000000",
+      "pan": "ABCDE1234F",
+      "upi": "ishanano@upi",
+      "redcupScore": 72,
+      "onTimeRate": 0.95,
+      "firstDraftRate": 0.8,
+      "qualityRating": 4.4,
+      "fraudFlagsUpheld": 0,
+      "competitorHistory": [],
+      "igConnected": true,
+      "tokenValid": true,
+      "refreshedAt": "2026-10-28T14:30:21.354Z"
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "cmp_Cxax9dyyqn",
+      "brandId": "br_HNWaeYCiG_",
+      "slug": "weekend-skincare-reel-demo",
+      "title": "Weekend skincare reel",
+      "brief": "Show your AM routine with our vitamin C serum. Keep it under 30s. Natural light preferred.",
+      "dosDonts": "Do: paid partnership label, speak Hindi or English.\\nDon't: mention competitor brands.",
+      "ratePer1000Paise": 80000,
+      "budgetPaise": 2500000,
+      "basePaise": 150000,
+      "capPerCreatorPaise": 1500000,
+      "slots": 2,
+      "criteria": {
+        "followers": {
+          "mode": "must",
+          "min": 10000,
+          "max": 50000
+        },
+        "niches": {
+          "mode": "must",
+          "any_of": [
+            "Beauty",
+            "Skincare"
+          ]
+        },
+        "audience_country": {
+          "mode": "must",
+          "country": "IN",
+          "min_pct": 60
+        },
+        "languages": {
+          "mode": "nice",
+          "any_of": [
+            "Hindi",
+            "English"
+          ]
+        },
+        "avg_reel_views": {
+          "mode": "nice",
+          "min": 3000
+        }
+      },
+      "presetId": "beauty_micro",
+      "status": "live",
+      "applicationClosesAt": "2026-11-04T14:30:21.354Z",
+      "awardDeadlineAt": null,
+      "createdAt": "2026-10-28T14:30:21.354Z",
+      "fundedAt": "2026-10-28T14:30:21.354Z"
+    }
+  ],
+  "applications": [],
+  "drafts": [],
+  "reels": [],
+  "ledger": [
+    {
+      "id": "led_MIHRDpPEvQ",
+      "type": "funding",
+      "amountPaise": 2500000,
+      "campaignId": "cmp_Cxax9dyyqn",
+      "applicationId": null,
+      "brandId": "br_HNWaeYCiG_",
+      "creatorId": null,
+      "createdAt": "2026-10-28T14:30:21.354Z",
+      "note": "Seed funding"
+    }
+  ],
+  "paymentOrders": [],
+  "eligibility": [],
+  "shortlistOverrides": [],
+  "adminActions": [],
+  "otps": []
+}

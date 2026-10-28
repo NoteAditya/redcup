@@ -1,0 +1,264 @@
+RedCup — Final Model
+
+
+
+
+RedCup — Final Model
+  ​Oct 16, 2026        · ​@Harsh Singh
+
+
+RedCup in one line
+RedCup is India's pay-for-results creator marketing platform: brands post campaigns,
+eligible creators apply, RedCup shortlists the best fit, the brand picks who to award, and
+creators earn a guaranteed base per approved reel plus pay for every verified view.
+
+Pitch: Meta Ads, but with real creators — brands pay a small base, then only for verified
+views.
+
+
+  For                                        What they get
+
+  Brands (D2C and small businesses, pan-     A shortlist of the best-fit creators for their
+  India)                                     niche, the final say on who's selected, approval
+                                             of every draft, verified results, budgets from
+                                             ₹5,000
+
+  Creators (any follower count)              Guaranteed base per approved reel, more for
+                                             every verified view, UPI payout in about a
+                                             week, a public record of results
+
+  Agencies and partners                      Run client campaigns on RedCup or earn
+                                             referral fees
+
+
+What makes it different: results over followers, numbers from Instagram's own data,
+money held upfront, public results boards, and rankings that can't be bought.
+
+
+The model
+Every campaign is a bounty: a reel brief the brand funds upfront. Eligible creators apply,
+RedCup shortlists the best fit, and the brand awards it. Creators are paid a base for
+approved, live work and a performance amount for verified views.
+
+How a campaign runs (about 2–3 weeks)
+
+ 1. Brand posts the campaign: brief, eligibility criteria (followers, niche, city, language),
+    base per creator tier, rate per 1,000 views, budget and number of creators — and funds
+    it through the payment partner.
+ 2. Eligible creators apply: creators who meet the criteria get a WhatsApp alert and apply.
+
+
+
+
+                                                                                        Page 1 of 5
+RedCup — Final Model
+
+
+
+
+ 3. RedCup shortlists: we filter applicants by niche, past results and fit for the campaign,
+    and send the brand a shortlist.
+ 4. Brand selects and awards: the brand picks its creators; each awarded creator's
+     maximum earning is reserved from the budget.
+ 5. Creative direction and draft: awarded creators get the brand's direction, make the
+    reel and send a draft; the brand approves it or asks for one change.
+ 6. Creator posts the approved reel with the Paid Partnership label.
+ 7. Tracking and payout: RedCup tracks verified views for 7 days, checks for fraud, and
+     pays by UPI.
+ 8. Results: a public results board ranks every awarded creator; unused budget goes back
+    to the brand.
+
+How creators are paid
+
+     Base: paid once the approved reel has been live 7 days. It starts from the creator's
+     follower tier and, after 3 bounties, is set by their own results.
+     Performance: a rate per 1,000 verified views, set by the brand.
+     Cap: base + performance can't exceed the per-creator maximum. Fake views cancel
+     both.
+
+
+  Creator tier             Base per approved reel (to confirm with the
+                           creator survey)
+
+  Nano (1K–10K)            ₹500–1,500
+
+  Micro (10K–50K)          ₹1,500–5,000
+
+  Mid (50K–2 lakh)         ₹5,000–15,000
+
+  Proven (3+ bounties)     About 30% of their typical verified views × rate
+
+
+
+
+Business model
+RedCup earns on both sides of every bounty — about 22% of the money that flows
+through it — and adds service fees on top. It stays a platform: services must never
+become most of the revenue.
+
+
+  Revenue stream                    Who pays        Price                             From
+
+  Platform fee                      Brand           15% on top of the bounty budget   Launch
+                                                    (+18% GST on the fee)
+
+
+
+
+                                                                                        Page 2 of 5
+RedCup — Final Model
+
+
+
+
+  Revenue stream                 Who pays        Price                           From
+
+  Creator commission             Creator         10% of each payout              Launch
+
+  Managed campaigns              Brand           ₹5,000–15,000 per campaign      Launch
+
+  Growth package                 Brand           ₹25,000–40,000 a month +        Month
+                                                 bounty budgets                  2
+
+  Agency partners                Agency          Reduced 12% platform fee on     Month
+                                                 client bounties                 3
+
+  Partner referrals              Service         Agreed share of work RedCup     Launch
+                                 partner         refers
+
+  Content rights, Creator Pro,   Brands,         Licence fees, subscriptions,    2027
+  featured bounties              creators        labelled placements
+
+  RedCup Score data              Brands,         Data and reports                2028
+                                 agencies
+
+
+Unit economics of one bounty
+
+
+                                                         Amount
+
+  Bounty budget                                          ₹50,000
+
+  Brand pays (budget + 15% fee + GST on fee)             ₹58,850
+
+  RedCup platform fee                                    ₹7,500
+
+  RedCup creator commission (10% of ₹50,000 if           ₹5,000
+  fully used)
+
+  Payment gateway costs (~2%)                            ~₹1,200
+
+  RedCup net per fully used bounty                       ~₹11,300
+
+
+What drives it: repeat brands (target 40%+ funding a second bounty within 60 days),
+budget fill rate (80%+ of each budget earned by creators), and average bounty size.
+
+
+What we launch with
+We launch pan-India in late October 2026 with the smallest product that runs a real paid
+bounty end to end; everything else is done by hand until it's proven.
+
+
+
+
+                                                                                      Page 3 of 5
+RedCup — Final Model
+
+
+
+
+  In at launch                                    Out at launch (done by hand or later)
+
+  Brand sign-up, verification, bounty builder     Live brand dashboard — weekly WhatsApp
+  with base tiers, checkout                       report instead
+
+  Creator sign-up with WhatsApp number,           Automatic WhatsApp alerts — sent by hand
+  Instagram connect, PAN and UPI                  at first
+
+  Campaign feed and applications, RedCup          Results boards — posted by hand as images
+  shortlist, brand selection, draft upload and    at first
+  approval
+
+  View tracking (Instagram API, or screen-        RedCup Score, leaderboards, brand badges
+  recorded insights checked by us until Meta
+  approves)
+
+  UPI payouts through the payment partner,        Automatic fraud scoring — reviewed by
+  admin review queue                              hand
+
+  Self-serve and Managed packages                 Growth package, agency accounts, content
+                                                  rights
+
+  Instagram Reels                                 YouTube Shorts
+
+
+Launch offer (proposed): first 20 Founding Brands pay no platform fee on their first
+bounty (up to ₹25,000), and RedCup writes the brief and picks creators for them.
+
+Launch targets
+
+
+  By                   Target
+
+  Launch day           100+ creator survey responses; 200 creators
+                       signed up; 3–5 funded bounties live
+
+  End of November      10 paying brands; first results boards published
+
+  Mid-January 2027     40%+ of brands fund a second bounty — the
+                       go/no-go check
+
+
+Before taking any money: payment partner account approved, terms of service and
+privacy policy live, GST invoicing ready, and Meta app review applied for.
+
+
+Expansion plan
+RedCup grows in four phases, and each one starts only when the last one proves itself —
+the first gate is 40% of brands coming back by mid-January 2027.
+
+
+
+                                                                                          Page 4 of 5
+RedCup — Final Model
+
+
+
+
+expansion roadmap · 2026 to 2028
+
+How each phase expands
+
+     Launch: win D2C brands across India, starting with categories where reels sell (beauty,
+     food and beverage, fashion); prove creators deliver and brands return.
+     Prove and automate: turn everything done by hand into software — alerts, results
+     boards, the RedCup Score, fraud checks — then raise a seed round on real repeat-
+     brand numbers.
+     Scale: bring in agencies as a sales channel, add YouTube Shorts, and sell content rights
+     so the best reels become paid ads.
+     The ad network: brands set a goal and budget and RedCup's AI runs the campaign;
+     pay-per-customer for local businesses through creator QR codes and coupons; the
+     RedCup Score becomes a data product and the base for creator financing.
+
+Path to a ₹100 crore valuation (assumptions)
+
+
+  Year           Campaign spend through RedCup   RedCup revenue
+
+  Year 1         ~₹1 crore                       ~₹20 lakh
+
+  Year 2         ₹15–20 crore                    ₹3–4 crore
+
+  Year 3         ₹50–70 crore                    ₹10–15 crore
+
+
+The bigger prize is ad budgets, not influencer budgets: small businesses already spend on
+boosting posts, and RedCup offers them real creators with verified results instead.
+
+
+
+
+                                                                                       Page 5 of 5
+

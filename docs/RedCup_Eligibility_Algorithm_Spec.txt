@@ -1,0 +1,322 @@
+ RedCup Eligibility & Shortlist
+ Algorithm
+ Build spec v1 for Om · from Harsh · 16 October 2026 · launch scope marked where it differs
+ from later versions
+
+
+ 1. What this builds
+ Creators should see, before applying, whether they are eligible for a campaign and exactly why not
+ — like Superset shows students which job posts they can apply to. Eligibility works as four rings,
+ from widest to narrowest:
+
+ Ring                        What it decides                      Who decides                    Automated at
+                                                                                                 launch?
+
+ 1. RedCup verified          Can this creator apply to            System                         Yes
+                             anything?
+
+ 2. Campaign                 Can this creator apply to this       System, using the brand's      Yes
+ must-haves                  campaign?                            criteria
+
+ 3. Shortlist                Which applicants does the brand      Fit Score + RedCup review      Score yes; quality
+                             see, in what order?                                                 rating by hand
+
+ 4. Award                    Who gets the campaign?               Brand (48-hour deadline)       Yes, with auto-award
+                                                                                                 fallback
+
+ Deliverables:
+
+  • A verification gate (Ring 1) with reason codes.
+  • A per-campaign criteria object; each rule is must (blocks applying) or nice (only affects Fit
+     Score).
+  • An eligibility engine returning a status + reasons for every creator × open campaign, refreshed
+     daily and on demand.
+  • Creator-side status on every campaign card, including "almost eligible".
+  • A live "≈ N creators eligible" count in the brand's campaign builder.
+  • Fit Score, shortlist generation, brand selection with deadline, and application states.
+
+
+ 2. Data inputs
+ Store the latest creator numbers in a creator_metrics table, refreshed daily from the Instagram API
+ (and right after a creator connects or reconnects).
+
+ Field                                    Source                  Notes
+
+ followers, account_type,                 Instagram API           account_type must be Creator or Business
+ media_count
+
+ account_age_days                         Instagram API (proxy)   Instagram doesn't expose account creation date: use
+                                                                  the date of the oldest post returned
+
+ avg_reel_views_10                        Instagram API           Mean views of the last 10 reels; null if fewer than 3
+                                                                  reels
+
+ engagement_rate_10                       Instagram API           Mean of (likes + comments + shares + saves) ÷
+                                                                  views over the last 10 reels
+
+
+
+
+RedCup · Eligibility & Shortlist Algorithm · v1                                                                       Page 1
+ Field                                    Source                    Notes
+
+ audience_country_pct,                    Instagram audience        Only available above Meta's minimum follower
+ audience_city_pct,                       insights                  threshold: store null when unavailable, never 0
+ audience_gender_age
+
+ niches (max 3), niche_verified[]         Creator profile +         Self-declared; a niche counts as verified once
+                                          RedCup review             RedCup checks recent reels
+
+ languages, city                          Creator profile
+
+ whatsapp, pan, upi                       Creator profile           Required for Ring 1
+
+ redcup_score, on_time_rate,              RedCup data               Null for creators with no completed campaigns
+ first_draft_rate
+
+ quality_rating (1–5)                     RedCup team               Manual at launch; null if not yet rated
+
+ fraud_flags_upheld,                      RedCup data               Competitor history = brands the creator was
+ competitor_history                                                 awarded on RedCup, with dates
+
+
+
+ 3. Ring 1 — RedCup verified
+ Run on sign-up, on every metrics refresh, and before every application. All rules must pass. Return
+ every failed rule, not just the first, so the creator can fix them all at once.
+
+ Rule                     Pass condition                      Reason code          Message shown
+
+ IG_CONNECTED             Professional account                IG_NOT_CONNECTE      Connect your Instagram professional
+                          connected, token valid              D                    account
+
+ ACCOUNT_AGE              account_age_days ≥ 90               ACCOUNT_TOO_NE       Your account needs to be 90 days old
+                                                              W                    (yours: {n} days)
+
+ MIN_POSTS                media_count ≥ 10                    TOO_FEW_POSTS        You need at least 10 posts (you have
+                                                                                   {n})
+
+ PROFILE_COMPLE           WhatsApp, PAN, UPI all              PROFILE_INCOMPLE     Add your {missing} to apply
+ TE                       present                             TE
+
+ NO_FRAUD                 fraud_flags_upheld = 0              ACCOUNT_RESTRICT     Your account can't apply right now;
+                                                              ED                   contact support
+
+
+
+
+RedCup · Eligibility & Shortlist Algorithm · v1                                                                       Page 2
+ 4. Campaign criteria
+ Each campaign stores a criteria JSON object. Every rule has a mode: must or nice. Numeric rules
+ support min and/or max.
+  {
+      "followers":        { "mode": "must", "min": 10000, "max": 50000 },
+      "niches":           { "mode": "must", "any_of": ["beauty", "skincare"], "require_verified": false },
+      "avg_reel_views":   { "mode": "nice", "min": 8000 },
+      "engagement_rate": { "mode": "must", "min": 0.02 },
+      "audience_country": { "mode": "must", "country": "IN", "min_pct": 60 },
+      "audience_cities": { "mode": "nice", "any_of": ["Delhi", "Mumbai"], "min_pct": 20 },
+      "languages":        { "mode": "must", "any_of": ["hi", "en"] },
+      "audience_gender": { "mode": "nice", "gender": "female", "min_pct": 55 },
+      "competitor_lock": { "mode": "must", "brand_ids": ["b_123", "b_456"], "days": 30 },
+      "min_redcup_score": { "mode": "nice", "min": 60 }
+  }
+
+ Brand builder presets (fill criteria in one click, then editable): "Beauty · micro · pan-India", "Food ·
+ nano · Hindi", "Fashion · micro · metro cities". Store presets as JSON templates.
+
+
+ 5. Eligibility engine
+ Evaluate every must rule. nice rules never block — they only feed the Fit Score. Status precedence
+ (first match wins):
+
+ Status                 When                                                    Creator sees
+
+ NOT_VERIFIED           Any Ring 1 rule fails                                   Finish your profile: {Ring 1
+                                                                                messages}
+
+ INCOMPLETE             A must rule needs data that's null because the          Connect Instagram / add details to
+                        creator hasn't connected or completed something         check eligibility
+                        they control
+
+ NOT_ELIGIBLE           Any must rule fails beyond tolerance, or data is        Not eligible: {reason for each failed
+                        unavailable from Instagram                              rule}
+
+ ALMOST                 Exactly one numeric must rule fails, and the gap is ≤   Almost: "You're 800 followers away"
+                        10% of the threshold
+
+ ELIGIBLE               All must rules pass                                     Apply
+
+  function evaluate(creator, campaign):
+      r1 = ring1_failures(creator)
+      if r1: return NOT_VERIFIED, r1
+
+        fails = []; missing = []
+        for rule in campaign.criteria where rule.mode == "must":
+            value = metric(creator, rule)
+            if value is null:
+                if creator_can_fix(rule): missing.append(rule)                  # IG not connected
+                else: fails.append(reason(rule, "DATA_UNAVAILABLE"))             # no audience data
+                continue
+            if not passes(rule, value):
+                fails.append(reason(rule, value))
+
+        if missing:   return INCOMPLETE, missing
+        if not fails: return ELIGIBLE, []
+        if len(fails) == 1 and fails[0].numeric and gap_pct(fails[0]) <= 0.10:
+            return ALMOST, fails
+        return NOT_ELIGIBLE, fails
+
+  gap_pct(rule) = |threshold - value| / threshold                 # 9,200 vs min 10,000 -> 0.08 -> ALMOST
+
+ Reason messages must name the rule, the requirement and the creator's value: "Needs 10K–50K
+ followers · you have 6.2K", "Needs 60%+ audience in India · yours is 48%", "Needs a Beauty or
+
+
+RedCup · Eligibility & Shortlist Algorithm · v1                                                                   Page 3
+ Skincare niche", "You promoted a competing brand in the last 30 days", "Instagram doesn't share
+ audience data for accounts your size yet".
+
+
+
+
+RedCup · Eligibility & Shortlist Algorithm · v1                                               Page 4
+ 6. When to compute, and locking
+  • Daily job: after the metrics refresh, recompute eligibility for every verified creator × every open
+     campaign. Store in eligibility_results.
+  • On demand: recompute for one creator when they connect Instagram, edit their profile, or open
+     a campaign card older than 24 hours.
+  • New campaign: compute for all creators when a campaign goes live, then send WhatsApp alerts
+     to ELIGIBLE creators only (and optionally ALMOST, as "you're close").
+  • Lock on apply: when a creator applies, copy the criteria and their metrics into the application
+     (criteria_snapshot, metrics_snapshot). Later drops in followers don't remove them.
+  • Feed filter: creators can toggle "Eligible only" / "Show all"; default is Eligible + Almost on top.
+  • Brand live count: as the brand edits criteria, run a count over creator_metrics with the must
+     rules (debounce ~500 ms). Show "≈ N creators eligible". If N < 3 × slots, warn: "Few creators
+     match — try relaxing a must-have".
+
+
+ 7. Fit Score (Ring 3)
+ Computed for every application when the application window closes (or when the brand asks for the
+ shortlist early). Each part is 0–1; Fit Score = 100 × weighted sum.
+
+ Part                             Weight          Calculation (v1)
+
+ A. Niche & audience              40%             0.5 × niche (primary match 1.0, secondary 0.7, verified +0.1 capped at
+ match                                            1) + 0.3 × min(target-country %, 100) ÷ 100 + 0.2 × share of nice rules
+                                                  met
+
+ B. Past performance              30%             If redcup_score exists: redcup_score ÷ 100. Else: percentile rank, among
+                                                  this campaign's applicants, of avg_reel_views_10 ÷ followers
+
+ C. Content quality               20%             (quality_rating − 1) ÷ 4; 0.5 if not yet rated
+
+ D. Reliability                   10%             0.6 × on_time_rate + 0.4 × first_draft_rate; 0.7 for creators with no
+                                                  history (new creators aren't punished)
+
+  fit = 100 * (0.40*A + 0.30*B + 0.20*C + 0.10*D)
+  tie-break: higher avg_reel_views_10, then earlier applied_at
+  store fit_breakdown = {A, B, C, D} on the application (brands and admins see the parts)
+
+ Keep the weights in config, not code — we'll tune them after the first 20–30 campaigns.
+
+
+ 8. Shortlist and award (Rings 3–4)
+  • Shortlist size: top min(applicants, 3 × slots) by Fit Score (configurable 2–3×).
+  • Admin review (launch): RedCup can pin or remove applicants before sending, with a required
+     reason. Log every override.
+  • Brand view: each shortlisted creator's profile, last 6 reels, followers, avg views, engagement,
+     audience split, Fit Score and its parts.
+  • Award deadline: brand selects up to slots creators within 48 hours. If not, auto-award the top
+     Fit Scores and notify the brand.
+  • On award: reserve the creator's cap from the budget (ledger entry), send direction + brief by
+     WhatsApp, start the draft deadline.
+  • Waitlist: if an awarded creator declines or misses the draft deadline, release the reservation and
+     offer the slot to the next shortlisted creator.
+  • Not selected: notify with a friendly message; never show their Fit Score to them in v1.
+
+ Application states
+
+
+RedCup · Eligibility & Shortlist Algorithm · v1                                                                           Page 5
+ State                       Moves to                                       Trigger
+
+ APPLIED                     SHORTLISTED / NOT_SHORTLISTED                  Shortlist generated
+
+ SHORTLISTED                 AWARDED / WAITLISTED / NOT_SELECTED            Brand selection or 48-hour
+                                                                            auto-award
+
+ WAITLISTED                  AWARDED / NOT_SELECTED                         A slot frees up, or the campaign fills
+
+ AWARDED                     DRAFT_SENT → (existing claim flow: approved,   Creator accepts and uploads a draft
+                             posted, tracking, paid)
+
+ AWARDED                     EXPIRED                                        Draft deadline missed — slot goes to
+                                                                            the waitlist
+
+
+
+
+RedCup · Eligibility & Shortlist Algorithm · v1                                                                Page 6
+ 9. Tables to add
+  creator_metrics(creator_id, followers, account_type, account_age_days, media_count,
+                  avg_reel_views_10, engagement_rate_10, audience_country_pct jsonb,
+                  audience_city_pct jsonb, audience_gender_age jsonb, refreshed_at)
+  campaigns      (+ criteria jsonb, slots, application_closes_at, shortlist_multiplier, preset_id)
+  eligibility_results(campaign_id, creator_id, status, reasons jsonb, computed_at)    -- unique (campaign_id, creator
+  applications   (campaign_id, creator_id, status, applied_at, criteria_snapshot jsonb,
+                  metrics_snapshot jsonb, fit_score, fit_breakdown jsonb, award_deadline_at)
+  shortlist_overrides(application_id, action pin|remove, reason, admin_id, created_at)
+  criteria_presets(id, name, criteria jsonb)
+
+
+ 10. Test cases
+ #      Creator                                   Campaign must-haves               Expected
+
+ 1      8,000 followers, Beauty, IG connected     Followers 10K–50K, Beauty         NOT_ELIGIBLE: 20% gap > 10%
+
+ 2      9,200 followers, Beauty                   Followers 10K–50K, Beauty         ALMOST: "800 followers away"
+
+ 3      25,000 followers, Food                    Followers 10K–50K, Beauty         NOT_ELIGIBLE: niche
+
+ 4      Instagram not connected                   Any                               NOT_VERIFIED: connect
+                                                                                    Instagram
+
+ 5      3,000 followers, no audience data         Audience 60%+ India (must)        NOT_ELIGIBLE: data unavailable
+        from Instagram
+
+ 6      30,000 followers, awarded by a            Competitor lock 30 days           NOT_ELIGIBLE: competitor
+        competitor 12 days ago
+
+ 7      Eligible, applies, then drops to 9,500    Followers 10K–50K                 Stays APPLIED (locked
+        followers                                                                   snapshot)
+
+ 8      Two failed numeric rules, both within     Followers + engagement            NOT_ELIGIBLE (ALMOST needs
+        10%                                                                         exactly one)
+
+ 9      Brand doesn't select within 48 hours      Slots = 5                         Top 5 Fit Scores auto-awarded
+
+
+
+ 11. Launch vs later
+ At launch                                                    Later
+
+ Rings 1–2 fully automated, status + reasons on every         Niche detection from captions and audio, not just
+ card, ALMOST state                                           self-declared
+
+ Live eligible count and presets in the brand builder         Fit Score weights tuned on real campaign data
+
+ Fit Score with manual quality rating; admin pin/remove       Automatic quality rating; RedCup Score as a must-have
+                                                              option
+
+ 48-hour award deadline with auto-award and waitlist          Lookalike recommendations: "creators like your top
+                                                              performers"
+
+ Questions or changes: discuss with Harsh before building anything that changes what creators or brands see.
+ Thresholds (90 days, 10 posts, 10% tolerance, 3× shortlist, 48 hours) are starting values — keep them in config.
+
+
+
+
+RedCup · Eligibility & Shortlist Algorithm · v1                                                                   Page 7
+
