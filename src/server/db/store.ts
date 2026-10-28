@@ -311,49 +311,41 @@ function persistFile(): Promise<void> {
   return writeChain;
 }
 
-function toIsoTs(value: unknown): string | null {
-  if (value == null) return null;
-  if (value instanceof Date) return value.toISOString();
-  const d = new Date(String(value));
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
-}
-
 async function loadFromNeonVersioned(
   sql: NeonQueryFunction<false, false>,
-): Promise<{ db: Db; updatedAt: string | null }> {
+): Promise<{ db: Db; epoch: number | null }> {
   await ensureSchema(sql);
-  const rows = await sql`SELECT data, updated_at FROM redcup_store WHERE id = 1`;
+  const rows = await sql`SELECT data, EXTRACT(EPOCH FROM updated_at) AS epoch FROM redcup_store WHERE id = 1`;
   if (!rows.length) {
     const db = await bootstrapAdminIfNeeded(empty());
     await sql`INSERT INTO redcup_store (id, data) VALUES (1, ${JSON.stringify(db)}::jsonb)
               ON CONFLICT (id) DO NOTHING`;
-    const again = await sql`SELECT data, updated_at FROM redcup_store WHERE id = 1`;
+    const again = await sql`SELECT data, EXTRACT(EPOCH FROM updated_at) AS epoch FROM redcup_store WHERE id = 1`;
     return {
       db: again.length ? ({ ...empty(), ...(again[0].data as Db) } as Db) : db,
-      updatedAt: again.length ? toIsoTs(again[0].updated_at) : null,
+      epoch: again.length ? Number(again[0].epoch) : null,
     };
   }
   return {
     db: { ...empty(), ...(rows[0].data as Db) } as Db,
-    updatedAt: toIsoTs(rows[0].updated_at),
+    epoch: Number(rows[0].epoch),
   };
 }
 
 async function saveToNeonOptimistic(
   sql: NeonQueryFunction<false, false>,
   db: Db,
-  expectedUpdatedAt: string | null,
+  expectedEpoch: number | null,
 ): Promise<boolean> {
   await ensureSchema(sql);
-  if (!expectedUpdatedAt) {
+  if (expectedEpoch == null || Number.isNaN(expectedEpoch)) {
     await saveToNeon(sql, db);
     return true;
   }
   const rows = await sql`
     UPDATE redcup_store
     SET data = ${JSON.stringify(db)}::jsonb, updated_at = now()
-    WHERE id = 1 AND updated_at = ${expectedUpdatedAt}::timestamptz
+    WHERE id = 1 AND EXTRACT(EPOCH FROM updated_at) = ${expectedEpoch}
     RETURNING id
   `;
   return rows.length > 0;
@@ -381,9 +373,9 @@ export async function updateDb<T>(fn: (db: Db) => T | Promise<T>): Promise<T> {
 
   let lastError: unknown;
   for (let attempt = 0; attempt < 8; attempt++) {
-    const { db, updatedAt } = await loadFromNeonVersioned(sql);
+    const { db, epoch } = await loadFromNeonVersioned(sql);
     const result = await fn(db);
-    const ok = await saveToNeonOptimistic(sql, db, updatedAt);
+    const ok = await saveToNeonOptimistic(sql, db, epoch);
     if (ok) {
       memory = db;
       return result;
