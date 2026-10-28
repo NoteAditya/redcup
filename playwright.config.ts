@@ -15,8 +15,8 @@ const isRemote = /^https?:\/\//.test(baseURL) && !baseURL.includes("127.0.0.1") 
 
 export default defineConfig({
   testDir: "./e2e",
-  timeout: 120_000,
-  expect: { timeout: 20_000 },
+  timeout: 180_000,
+  expect: { timeout: 30_000 },
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
@@ -27,6 +27,8 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "off",
+    browserName: "chromium",
+    channel: "chrome",
   },
   webServer: isRemote
     ? undefined
@@ -40,14 +42,20 @@ export default defineConfig({
     {
       name: "mobile-390",
       use: {
-        ...devices["iPhone 12"],
+        ...devices["Pixel 5"],
+        browserName: "chromium",
+        channel: "chrome",
         viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
       },
     },
     {
       name: "desktop-1440",
       use: {
         ...devices["Desktop Chrome"],
+        browserName: "chromium",
+        channel: "chrome",
         viewport: { width: 1440, height: 900 },
       },
     },

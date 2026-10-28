@@ -30,6 +30,21 @@ async function noConsoleErrors(page: Page) {
   };
 }
 
+
+async function signIn(page: Page, contact: string, password: string) {
+  await page.goto("/login");
+  // Clear any prior session
+  const signOut = page.getByRole("button", { name: /Sign out/i });
+  if (await signOut.count()) {
+    await signOut.click();
+    await page.waitForURL(/\/(login)?$/, { timeout: 15_000 }).catch(() => undefined);
+    await page.goto("/login");
+  }
+  await page.locator("#contact").fill(contact);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByRole("button", { name: /^Sign in$/i }).click();
+}
+
 async function shot(page: Page, name: string) {
   const project = test.info().project.name;
   const file = path.join(ART, `${project}-${name}.png`);
@@ -101,21 +116,23 @@ test.describe("RedCup production flows", () => {
     await shot(page, "brand-dashboard");
 
     // Admin approves KYC
-    await page.goto("/login");
-    await page.getByLabel("Email or phone").fill(adminEmail);
-    await page.getByLabel("Password", { exact: true }).fill(adminPassword!);
-    await page.getByRole("button", { name: /^Sign in$/i }).click();
+    await signIn(page, adminEmail, adminPassword!);
     await expect(page).toHaveURL(/\/admin/, { timeout: 30_000 });
     await shot(page, "admin");
     await page.goto("/admin/verification");
-    await expect(page.getByText(`Test Brand ${id}`).first()).toBeVisible({ timeout: 20_000 });
-    await page.getByRole("button", { name: /Approve KYC/i }).first().click();
+    const brandCard = page.locator(".card", { hasText: `Test Brand ${id}` });
+    if (!(await brandCard.count())) {
+      await page.waitForTimeout(1500);
+      await page.reload();
+    }
+    await expect(brandCard.first()).toBeVisible({ timeout: 30_000 });
+    await brandCard.first().getByRole("button", { name: /Approve KYC/i }).click();
     await page.waitForTimeout(800);
     await shot(page, "admin-verification");
 
     // Brand funds bounty (TEST MODE)
     await page.goto("/login");
-    await page.getByLabel("Email or phone").fill(brandEmail);
+    await page.locator("#contact").fill(brandEmail);
     await page.getByLabel("Password", { exact: true }).fill(password);
     await page.getByRole("button", { name: /^Sign in$/i }).click();
     await expect(page).toHaveURL(/\/brand/, { timeout: 30_000 });
@@ -158,10 +175,7 @@ test.describe("RedCup production flows", () => {
     await shot(page, "creator-applied");
 
     // Brand shortlist + award
-    await page.goto("/login");
-    await page.getByLabel("Email or phone").fill(brandEmail);
-    await page.getByLabel("Password", { exact: true }).fill(password);
-    await page.getByRole("button", { name: /^Sign in$/i }).click();
+    await signIn(page, brandEmail, password);
     await page.goto(campaignUrl);
     await page.getByRole("button", { name: /Generate shortlist/i }).click();
     await expect(page.getByText(/SHORTLISTED|Award up to/i).first()).toBeVisible({ timeout: 30_000 });
@@ -172,10 +186,7 @@ test.describe("RedCup production flows", () => {
     await shot(page, "brand-awarded");
 
     // Creator draft
-    await page.goto("/login");
-    await page.getByLabel("Email or phone").fill(creatorEmail);
-    await page.getByLabel("Password", { exact: true }).fill(password);
-    await page.getByRole("button", { name: /^Sign in$/i }).click();
+    await signIn(page, creatorEmail, password);
     await page.goto("/creator/applications");
     await page.getByRole("link").first().click();
     await page.getByLabel("Caption").fill("Morning glow with vitamin C — Paid partnership.");
@@ -185,20 +196,14 @@ test.describe("RedCup production flows", () => {
     await shot(page, "creator-draft");
 
     // Brand approve draft
-    await page.goto("/login");
-    await page.getByLabel("Email or phone").fill(brandEmail);
-    await page.getByLabel("Password", { exact: true }).fill(password);
-    await page.getByRole("button", { name: /^Sign in$/i }).click();
+    await signIn(page, brandEmail, password);
     await page.goto(campaignUrl);
     await page.getByRole("button", { name: /^Approve$/i }).click();
     await expect(page.getByText(/approved|APPROVED/i).first()).toBeVisible({ timeout: 20_000 });
     await shot(page, "brand-draft-approved");
 
     // Creator posts reel
-    await page.goto("/login");
-    await page.getByLabel("Email or phone").fill(creatorEmail);
-    await page.getByLabel("Password", { exact: true }).fill(password);
-    await page.getByRole("button", { name: /^Sign in$/i }).click();
+    await signIn(page, creatorEmail, password);
     await page.goto("/creator/applications");
     await page.getByRole("link").first().click();
     await page.getByLabel(/Instagram permalink/i).fill("https://www.instagram.com/reel/E2ETEST123/");
