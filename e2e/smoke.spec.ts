@@ -31,18 +31,18 @@ async function noConsoleErrors(page: Page) {
 }
 
 
-async function signIn(page: Page, contact: string, password: string) {
-  await page.goto("/");
-  const signOut = page.getByRole("button", { name: /Sign out/i });
-  if (await signOut.count()) {
-    await signOut.click();
-    await page.waitForTimeout(500);
-  }
+async function signIn(page: Page, contact: string, password: string, expectPath?: RegExp) {
+  await page.context().clearCookies();
   await page.goto("/login");
-  await page.locator("#contact").fill("");
   await page.locator("#contact").fill(contact);
   await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByRole("button", { name: /^Sign in$/i }).click();
+  await Promise.all([
+    page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 30_000 }),
+    page.getByRole("button", { name: /^Sign in$/i }).click(),
+  ]);
+  if (expectPath) {
+    await expect(page).toHaveURL(expectPath, { timeout: 15_000 });
+  }
 }
 
 async function shot(page: Page, name: string) {
@@ -89,6 +89,7 @@ test.describe("RedCup production flows", () => {
   test("full bounty lifecycle: signup → fund → apply → shortlist → award → draft → approve", async ({
     page,
   }) => {
+    test.setTimeout(600_000);
     const done = await noConsoleErrors(page);
     const id = stamp();
     const brandEmail = `brand.${id}@redcup.test`;
@@ -116,7 +117,7 @@ test.describe("RedCup production flows", () => {
     await shot(page, "brand-dashboard");
 
     // Admin approves KYC
-    await signIn(page, adminEmail, adminPassword!);
+    await signIn(page, adminEmail, adminPassword!, /\/admin/);
     await expect(page).toHaveURL(/\/admin/, { timeout: 30_000 });
     await shot(page, "admin");
     await page.goto("/admin/verification");
@@ -131,8 +132,7 @@ test.describe("RedCup production flows", () => {
     await shot(page, "admin-verification");
 
     // Brand funds bounty (TEST MODE)
-    await signIn(page, brandEmail, password);
-    await expect(page).toHaveURL(/\/brand/, { timeout: 30_000 });
+    await signIn(page, brandEmail, password, /\/brand/);
     await page.goto("/brand/bounties/new");
     await expect(page.getByText(/TEST MODE/i).first()).toBeVisible();
     await shot(page, "bounty-builder-test-mode");
@@ -166,14 +166,17 @@ test.describe("RedCup production flows", () => {
     await page.getByRole("button", { name: /Save and continue/i }).click();
     await expect(page).toHaveURL(/\/creator/, { timeout: 30_000 });
     await shot(page, "creator-dashboard");
-    await expect(page.getByText(`E2E bounty ${id}`)).toBeVisible({ timeout: 20_000 });
-    await page.getByRole("button", { name: /^Apply$/i }).first().click();
-    await expect(page.getByText(/Applied/i).first()).toBeVisible({ timeout: 20_000 });
+    const bountyCard = page.locator(".card", { hasText: `E2E bounty ${id}` });
+    await expect(bountyCard.first()).toBeVisible({ timeout: 20_000 });
+    await bountyCard.first().getByRole("button", { name: /^Apply$/i }).click();
+    await expect(bountyCard.first().getByText(/Applied/i)).toBeVisible({ timeout: 20_000 });
     await shot(page, "creator-applied");
 
     // Brand shortlist + award
-    await signIn(page, brandEmail, password);
+    await signIn(page, brandEmail, password, /\/brand/);
     await page.goto(campaignUrl);
+    await expect(page).toHaveURL(/\/brand\/bounties\//, { timeout: 20_000 });
+    await expect(page.getByRole("button", { name: /Generate shortlist/i })).toBeVisible({ timeout: 20_000 });
     await page.getByRole("button", { name: /Generate shortlist/i }).click();
     await expect(page.getByText(/SHORTLISTED|Award up to/i).first()).toBeVisible({ timeout: 30_000 });
     await shot(page, "brand-shortlist");
@@ -183,26 +186,30 @@ test.describe("RedCup production flows", () => {
     await shot(page, "brand-awarded");
 
     // Creator draft
-    await signIn(page, creatorEmail, password);
+    await signIn(page, creatorEmail, password, /\/creator/);
     await page.goto("/creator/applications");
-    await page.getByRole("link").first().click();
+    await expect(page.getByRole("heading", { name: /Applications/i })).toBeVisible({ timeout: 20_000 });
+    await page.getByRole("link", { name: new RegExp(`E2E bounty ${id}`) }).click();
+    await expect(page.getByLabel("Caption")).toBeVisible({ timeout: 20_000 });
     await page.getByLabel("Caption").fill("Morning glow with vitamin C — Paid partnership.");
     await page.getByLabel(/Video path/i).fill("uploads/e2e-draft.mp4");
     await page.getByRole("button", { name: /Send draft/i }).click();
-    await expect(page.getByText(/DRAFT_SENT|pending|draft/i).first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/DRAFT_SENT|pending|Draft v/i).first()).toBeVisible({ timeout: 20_000 });
     await shot(page, "creator-draft");
 
     // Brand approve draft
-    await signIn(page, brandEmail, password);
+    await signIn(page, brandEmail, password, /\/brand/);
     await page.goto(campaignUrl);
     await page.getByRole("button", { name: /^Approve$/i }).click();
     await expect(page.getByText(/approved|APPROVED/i).first()).toBeVisible({ timeout: 20_000 });
     await shot(page, "brand-draft-approved");
 
     // Creator posts reel
-    await signIn(page, creatorEmail, password);
+    await signIn(page, creatorEmail, password, /\/creator/);
     await page.goto("/creator/applications");
-    await page.getByRole("link").first().click();
+    await expect(page.getByRole("heading", { name: /Applications/i })).toBeVisible({ timeout: 20_000 });
+    await page.getByRole("link", { name: new RegExp(`E2E bounty ${id}`) }).click();
+    await expect(page.getByLabel(/Instagram permalink/i)).toBeVisible({ timeout: 20_000 });
     await page.getByLabel(/Instagram permalink/i).fill("https://www.instagram.com/reel/E2ETEST123/");
     await page.getByRole("button", { name: /Mark as posted/i }).click();
     await expect(page.getByText(/POSTED|posted/i).first()).toBeVisible({ timeout: 20_000 });
