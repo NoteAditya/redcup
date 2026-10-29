@@ -110,7 +110,7 @@ export function SignInForm() {
           });
         }}
       >
-        <h3 style={{ marginBottom: "0.5rem" }}>OTP sign-in</h3>
+        <p style={{ marginBottom: "0.5rem", fontWeight: 700 }}>OTP sign-in</p>
         <p className="muted" style={{ marginBottom: "0.75rem", fontSize: "0.85rem" }}>
           Prefer a code? Add a Resend or SMS key later. Until then this shows Connect.
         </p>

@@ -3,7 +3,7 @@ export function TestModeBanner({ detail }: { detail?: string }) {
     <div
       className="connect-banner"
       role="status"
-      style={{ borderColor: "var(--cup)", background: "color-mix(in srgb, var(--cup) 8%, white)" }}
+      style={{ borderColor: "var(--warn)", background: "color-mix(in srgb, var(--warn) 10%, white)" }}
     >
       <strong>TEST MODE</strong>
       <div className="muted" style={{ marginTop: 4 }}>

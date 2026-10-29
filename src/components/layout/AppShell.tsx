@@ -1,29 +1,29 @@
 import Link from "next/link";
-import { SiteHeader } from "./SiteHeader";
 
-export function AppShell({
-  children,
-  nav,
-}: {
-  children: React.ReactNode;
-  nav: { href: string; label: string }[];
-}) {
+type NavItem = { href: string; label: string };
+
+export function AppShell({ nav, children }: { nav: NavItem[]; children: React.ReactNode }) {
   return (
-    <div className="frame-sheet">
-      <div className="sheet" style={{ padding: "0 1.25rem 2rem", maxWidth: 1100, margin: "0 auto" }}>
-        <SiteHeader tone="app" />
-        <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
-          <aside style={{ minWidth: 160, flex: "0 0 160px" }}>
-            <nav style={{ display: "flex", flexDirection: "column", gap: "0.45rem", fontSize: "0.9rem" }}>
-              {nav.map((n) => (
-                <Link key={n.href} href={n.href} className="btn btn-ghost" style={{ justifyContent: "flex-start" }}>
-                  {n.label}
-                </Link>
-              ))}
-            </nav>
-          </aside>
-          <main style={{ flex: "1 1 480px", minWidth: 0 }}>{children}</main>
-        </div>
+    <div className="app-frame">
+      <div className="app-shell">
+        <aside className="app-nav" aria-label="App">
+          <Link href="/" className="logo" style={{ margin: "0.25rem 0.35rem 1rem" }}>
+            <span className="logo-mark" aria-hidden />
+            <span>
+              <span style={{ color: "var(--cup)" }}>Red</span>Cup
+            </span>
+          </Link>
+          {nav.map((item) => (
+            <Link key={item.href} href={item.href}>
+              {item.label}
+            </Link>
+          ))}
+          <div style={{ flex: 1 }} />
+          <Link href="/" style={{ fontSize: "0.82rem", color: "var(--muted)" }}>
+            ← Marketing site
+          </Link>
+        </aside>
+        <div className="app-main">{children}</div>
       </div>
     </div>
   );
