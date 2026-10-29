@@ -5,7 +5,7 @@ export const metadata = { title: "About" };
 
 export default function Page() {
   return (
-    <MarketingShell>
+    <MarketingShell night>
       <h1>About RedCup</h1>
       <p style={{ marginTop: "0.75rem", maxWidth: "56ch", fontSize: "1.05rem" }}>
         RedCup is an India-focused creator marketing platform. Brands fund Instagram reel bounties; eligible creators

@@ -13,7 +13,7 @@ const STEPS = [
 
 export default function ForBrandsPage() {
   return (
-    <MarketingShell>
+    <MarketingShell night>
       <h1>Run a pay-for-results bounty</h1>
       <p style={{ maxWidth: "52ch", marginTop: "0.75rem", fontSize: "1.05rem" }}>
         You fund the creator budget upfront. RedCup takes a 15% fee (+ GST). Creators apply, we shortlist by Fit Score,

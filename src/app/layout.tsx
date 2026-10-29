@@ -1,7 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans } from "next/font/google";
+import { Instrument_Serif, Syne, DM_Sans } from "next/font/google";
 import { MotionProviders } from "@/components/motion/Providers";
 import "./globals.css";
+
+const instrument = Instrument_Serif({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
+
+const syne = Syne({
+  variable: "--font-ui",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
 
 const dmSans = DM_Sans({
   variable: "--font-app",
@@ -37,28 +51,15 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#F7F2F1",
+  themeColor: "#140d0e",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <link
-          href="https://api.fontshare.com/v2/css?f[]=chillax@400,500,600,700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body
-        className={dmSans.variable}
-        style={
-          {
-            ["--font-display" as string]: '"Chillax", system-ui, sans-serif',
-          } as React.CSSProperties
-        }
-      >
+    <html lang="en" className={`${instrument.variable} ${syne.variable} ${dmSans.variable}`}>
+      <body>
         <MotionProviders>{children}</MotionProviders>
       </body>
     </html>

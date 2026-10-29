@@ -13,7 +13,7 @@ const STEPS = [
 
 export default function ForCreatorsPage() {
   return (
-    <MarketingShell>
+    <MarketingShell night>
       <h1>Earn on approved reels</h1>
       <p style={{ maxWidth: "52ch", marginTop: "0.75rem", fontSize: "1.05rem" }}>
         Connect Instagram, finish PAN and UPI, apply only where you match, and get base plus capped performance for

@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 
-const LINKS = [
-  { href: "/for-brands", label: "For brands" },
-  { href: "/for-creators", label: "For creators" },
-  { href: "/bounties", label: "Bounties" },
-  { href: "/creators", label: "Creators" },
+const LEFT = [
+  { href: "/for-brands", label: "Experience" },
+  { href: "/for-creators", label: "Creators" },
+];
+const RIGHT = [
+  { href: "/bounties", label: "Collection" },
   { href: "/about", label: "About" },
 ];
 
@@ -28,37 +29,41 @@ export function SiteHeader() {
     };
   }, [open]);
 
+  const linkClass = (href: string) => {
+    const active = pathname === href || pathname.startsWith(href + "/");
+    return active ? "is-active" : undefined;
+  };
+
   return (
     <header className={`site-header ${open ? "is-open" : ""}`}>
-      <div className="site-header-inner">
-        <Link href="/" className="logo" aria-label="RedCup home" prefetch>
+      <div className="site-header-inner site-header-rail">
+        <nav className="nav-rail nav-rail-left" aria-label="Primary left">
+          {LEFT.map((l) => (
+            <Link key={l.href} href={l.href} className={linkClass(l.href)} prefetch>
+              {l.label}
+            </Link>
+          ))}
+        </nav>
+
+        <Link href="/" className="logo logo-center" aria-label="RedCup home" prefetch>
           <span className="logo-mark" aria-hidden />
-          <span>
-            <span style={{ color: "var(--cup)" }}>Red</span>Cup
+          <span className="logo-word">
+            <span className="logo-red">Red</span>Cup
           </span>
         </Link>
 
-        <nav className="nav-plain" aria-label="Primary">
-          {LINKS.map((l) => {
-            const active = pathname === l.href || pathname.startsWith(l.href + "/");
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={active ? "is-active" : undefined}
-                prefetch
-              >
+        <div className="nav-rail nav-rail-right">
+          <nav aria-label="Primary right">
+            {RIGHT.map((l) => (
+              <Link key={l.href} href={l.href} className={linkClass(l.href)} prefetch>
                 {l.label}
               </Link>
-            );
-          })}
-        </nav>
-
-        <div className="nav-cta">
-          <Link href="/login" className="btn btn-ghost nav-login" prefetch>
+            ))}
+          </nav>
+          <Link href="/login" className="nav-text-link" prefetch>
             Log in
           </Link>
-          <Link href="/signup" className="btn btn-primary" prefetch>
+          <Link href="/signup" className="btn btn-primary btn-compact" prefetch>
             Get started
           </Link>
           <button
@@ -78,19 +83,13 @@ export function SiteHeader() {
       {open ? (
         <div id={panelId} className="nav-fullscreen">
           <nav aria-label="Mobile">
-            {LINKS.map((l) => (
-              <Link key={l.href} href={l.href} className="nav-fullscreen-link" prefetch>
-                {l.label}
-              </Link>
-            ))}
-            <div className="nav-fullscreen-actions">
-              <Link href="/login" className="btn btn-ghost" prefetch>
-                Log in
-              </Link>
-              <Link href="/signup" className="btn btn-primary" prefetch>
-                Get started
-              </Link>
-            </div>
+            {[...LEFT, ...RIGHT, { href: "/login", label: "Log in" }, { href: "/signup", label: "Get started" }].map(
+              (l) => (
+                <Link key={l.href} href={l.href} prefetch>
+                  {l.label}
+                </Link>
+              ),
+            )}
           </nav>
         </div>
       ) : null}

@@ -14,8 +14,10 @@ export default async function BountiesPage() {
   const brands = new Map(db.brands.map((b) => [b.id, b]));
 
   return (
-    <MarketingShell>
-      <h1>Open bounties</h1>
+    <MarketingShell night>
+      <div className="chapter" style={{ marginTop: "3rem" }}>
+      <p className="chapter-kicker">Collection</p>
+      <h1 className="display-stack display-stack-sm">Open bounties</h1>
       <p className="muted" style={{ marginTop: "0.5rem", maxWidth: "52ch" }}>
         Public list of live and active campaigns. Sign in as a creator to see your eligibility on each card.
       </p>
@@ -39,6 +41,7 @@ export default async function BountiesPage() {
             slots={c.slots}
           />
         ))}
+      </div>
       </div>
     </MarketingShell>
   );

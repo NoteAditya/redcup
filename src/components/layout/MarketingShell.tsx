@@ -1,9 +1,15 @@
 import Link from "next/link";
 import { SiteHeader } from "./SiteHeader";
 
-export function MarketingShell({ children }: { children: React.ReactNode }) {
+export function MarketingShell({
+  children,
+  night = false,
+}: {
+  children: React.ReactNode;
+  night?: boolean;
+}) {
   return (
-    <div className="shell">
+    <div className={`shell ${night ? "shell-night" : ""}`}>
       <SiteHeader />
       <main className="shell-main">{children}</main>
       <footer className="site-footer">
@@ -78,9 +84,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="site-footer-base">
           <span>© {new Date().getFullYear()} RedCup. Built for Indian brands and creators.</span>
-          <p className="site-footer-credits">
-            Photos: Electric Cinema film cans (CC0 / Openverse); film technician by Aldo Bidini (CC BY-SA 4.0).
-          </p>
+          <span className="footer-credit">Design rhythm interpreted from award craft — not a clone.</span>
         </div>
       </footer>
     </div>
