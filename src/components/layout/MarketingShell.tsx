@@ -12,7 +12,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
             <Link href="/" className="logo" style={{ color: "#fff" }}>
               <span className="logo-mark" aria-hidden />
               <span>
-                <span style={{ color: "var(--cup)" }}>Red</span>Cup
+                <span style={{ color: "#f0a8a8" }}>Red</span>Cup
               </span>
             </Link>
             <p className="muted" style={{ marginTop: "0.85rem", maxWidth: "32ch", fontSize: "0.88rem" }}>
