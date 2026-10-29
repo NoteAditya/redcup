@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Magnetic } from "@/components/motion/Magnetic";
 
 const LINKS = [
   { href: "/for-brands", label: "For brands" },
@@ -17,16 +15,7 @@ const LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const reduce = useReducedMotion();
   const panelId = useId();
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     setOpen(false);
@@ -40,7 +29,7 @@ export function SiteHeader() {
   }, [open]);
 
   return (
-    <header className={`site-header ${scrolled ? "is-scrolled" : ""} ${open ? "is-open" : ""}`}>
+    <header className={`site-header ${open ? "is-open" : ""}`}>
       <div className="site-header-inner">
         <Link href="/" className="logo" aria-label="RedCup home" prefetch>
           <span className="logo-mark" aria-hidden />
@@ -49,42 +38,29 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="nav-pill" aria-label="Primary">
-          <div className="nav-pill-track">
-            {LINKS.map((l) => {
-              const active = pathname === l.href || pathname.startsWith(l.href + "/");
-              return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className={`nav-pill-link ${active ? "is-active" : ""}`}
-                  prefetch
-                >
-                  {active && !reduce ? (
-                    <motion.span
-                      layoutId="nav-pill-active"
-                      className="nav-pill-active"
-                      transition={{ type: "spring", stiffness: 380, damping: 34 }}
-                    />
-                  ) : active ? (
-                    <span className="nav-pill-active" />
-                  ) : null}
-                  <span className="nav-pill-label">{l.label}</span>
-                </Link>
-              );
-            })}
-          </div>
+        <nav className="nav-plain" aria-label="Primary">
+          {LINKS.map((l) => {
+            const active = pathname === l.href || pathname.startsWith(l.href + "/");
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={active ? "is-active" : undefined}
+                prefetch
+              >
+                {l.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="nav-cta">
           <Link href="/login" className="btn btn-ghost nav-login" prefetch>
             Log in
           </Link>
-          <Magnetic>
-            <Link href="/signup" className="btn btn-primary" prefetch>
-              Get started
-            </Link>
-          </Magnetic>
+          <Link href="/signup" className="btn btn-primary" prefetch>
+            Get started
+          </Link>
           <button
             type="button"
             className="nav-burger"
@@ -99,41 +75,25 @@ export function SiteHeader() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {open ? (
-          <motion.div
-            id={panelId}
-            className="nav-fullscreen"
-            initial={reduce ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduce ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.22 }}
-          >
-            <nav aria-label="Mobile">
-              {LINKS.map((l, i) => (
-                <motion.div
-                  key={l.href}
-                  initial={reduce ? false : { opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.04 * i, duration: 0.28 }}
-                >
-                  <Link href={l.href} className="nav-fullscreen-link" prefetch>
-                    {l.label}
-                  </Link>
-                </motion.div>
-              ))}
-              <div className="nav-fullscreen-actions">
-                <Link href="/login" className="btn btn-ghost" prefetch>
-                  Log in
-                </Link>
-                <Link href="/signup" className="btn btn-primary" prefetch>
-                  Get started
-                </Link>
-              </div>
-            </nav>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {open ? (
+        <div id={panelId} className="nav-fullscreen">
+          <nav aria-label="Mobile">
+            {LINKS.map((l) => (
+              <Link key={l.href} href={l.href} className="nav-fullscreen-link" prefetch>
+                {l.label}
+              </Link>
+            ))}
+            <div className="nav-fullscreen-actions">
+              <Link href="/login" className="btn btn-ghost" prefetch>
+                Log in
+              </Link>
+              <Link href="/signup" className="btn btn-primary" prefetch>
+                Get started
+              </Link>
+            </div>
+          </nav>
+        </div>
+      ) : null}
     </header>
   );
 }

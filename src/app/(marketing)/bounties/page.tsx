@@ -1,7 +1,6 @@
 import { MarketingShell } from "@/components/layout/MarketingShell";
 import { BountyCard } from "@/components/bounty/BountyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Reveal } from "@/components/motion/Reveal";
 import { readDb } from "@/server/db/store";
 
 export const metadata = { title: "Bounties" };
@@ -16,12 +15,10 @@ export default async function BountiesPage() {
 
   return (
     <MarketingShell>
-      <Reveal>
-        <h1>Open bounties</h1>
-        <p className="muted" style={{ marginTop: "0.5rem", maxWidth: "52ch" }}>
-          Public list of live and active campaigns. Sign in as a creator to see your eligibility on each card.
-        </p>
-      </Reveal>
+      <h1>Open bounties</h1>
+      <p className="muted" style={{ marginTop: "0.5rem", maxWidth: "52ch" }}>
+        Public list of live and active campaigns. Sign in as a creator to see your eligibility on each card.
+      </p>
       <div className="bounty-grid" style={{ marginTop: "1.25rem" }}>
         {live.length === 0 && (
           <EmptyState
@@ -31,17 +28,16 @@ export default async function BountiesPage() {
             actionLabel="Start as a brand"
           />
         )}
-        {live.map((c, i) => (
-          <Reveal key={c.id} delay={Math.min(i * 0.04, 0.2)}>
-            <BountyCard
-              href={"/bounties/" + c.slug}
-              title={c.title}
-              brandName={brands.get(c.brandId)?.businessName}
-              status={c.status}
-              budgetPaise={c.budgetPaise}
-              slots={c.slots}
-            />
-          </Reveal>
+        {live.map((c) => (
+          <BountyCard
+            key={c.id}
+            href={"/bounties/" + c.slug}
+            title={c.title}
+            brandName={brands.get(c.brandId)?.businessName}
+            status={c.status}
+            budgetPaise={c.budgetPaise}
+            slots={c.slots}
+          />
         ))}
       </div>
     </MarketingShell>

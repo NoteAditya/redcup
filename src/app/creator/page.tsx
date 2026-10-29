@@ -21,7 +21,15 @@ export default async function CreatorDashboard() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", alignItems: "end" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: "1rem",
+          flexWrap: "wrap",
+          alignItems: "end",
+        }}
+      >
         <div>
           <h1>Creator dashboard</h1>
           <p className="muted" style={{ marginTop: "0.35rem" }}>
@@ -40,24 +48,22 @@ export default async function CreatorDashboard() {
         </div>
       )}
 
-      <div className="axis axis-3" style={{ marginTop: "1.15rem" }}>
-        <div className="card">
-          <div className="muted" style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Followers</div>
-          <div style={{ fontSize: "1.5rem", fontWeight: 800, marginTop: 4 }}>
-            {metrics?.followers?.toLocaleString("en-IN") || "—"}
-          </div>
+      <dl className="app-kpi">
+        <div>
+          <dt>Followers</dt>
+          <dd>{metrics?.followers?.toLocaleString("en-IN") || "—"}</dd>
         </div>
-        <div className="card">
-          <div className="muted" style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Applications</div>
-          <div style={{ fontSize: "1.5rem", fontWeight: 800, marginTop: 4 }}>{myApps.length}</div>
+        <div>
+          <dt>Applications</dt>
+          <dd>{myApps.length}</dd>
         </div>
-        <div className="card">
-          <div className="muted" style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Open bounties</div>
-          <div style={{ fontSize: "1.5rem", fontWeight: 800, marginTop: 4 }}>{live.length}</div>
+        <div>
+          <dt>Open bounties</dt>
+          <dd>{live.length}</dd>
         </div>
-      </div>
+      </dl>
 
-      <h2 style={{ marginTop: "1.5rem" }}>Open for you</h2>
+      <h2 style={{ marginTop: "0.5rem" }}>Open for you</h2>
       <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
         {live.length === 0 && (
           <EmptyState
@@ -71,10 +77,20 @@ export default async function CreatorDashboard() {
           const brand = brands.get(c.brandId);
           const already = applied.has(c.id);
           return (
-            <div key={c.id} className="card" style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
+            <div
+              key={c.id}
+              className="card"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "1rem",
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
               <div>
                 <strong>{c.title}</strong>
-                <div className="muted" style={{ fontSize: "0.85rem", marginTop: 4 }}>
+                <div className="muted" style={{ fontSize: "0.9rem", marginTop: 4 }}>
                   {brand?.businessName || "Brand"} · {formatINR(c.budgetPaise)} · {c.slots} slots
                 </div>
               </div>

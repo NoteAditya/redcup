@@ -15,27 +15,35 @@ export default async function AdminHome() {
         Store mode: {dbMode()} · users {db.users.length} · campaigns {db.campaigns.length} · apps{" "}
         {db.applications.length}
       </p>
-      <div className="axis axis-2" style={{ marginTop: "1.25rem" }}>
-        <div className="card">
-          <h3>Funded budget (ledger)</h3>
-          <p style={{ fontSize: "1.4rem", marginTop: 8 }}>{formatINR(funding)}</p>
+      <dl className="app-kpi">
+        <div>
+          <dt>Funded budget</dt>
+          <dd>{formatINR(funding)}</dd>
         </div>
-        <div className="card">
-          <h3>Queues</h3>
-          <ul style={{ marginTop: 8, paddingLeft: "1.1rem", lineHeight: 1.7 }}>
-            <li>
-              <Link href="/admin/verification">KYC + reel verification</Link>
-            </li>
-            <li>
-              <Link href="/admin/metrics">Manual metrics</Link>
-            </li>
-            <li>
-              <Link href="/admin/payouts">Payouts</Link>
-            </li>
-          </ul>
+        <div>
+          <dt>Users</dt>
+          <dd>{db.users.length}</dd>
         </div>
+        <div>
+          <dt>Campaigns</dt>
+          <dd>{db.campaigns.length}</dd>
+        </div>
+      </dl>
+      <div className="card" style={{ marginBottom: "1.25rem" }}>
+        <h3 style={{ marginBottom: "0.5rem" }}>Queues</h3>
+        <ul style={{ margin: 0, paddingLeft: "1.1rem", lineHeight: 1.7 }}>
+          <li>
+            <Link href="/admin/verification">KYC + reel verification</Link>
+          </li>
+          <li>
+            <Link href="/admin/metrics">Manual metrics</Link>
+          </li>
+          <li>
+            <Link href="/admin/payouts">Payouts</Link>
+          </li>
+        </ul>
       </div>
-      <h2 style={{ marginTop: "1.5rem" }}>Campaigns</h2>
+      <h2>Campaigns</h2>
       <table className="table">
         <thead>
           <tr>

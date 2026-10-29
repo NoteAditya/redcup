@@ -25,9 +25,6 @@ export default async function SignupPage({
   return (
     <MarketingShell>
       <div className="signup-stage">
-        <p className="chip" style={{ marginBottom: "0.85rem" }}>
-          {role === "creator" ? "Creator path" : "Brand path"}
-        </p>
         <h1>{role === "creator" ? "Create your creator account" : "Create your brand account"}</h1>
         <p className="muted" style={{ margin: "0.5rem 0 1.15rem" }}>
           Already have one? <Link href="/login">Sign in</Link>

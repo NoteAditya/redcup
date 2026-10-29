@@ -128,9 +128,6 @@ export function CreatorOnboardingForm({ igMessage }: { igMessage?: string | null
       <CupProgress progress={progress} label={`Creator setup · step ${step + 1} of ${STEPS.length}`} />
       <div className="onboard-grid">
         <div className="onboard-question card">
-          <p className="chip" style={{ marginBottom: "0.75rem" }}>
-            Creator path
-          </p>
           <AnimatePresence mode="wait">
             <motion.div
               key={current.key}
@@ -181,7 +178,7 @@ export function CreatorOnboardingForm({ igMessage }: { igMessage?: string | null
         </div>
 
         <aside className="onboard-preview" aria-live="polite">
-          <p className="chip">Live profile card</p>
+          <h3 style={{ fontSize: "1rem", marginBottom: "0.65rem" }}>Live profile card</h3>
           <div className={`creator-preview-card card ${previewReady ? "is-alive" : "is-ghost"}`}>
             <div className="creator-preview-avatar" aria-hidden>
               {(data.displayName || "?").slice(0, 1).toUpperCase()}

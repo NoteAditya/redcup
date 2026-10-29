@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import { MotionProviders } from "@/components/motion/Providers";
 import "./globals.css";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const dmSans = DM_Sans({
+  variable: "--font-app",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -45,7 +45,20 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} antialiased`}>
+      <head>
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=chillax@400,500,600,700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body
+        className={dmSans.variable}
+        style={
+          {
+            ["--font-display" as string]: '"Chillax", system-ui, sans-serif',
+          } as React.CSSProperties
+        }
+      >
         <MotionProviders>{children}</MotionProviders>
       </body>
     </html>

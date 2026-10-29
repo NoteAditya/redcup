@@ -23,7 +23,15 @@ export default async function BrandDashboard() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", alignItems: "end" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: "1rem",
+          flexWrap: "wrap",
+          alignItems: "end",
+        }}
+      >
         <div>
           <h1>Brand dashboard</h1>
           <p className="muted" style={{ marginTop: "0.35rem" }}>
@@ -36,34 +44,30 @@ export default async function BrandDashboard() {
       </div>
 
       {brand?.kycStatus !== "approved" && (
-        <div className="card" style={{ marginTop: "1rem", borderColor: "color-mix(in srgb, var(--warn) 35%, var(--line))" }}>
+        <div className="card" style={{ marginTop: "1rem", background: "color-mix(in srgb, var(--warn) 10%, var(--sheet))" }}>
           Finish onboarding and wait for admin KYC approval before funding a bounty.{" "}
           <Link href="/brand/onboarding">Open profile</Link>
         </div>
       )}
 
-      <div className="axis axis-3" style={{ marginTop: "1.15rem" }}>
-        <div className="card">
-          <div className="muted" style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
-            Bounties
-          </div>
-          <div style={{ fontSize: "1.5rem", fontWeight: 800, marginTop: 4 }}>{campaigns.length}</div>
+      <dl className="app-kpi">
+        <div>
+          <dt>Bounties</dt>
+          <dd>{campaigns.length}</dd>
         </div>
-        <div className="card">
-          <div className="muted" style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>
-            Budget locked
-          </div>
-          <div style={{ fontSize: "1.5rem", fontWeight: 800, marginTop: 4 }}>{formatINR(spent)}</div>
+        <div>
+          <dt>Budget locked</dt>
+          <dd>{formatINR(spent)}</dd>
         </div>
-        <div className="card">
-          <div className="muted" style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>
-            By status
-          </div>
-          {byStatus.length ? <StatBars items={byStatus} /> : <p className="muted" style={{ fontSize: "0.85rem" }}>No data yet</p>}
+        <div>
+          <dt>By status</dt>
+          <dd style={{ fontSize: "1rem", fontWeight: 500 }}>
+            {byStatus.length ? <StatBars items={byStatus} /> : <span className="muted">No data yet</span>}
+          </dd>
         </div>
-      </div>
+      </dl>
 
-      <h2 style={{ marginTop: "1.5rem" }}>Your bounties</h2>
+      <h2 style={{ marginTop: "0.5rem" }}>Your bounties</h2>
       <div className="bounty-grid" style={{ marginTop: "0.75rem" }}>
         {campaigns.length === 0 && (
           <EmptyState

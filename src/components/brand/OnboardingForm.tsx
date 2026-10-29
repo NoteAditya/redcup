@@ -146,9 +146,6 @@ export function BrandOnboardingForm() {
       <CupProgress progress={progress} label={`Brand setup · step ${step + 1} of ${STEPS.length}`} />
       <div className="onboard-grid">
         <div className="onboard-question card">
-          <p className="chip" style={{ marginBottom: "0.75rem" }}>
-            Brand path
-          </p>
           <AnimatePresence mode="wait">
             <motion.div
               key={current.key}
@@ -204,7 +201,7 @@ export function BrandOnboardingForm() {
         </div>
 
         <aside className="onboard-preview" aria-live="polite">
-          <p className="chip">Live bounty preview</p>
+          <h3 style={{ fontSize: "1rem", marginBottom: "0.65rem" }}>Live bounty preview</h3>
           <div className={`bounty-card card ${previewReady ? "is-alive" : "is-ghost"}`}>
             <div className="bounty-card-top">
               <div>

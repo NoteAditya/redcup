@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type NavItem = { href: string; label: string };
 
 export function AppShell({ nav, children }: { nav: NavItem[]; children: React.ReactNode }) {
+  const pathname = usePathname();
   return (
     <div className="app-frame">
       <div className="app-shell">
@@ -13,13 +17,19 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: React.Re
               <span style={{ color: "var(--cup)" }}>Red</span>Cup
             </span>
           </Link>
-          {nav.map((item) => (
-            <Link key={item.href} href={item.href}>
-              {item.label}
-            </Link>
-          ))}
+          {nav.map((item) => {
+            const active =
+              pathname === item.href ||
+              (item.href !== "/" && pathname.startsWith(item.href + "/")) ||
+              (item.href.match(/\/(brand|creator|admin)$/) && pathname === item.href);
+            return (
+              <Link key={item.href} href={item.href} className={active ? "active" : undefined}>
+                {item.label}
+              </Link>
+            );
+          })}
           <div style={{ flex: 1 }} />
-          <Link href="/" style={{ fontSize: "0.82rem", color: "var(--muted)" }}>
+          <Link href="/" style={{ fontSize: "0.875rem", color: "var(--muted)" }}>
             ← Marketing site
           </Link>
         </aside>

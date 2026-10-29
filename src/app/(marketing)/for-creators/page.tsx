@@ -3,53 +3,69 @@ import { MarketingShell } from "@/components/layout/MarketingShell";
 
 export const metadata = { title: "For creators" };
 
+const STEPS = [
+  "Connect Instagram and finish PAN + UPI.",
+  "Browse open bounties — see Eligible / Almost / Not eligible before you apply.",
+  "Apply only where you match. Brands shortlist by Fit Score.",
+  "Ship one draft. One revision. Then post with the paid partnership label.",
+  "Earn base plus capped performance on verified views.",
+];
+
 export default function ForCreatorsPage() {
   return (
     <MarketingShell>
-      <p className="chip" style={{ marginBottom: "0.85rem" }}>
-        Creators
-      </p>
-      <h1>Earn for approved reels and verified views</h1>
-      <p className="muted" style={{ maxWidth: "52ch", marginTop: "0.75rem", fontSize: "1.02rem" }}>
-        Connect Instagram, finish PAN and UPI, and apply only to bounties you are eligible for. RedCup shows
-        Eligible / Almost / Not eligible on every card — no claim-first scramble.
+      <h1>Earn on approved reels</h1>
+      <p style={{ maxWidth: "52ch", marginTop: "0.75rem", fontSize: "1.05rem" }}>
+        Connect Instagram, finish PAN and UPI, apply only where you match, and get base plus capped performance for
+        verified views.
       </p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", marginTop: "1.25rem" }}>
         <Link href="/signup?role=creator" className="btn btn-primary">
           Create a creator account
         </Link>
         <Link href="/bounties" className="btn btn-ghost">
-          Browse bounties
+          Browse open bounties
         </Link>
       </div>
 
-      <div className="axis axis-2" style={{ marginTop: "1.75rem" }}>
-        <div className="card">
-          <div className="step-num">BASE</div>
-          <h3>Base + performance</h3>
-          <p className="muted" style={{ marginTop: "0.4rem" }}>
-            Base pays when your draft is approved and the reel is live with a paid partnership label. Performance
-            pays per verified 1,000 views, capped.
-          </p>
+      <section className="how-band" style={{ marginTop: "2.5rem" }}>
+        <div className="how-band-head">
+          <h2>From profile to payout</h2>
+          <p>Apply with confidence. Earn when the reel is live and views are verified.</p>
         </div>
-        <div className="card">
-          <div className="step-num">FIT</div>
-          <h3>Fit Score shortlist</h3>
-          <p className="muted" style={{ marginTop: "0.4rem" }}>
-            Matching niches, audience, and reliability raise your Fit Score. Brands award from the shortlist;
-            if they miss the deadline, top Fit Scores auto-award.
-          </p>
+        <div className="how-cols" style={{ gridTemplateColumns: "1fr" }}>
+          {STEPS.map((step) => (
+            <div key={step} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
+              <span
+                aria-hidden
+                style={{
+                  width: "0.55rem",
+                  height: "0.55rem",
+                  borderRadius: "50%",
+                  background: "var(--cta)",
+                  marginTop: "0.45rem",
+                  flexShrink: 0,
+                }}
+              />
+              <p style={{ margin: 0, maxWidth: "56ch" }}>{step}</p>
+            </div>
+          ))}
         </div>
-      </div>
+      </section>
 
-      <section className="band band-ink" style={{ marginTop: "1.75rem" }}>
-        <h2 style={{ maxWidth: "20ch" }}>Apply where you already match.</h2>
-        <p className="muted" style={{ marginTop: "0.7rem", maxWidth: "46ch" }}>
-          Eligibility is computed before you apply, so your time goes to briefs you can win — not guesswork DMs.
-        </p>
-        <Link href="/signup?role=creator" className="btn btn-primary" style={{ marginTop: "1.1rem" }}>
-          Join as a creator
-        </Link>
+      <section className="axis axis-2" style={{ marginTop: "1.5rem" }}>
+        <div className="card">
+          <h3>Eligibility first</h3>
+          <p style={{ marginTop: "0.4rem" }}>
+            Every open bounty shows whether you match before you spend a minute writing.
+          </p>
+        </div>
+        <div className="card">
+          <h3>Pay for results</h3>
+          <p style={{ marginTop: "0.4rem" }}>
+            Base for an approved live reel, plus capped performance on verified views — within campaign caps.
+          </p>
+        </div>
       </section>
     </MarketingShell>
   );

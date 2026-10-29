@@ -8,9 +8,6 @@ export default function LoginPage() {
   return (
     <MarketingShell>
       <div style={{ maxWidth: 440 }}>
-        <p className="chip" style={{ marginBottom: "0.85rem" }}>
-          Account
-        </p>
         <h1>Sign in</h1>
         <p className="muted" style={{ margin: "0.5rem 0 1.15rem" }}>
           New here? <Link href="/signup">Create an account</Link>

@@ -8,12 +8,18 @@ export function CupProgress({
   label: string;
 }) {
   const pct = Math.max(0, Math.min(1, progress));
-  const fillH = Math.round(pct * 72);
   return (
-    <div className="cup-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct * 100)} aria-label={label}>
+    <div
+      className="cup-progress"
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(pct * 100)}
+      aria-label={label}
+    >
       <div className="cup-progress-visual" aria-hidden>
         <div className="cup-progress-bowl">
-          <div className="cup-progress-fill" style={{ height: fillH }} />
+          <div className="cup-progress-fill" style={{ height: `${Math.round(pct * 100)}%` }} />
         </div>
         <div className="cup-progress-rim" />
       </div>
