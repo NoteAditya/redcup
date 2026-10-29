@@ -38,19 +38,19 @@ export function SignUpForm({ defaultRole = "brand" }: { defaultRole?: "brand" | 
       </div>
       <div className="field">
         <label htmlFor="name">{role === "brand" ? "Business name" : "Display name"}</label>
-        <input id="name" name="name" required autoComplete="name" />
+        <input id="name" name="name" className="input" required autoComplete="name" />
       </div>
       <div className="field">
         <label htmlFor="email">Email</label>
-        <input id="email" name="email" type="email" autoComplete="email" />
+        <input id="email" name="email" className="input" type="email" autoComplete="email" />
       </div>
       <div className="field">
         <label htmlFor="phone">Phone (optional)</label>
-        <input id="phone" name="phone" autoComplete="tel" />
+        <input id="phone" name="phone" className="input" autoComplete="tel" />
       </div>
       <div className="field">
         <label htmlFor="password">Password</label>
-        <input id="password" name="password" type="password" required minLength={6} autoComplete="new-password" />
+        <input id="password" name="password" className="input" type="password" required minLength={6} autoComplete="new-password" />
       </div>
       {error && <p className="err">{error}</p>}
       <button className="btn btn-primary" disabled={pending} type="submit">
@@ -84,11 +84,11 @@ export function SignInForm() {
       >
         <div className="field">
           <label htmlFor="contact">Email or phone</label>
-          <input id="contact" name="contact" required autoComplete="username" />
+          <input id="contact" name="contact" className="input" required autoComplete="username" />
         </div>
         <div className="field">
           <label htmlFor="password">Password</label>
-          <input id="password" name="password" type="password" required autoComplete="current-password" />
+          <input id="password" name="password" className="input" type="password" required autoComplete="current-password" />
         </div>
         {error && <p className="err">{error}</p>}
         <button className="btn btn-primary" disabled={pending} type="submit">
@@ -116,7 +116,7 @@ export function SignInForm() {
         </p>
         <div className="field">
           <label htmlFor="otpContact">Email or phone</label>
-          <input id="otpContact" name="otpContact" required />
+          <input id="otpContact" name="otpContact" className="input" required />
         </div>
         <button className="btn btn-ghost" type="submit" disabled={pending}>
           Send code

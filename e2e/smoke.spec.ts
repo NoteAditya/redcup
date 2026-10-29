@@ -86,6 +86,20 @@ test.describe("RedCup production flows", () => {
     expect(body.db).toBe("neon");
   });
 
+
+  test("cinematic role picker and both onboarding paths render", async ({ page }) => {
+    const done = await noConsoleErrors(page);
+    await page.goto("/signup");
+    await expect(page.getByRole("button", { name: /I'm a brand/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /I'm a creator/i })).toBeVisible();
+    await page.getByRole("button", { name: "Brand", exact: true }).click();
+    await expect(page).toHaveURL(/signup\?role=brand/);
+    await expect(page.getByRole("button", { name: "Brand", exact: true })).toBeVisible();
+    await page.goto("/signup?role=creator");
+    await expect(page.getByRole("button", { name: "Creator", exact: true })).toBeVisible();
+    await done();
+  });
+
   test("full bounty lifecycle: signup → fund → apply → shortlist → award → draft → approve", async ({
     page,
   }) => {
@@ -107,10 +121,15 @@ test.describe("RedCup production flows", () => {
     await page.getByLabel("Password", { exact: true }).fill(password);
     await page.getByRole("button", { name: /Create account/i }).click();
     await expect(page).toHaveURL(/\/brand\/onboarding/, { timeout: 30_000 });
+    // Conversational brand onboarding — one field per screen
     await page.getByLabel("Business name").fill(`Test Brand ${id}`);
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel("Category").fill("Beauty");
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel("City").fill("Mumbai");
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel("Website").fill("https://example.com");
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel("GSTIN (for KYC)").fill("27AABCU9603R1ZM");
     await page.getByRole("button", { name: /Save and continue/i }).click();
     await expect(page).toHaveURL(/\/brand/, { timeout: 30_000 });
@@ -154,14 +173,23 @@ test.describe("RedCup production flows", () => {
     await page.getByLabel("Password", { exact: true }).fill(password);
     await page.getByRole("button", { name: /Create account/i }).click();
     await expect(page).toHaveURL(/\/creator\/onboarding/, { timeout: 30_000 });
+    // Conversational creator onboarding — one field per screen
     await page.getByLabel("Display name").fill(`Creator ${id}`);
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel("Instagram handle").fill(`creator${id}`);
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel("City").fill("Mumbai");
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel(/Languages/i).fill("Hindi, English");
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel(/Categories/i).fill("Beauty, Lifestyle");
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel(/WhatsApp/i).fill("+919876543210");
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel("PAN").fill("ABCDE1234F");
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel("UPI ID").fill(`creator${id}@upi`);
+    await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel(/Followers/i).fill("15000");
     await page.getByRole("button", { name: /Save and continue/i }).click();
     await expect(page).toHaveURL(/\/creator/, { timeout: 30_000 });

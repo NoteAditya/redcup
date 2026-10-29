@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { readDb, dbMode } from "@/server/db/store";
 import { formatINR } from "@/lib/money";
+import { StatBars } from "@/components/ui/StatBars";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +56,18 @@ export default async function AdminHome() {
           ))}
         </tbody>
       </table>
+
+      <div className="card" style={{ marginTop: "1rem" }}>
+        <h2 style={{ marginBottom: "0.75rem" }}>Campaign status</h2>
+        <StatBars
+          items={Object.entries(
+            db.campaigns.reduce<Record<string, number>>((acc, c) => {
+              acc[c.status] = (acc[c.status] || 0) + 1;
+              return acc;
+            }, {}),
+          ).map(([label, value]) => ({ label, value }))}
+        />
+      </div>
     </div>
   );
 }

@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { formatINR } from "@/lib/money";
-import { EligibilityChip } from "@/components/ui/EligibilityChip";
 import { getSession } from "@/server/auth/session";
 import { readDb } from "@/server/db/store";
-import { evaluate } from "@/server/eligibility/evaluate";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { ApplyButton } from "@/components/creator/ApplyButton";
 
 export const dynamic = "force-dynamic";
@@ -18,48 +17,68 @@ export default async function CreatorDashboard() {
   const applied = new Set(
     db.applications.filter((a) => a.creatorId === creator?.id).map((a) => a.campaignId),
   );
+  const myApps = db.applications.filter((a) => a.creatorId === creator?.id);
 
   return (
     <div>
-      <h1>Creator dashboard</h1>
-      <p className="muted" style={{ marginTop: "0.35rem" }}>
-        {creator?.displayName || "Creator"} · {creator?.level}
-        {!metrics && (
-          <>
-            {" "}
-            · <Link href="/creator/onboarding">Finish profile</Link>
-          </>
-        )}
-      </p>
-      <h2 style={{ marginTop: "1.25rem" }}>Live bounties</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", alignItems: "end" }}>
+        <div>
+          <h1>Creator dashboard</h1>
+          <p className="muted" style={{ marginTop: "0.35rem" }}>
+            {creator?.displayName || "Creator"} @{creator?.handle || "—"} · {creator?.level || "new"}
+          </p>
+        </div>
+        <Link href="/creator/onboarding" className="btn btn-ghost" prefetch>
+          Edit profile
+        </Link>
+      </div>
+
+      {!creator?.handle && (
+        <div className="card" style={{ marginTop: "1rem" }}>
+          Finish onboarding so eligibility and applications unlock.{" "}
+          <Link href="/creator/onboarding">Continue setup</Link>
+        </div>
+      )}
+
+      <div className="axis axis-3" style={{ marginTop: "1.15rem" }}>
+        <div className="card">
+          <div className="muted" style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Followers</div>
+          <div style={{ fontSize: "1.5rem", fontWeight: 800, marginTop: 4 }}>
+            {metrics?.followers?.toLocaleString("en-IN") || "—"}
+          </div>
+        </div>
+        <div className="card">
+          <div className="muted" style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Applications</div>
+          <div style={{ fontSize: "1.5rem", fontWeight: 800, marginTop: 4 }}>{myApps.length}</div>
+        </div>
+        <div className="card">
+          <div className="muted" style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Open bounties</div>
+          <div style={{ fontSize: "1.5rem", fontWeight: 800, marginTop: 4 }}>{live.length}</div>
+        </div>
+      </div>
+
+      <h2 style={{ marginTop: "1.5rem" }}>Open for you</h2>
       <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
-        {live.length === 0 && <div className="card muted">No live bounties right now.</div>}
+        {live.length === 0 && (
+          <EmptyState
+            title="No live bounties"
+            body="When brands fund campaigns, matching ones show up here with eligibility chips."
+            actionHref="/bounties"
+            actionLabel="Browse public list"
+          />
+        )}
         {live.map((c) => {
-          const elig = metrics ? evaluate(metrics, c.criteria) : { status: "INCOMPLETE" as const, reasons: [] };
+          const brand = brands.get(c.brandId);
+          const already = applied.has(c.id);
           return (
-            <div key={c.id} className="card">
-              <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
-                <div>
-                  <strong>{c.title}</strong>
-                  <div className="muted" style={{ fontSize: "0.85rem", marginTop: 4 }}>
-                    {brands.get(c.brandId)?.businessName} · {formatINR(c.basePaise)} base ·{" "}
-                    {formatINR(c.ratePer1000Paise)}/1K · cap {formatINR(c.capPerCreatorPaise)}
-                  </div>
+            <div key={c.id} className="card" style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
+              <div>
+                <strong>{c.title}</strong>
+                <div className="muted" style={{ fontSize: "0.85rem", marginTop: 4 }}>
+                  {brand?.businessName || "Brand"} · {formatINR(c.budgetPaise)} · {c.slots} slots
                 </div>
-                <EligibilityChip status={elig.status} />
               </div>
-              {elig.reasons[0] && (
-                <p className="muted" style={{ fontSize: "0.85rem", marginTop: 8 }}>
-                  {elig.reasons[0].message}
-                </p>
-              )}
-              <div style={{ marginTop: 10 }}>
-                {applied.has(c.id) ? (
-                  <span className="chip">Applied</span>
-                ) : (
-                  <ApplyButton campaignId={c.id} disabled={elig.status !== "ELIGIBLE"} />
-                )}
-              </div>
+              {already ? <span className="chip chip-ok">Applied</span> : <ApplyButton campaignId={c.id} />}
             </div>
           );
         })}
