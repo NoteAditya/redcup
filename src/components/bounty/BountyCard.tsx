@@ -11,22 +11,41 @@ export type BountyCardProps = {
   niche?: string;
 };
 
-export function BountyCard({ href, title, brandName, status, budgetPaise, slots, niche }: BountyCardProps) {
+export function BountyCard({
+  href,
+  title,
+  brandName,
+  status,
+  budgetPaise,
+  slots,
+  niche,
+}: BountyCardProps) {
+  const isLive = ["live", "shortlisted", "in_production", "tracking"].includes(status);
+  const chipClass = isLive ? "chip chip-ok" : "chip";
+
   return (
-    <Link href={href} className="bounty-card card" prefetch>
+    <Link href={href} className="bounty-card" prefetch>
       <div className="bounty-card-top">
         <div>
           <strong className="bounty-card-title">{title}</strong>
-          <div className="muted bounty-card-sub">
+          <div className="bounty-card-sub">
             {brandName || "Brand"}
             {niche ? ` · ${niche}` : ""} · {slots} slot{slots === 1 ? "" : "s"}
           </div>
         </div>
-        <span className={`chip status-${status}`}>{status.replace(/_/g, " ")}</span>
+        <span className={chipClass}>{status.replace(/_/g, " ")}</span>
       </div>
+
       <div className="bounty-card-foot">
-        <span className="bounty-card-budget">{formatINR(budgetPaise)}</span>
-        <span className="bounty-card-cta muted">View details →</span>
+        <div>
+          <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block" }}>
+            Creator Pool
+          </span>
+          <div className="bounty-card-budget">{formatINR(budgetPaise)}</div>
+        </div>
+        <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--accent)" }}>
+          View Details
+        </span>
       </div>
     </Link>
   );

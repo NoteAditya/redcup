@@ -50,3 +50,7 @@ data/store.json
 .vercel
 playwright-report/
 test-results/
+
+# Agent skills
+.agents/
+.skills/

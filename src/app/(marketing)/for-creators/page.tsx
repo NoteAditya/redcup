@@ -1,69 +1,128 @@
 import Link from "next/link";
 import { MarketingShell } from "@/components/layout/MarketingShell";
 
-export const metadata = { title: "For creators" };
+export const metadata = { title: "For Creators — Earn on Approved Reels" };
 
 const STEPS = [
-  "Connect Instagram and finish PAN + UPI.",
-  "Browse open bounties — see Eligible / Almost / Not eligible before you apply.",
-  "Apply only where you match. Brands shortlist by Fit Score.",
-  "Ship one draft. One revision. Then post with the paid partnership label.",
-  "Earn base plus capped performance on verified views.",
+  {
+    step: "Step 1",
+    tag: "Instagram Auth",
+    title: "Connect Instagram & Set Up Payouts",
+    desc: "Authenticate your professional Instagram account and submit PAN + UPI details for automated direct deposits.",
+  },
+  {
+    step: "Step 2",
+    tag: "Live Eligibility",
+    title: "Instant Eligibility Check on Every Bounty",
+    desc: "Browse live campaigns and see whether you are Eligible, Almost, or Not Eligible before writing a single word.",
+  },
+  {
+    step: "Step 3",
+    tag: "Smart Matching",
+    title: "Apply Only Where You Match",
+    desc: "No wasted pitches. Brands review automated Fit Score shortlists and award slots within 48 hours.",
+  },
+  {
+    step: "Step 4",
+    tag: "Draft Feedback",
+    title: "Submit Draft with One Revision Cycle",
+    desc: "Upload your reel draft directly in the creator dashboard. Clear brand feedback with maximum one revision round.",
+  },
+  {
+    step: "Step 5",
+    tag: "Direct UPI",
+    title: "Publish & Receive Guaranteed Payout",
+    desc: "Post with the paid partnership tag. Earn guaranteed base payout upon publishing, plus performance bonuses per 1,000 verified views.",
+  },
 ];
 
 export default function ForCreatorsPage() {
   return (
-    <MarketingShell night>
-      <h1>Earn on approved reels</h1>
-      <p style={{ maxWidth: "52ch", marginTop: "0.75rem", fontSize: "1.05rem" }}>
-        Connect Instagram, finish PAN and UPI, apply only where you match, and get base plus capped performance for
-        verified views.
-      </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", marginTop: "1.25rem" }}>
-        <Link href="/signup?role=creator" className="btn btn-primary">
-          Create a creator account
-        </Link>
-        <Link href="/bounties" className="btn btn-ghost">
-          Browse open bounties
-        </Link>
+    <MarketingShell>
+      <div style={{ maxWidth: "680px", marginBottom: "3rem" }}>
+        <h1 style={{ marginBottom: "0.85rem" }}>
+          Earn on approved reels and verified views.
+        </h1>
+        <p className="lede">
+          Connect your Instagram account, check your eligibility on any open campaign before applying, upload a single draft, and get paid directly via UPI as soon as views hit each milestone.
+        </p>
+        <div style={{ display: "flex", gap: "0.65rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
+          <Link href="/signup?role=creator" className="btn btn-primary">
+            Join as a Creator
+          </Link>
+          <Link href="/bounties" className="btn btn-ghost">
+            Browse Open Bounties
+          </Link>
+        </div>
       </div>
 
-      <section className="how-band" style={{ marginTop: "2.5rem" }}>
-        <div className="how-band-head">
-          <h2>From profile to payout</h2>
-          <p>Apply with confidence. Earn when the reel is live and views are verified.</p>
+      {/* 5-Step Ruled Ledger */}
+      <section
+        style={{
+          border: "1px solid var(--line)",
+          borderRadius: "var(--radius-card)",
+          overflow: "hidden",
+          backgroundColor: "var(--sheet)",
+          margin: "var(--section-gap) 0",
+        }}
+      >
+        <div style={{ padding: "1.5rem 1.75rem", borderBottom: "1px solid var(--line)", backgroundColor: "var(--paper-subtle)" }}>
+          <span className="chip chip-cup">Creator SLA</span>
+          <h2 style={{ fontSize: "1.25rem", marginTop: "0.35rem" }}>From profile connection to direct UPI payout</h2>
         </div>
-        <div className="how-cols" style={{ gridTemplateColumns: "1fr" }}>
-          {STEPS.map((step) => (
-            <div key={step} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
-              <span
-                aria-hidden
-                style={{
-                  width: "0.55rem",
-                  height: "0.55rem",
-                  borderRadius: "50%",
-                  background: "var(--cta)",
-                  marginTop: "0.45rem",
-                  flexShrink: 0,
-                }}
-              />
-              <p style={{ margin: 0, maxWidth: "56ch" }}>{step}</p>
+
+        <div>
+          {STEPS.map((step, idx) => (
+            <div
+              key={step.step}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "100px 1fr",
+                gap: "1.5rem",
+                padding: "1.5rem 1.75rem",
+                borderBottom: idx < STEPS.length - 1 ? "1px solid var(--line)" : "none",
+                alignItems: "start",
+              }}
+            >
+              <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--muted)" }}>
+                {step.step}
+              </div>
+              <div>
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                  <h3 style={{ fontSize: "1.0625rem" }}>{step.title}</h3>
+                  <span className="chip" style={{ fontSize: "0.6875rem" }}>{step.tag}</span>
+                </div>
+                <p style={{ margin: "0.35rem 0 0", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+                  {step.desc}
+                </p>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="axis axis-2" style={{ marginTop: "1.5rem" }}>
+      {/* Value Pillars */}
+      <section
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: "1rem",
+          margin: "var(--section-gap) 0",
+        }}
+      >
         <div className="card">
-          <h3>Eligibility first</h3>
-          <p style={{ marginTop: "0.4rem" }}>
-            Every open bounty shows whether you match before you spend a minute writing.
+          <span className="chip chip-ok" style={{ marginBottom: "0.65rem" }}>Zero Time Waste</span>
+          <h3 style={{ fontSize: "1.15rem" }}>Eligibility upfront</h3>
+          <p style={{ marginTop: "0.4rem", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+            Our matching system checks your profile against campaign criteria before you write an application. You immediately know if you qualify for the bounty.
           </p>
         </div>
+
         <div className="card">
-          <h3>Pay for results</h3>
-          <p style={{ marginTop: "0.4rem" }}>
-            Base for an approved live reel, plus capped performance on verified views — within campaign caps.
+          <span className="chip chip-cup" style={{ marginBottom: "0.65rem" }}>Escrow Protected</span>
+          <h3 style={{ fontSize: "1.15rem" }}>Guaranteed payout</h3>
+          <p style={{ marginTop: "0.4rem", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+            Every bounty budget is deposited by the brand before launch. Once your reel goes live with the paid partnership tag and views are verified, payouts trigger automatically.
           </p>
         </div>
       </section>

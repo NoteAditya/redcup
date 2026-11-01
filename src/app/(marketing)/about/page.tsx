@@ -1,35 +1,68 @@
 import Link from "next/link";
 import { MarketingShell } from "@/components/layout/MarketingShell";
 
-export const metadata = { title: "About" };
+export const metadata = { title: "About RedCup — Performance Creator Protocol" };
 
-export default function Page() {
+export default function AboutPage() {
   return (
-    <MarketingShell night>
-      <h1>About RedCup</h1>
-      <p style={{ marginTop: "0.75rem", maxWidth: "56ch", fontSize: "1.05rem" }}>
-        RedCup is an India-focused creator marketing platform. Brands fund Instagram reel bounties; eligible creators
-        apply; Fit Score shortlists; brands award; creators earn base plus pay per verified views.
-      </p>
-      <section className="how-band" style={{ marginTop: "2rem" }}>
-        <div className="how-cols">
-          <div>
-            <h3>For brands</h3>
-            <p>Fund once, award from a shortlist, pay on verified results.</p>
-          </div>
-          <div>
-            <h3>For creators</h3>
-            <p>Apply where you match. Earn base and capped performance.</p>
-          </div>
-          <div>
-            <h3>In between</h3>
-            <p>Draft review, paid labels, and view verification in one place.</p>
-          </div>
+    <MarketingShell>
+      <div style={{ maxWidth: "720px", marginBottom: "3rem" }}>
+        <p className="kicker">About the Platform</p>
+        <h1 style={{ marginBottom: "0.85rem" }}>
+          Built for brands and creators who want verified results.
+        </h1>
+        <p className="lede">
+          Most influencer marketing runs on fake screenshots, delayed invoices, and guesswork. RedCup fixes that with escrow and direct API tracking. Brands deposit budgets before work begins, creators review clear briefs, and payouts trigger automatically as verified Instagram views hit each milestone.
+        </p>
+
+        <div style={{ display: "flex", gap: "0.65rem", marginTop: "1.5rem" }}>
+          <Link href="/signup" className="btn btn-primary">
+            Get Started on RedCup
+          </Link>
+          <Link href="/bounties" className="btn btn-ghost">
+            View Live Bounties
+          </Link>
         </div>
-      </section>
-      <Link href="/signup" className="btn btn-primary" style={{ marginTop: "0.5rem" }}>
-        Get started
-      </Link>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: "1rem",
+          margin: "var(--section-gap) 0",
+        }}
+      >
+        <div className="card">
+          <span className="chip chip-ok" style={{ marginBottom: "0.75rem" }}>
+            For Brands
+          </span>
+          <h3 style={{ fontSize: "1.15rem" }}>Predictable ROI</h3>
+          <p style={{ marginTop: "0.4rem", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+            Fund your campaign once into escrow. Award creators ranked by Fit Score and only pay when the reel is live and real views are verified.
+          </p>
+        </div>
+
+        <div className="card">
+          <span className="chip chip-cup" style={{ marginBottom: "0.75rem" }}>
+            For Creators
+          </span>
+          <h3 style={{ fontSize: "1.15rem" }}>Guaranteed Payouts</h3>
+          <p style={{ marginTop: "0.4rem", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+            Check your eligibility tag before spending time applying. Receive your base fee upon publication, plus view bonuses directly via UPI.
+          </p>
+        </div>
+
+        <div className="card">
+          <span className="chip chip-warn" style={{ marginBottom: "0.75rem" }}>
+            Platform Engine
+          </span>
+          <h3 style={{ fontSize: "1.15rem" }}>Graph API Verification</h3>
+          <p style={{ marginTop: "0.4rem", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+            No fake screenshots or spoofed analytics. RedCup reads direct Instagram Graph metrics on verified post permalinks with paid partnership tags.
+          </p>
+        </div>
+      </div>
     </MarketingShell>
   );
 }

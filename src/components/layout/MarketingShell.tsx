@@ -3,88 +3,83 @@ import { SiteHeader } from "./SiteHeader";
 
 export function MarketingShell({
   children,
-  night = false,
+  fullWidth = false,
 }: {
   children: React.ReactNode;
-  night?: boolean;
+  fullWidth?: boolean;
 }) {
   return (
-    <div className={`shell ${night ? "shell-night" : ""}`}>
+    <div className="shell">
       <SiteHeader />
-      <main className="shell-main">{children}</main>
+      <main className="shell-main">
+        {fullWidth ? children : <div className="shell-container">{children}</div>}
+      </main>
       <footer className="site-footer">
         <div className="site-footer-inner">
-          <div className="footer-mark" aria-hidden>
-            {"REDCUP.".split("").map((ch, i) => (
-              <span key={i}>{ch}</span>
-            ))}
-          </div>
           <div className="footer-cols">
             <div>
-              <Link href="/" className="logo" style={{ color: "#fff" }}>
-                <span className="logo-mark" aria-hidden />
-                <span>
-                  <span style={{ color: "#f0a8a8" }}>Red</span>Cup
-                </span>
+              <Link href="/" className="logo">
+                <span className="logo-mark" aria-hidden="true" />
+                <span>RedCup</span>
               </Link>
-              <p className="muted" style={{ marginTop: "0.85rem", maxWidth: "32ch", fontSize: "0.95rem" }}>
-                Pay-for-results Instagram reel bounties. Brands fund upfront. Creators earn on approved posts and
-                verified views.
+              <p
+                style={{
+                  marginTop: "0.85rem",
+                  maxWidth: "32ch",
+                  fontSize: "0.875rem",
+                  color: "var(--color-muted)",
+                  lineHeight: 1.6,
+                }}
+              >
+                Escrow-backed creator campaigns and verified view payouts for Instagram reels.
               </p>
             </div>
+
             <div>
-              <p>Product</p>
+              <p>Platform</p>
               <ul>
                 <li>
-                  <Link href="/for-brands">For brands</Link>
+                  <Link href="/for-brands">For Brands</Link>
                 </li>
                 <li>
-                  <Link href="/for-creators">For creators</Link>
+                  <Link href="/for-creators">For Creators</Link>
                 </li>
                 <li>
-                  <Link href="/bounties">Open bounties</Link>
+                  <Link href="/bounties">Open Bounties</Link>
                 </li>
                 <li>
-                  <Link href="/creators">Creator directory</Link>
+                  <Link href="/creators">Creator Directory</Link>
                 </li>
               </ul>
             </div>
+
             <div>
-              <p>Company</p>
+              <p>Legal &amp; Trust</p>
               <ul>
                 <li>
-                  <Link href="/about">About</Link>
+                  <Link href="/terms">Terms of Service</Link>
                 </li>
                 <li>
-                  <Link href="/contact">Contact</Link>
+                  <Link href="/privacy">Privacy Policy</Link>
                 </li>
                 <li>
-                  <Link href="/signup">Create account</Link>
+                  <Link href="/refunds">Escrow &amp; Refund SLA</Link>
                 </li>
                 <li>
-                  <Link href="/login">Sign in</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <p>Legal</p>
-              <ul>
-                <li>
-                  <Link href="/terms">Terms</Link>
-                </li>
-                <li>
-                  <Link href="/privacy">Privacy</Link>
-                </li>
-                <li>
-                  <Link href="/refunds">Refunds</Link>
+                  <Link href="/contact">Contact Support</Link>
                 </li>
               </ul>
             </div>
           </div>
-        </div>
-        <div className="site-footer-base">
-          <span>© {new Date().getFullYear()} RedCup. Built for Indian brands and creators.</span>
-          <span className="footer-credit">Design rhythm interpreted from award craft — not a clone.</span>
+
+          <div className="site-footer-base">
+            <div>&copy; {new Date().getFullYear()} RedCup Protocol. All rights reserved.</div>
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <span>100% Escrow Protection</span>
+              <span>•</span>
+              <span>Official Instagram Graph API</span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

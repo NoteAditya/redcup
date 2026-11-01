@@ -3,7 +3,7 @@ import { BountyCard } from "@/components/bounty/BountyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { readDb } from "@/server/db/store";
 
-export const metadata = { title: "Bounties" };
+export const metadata = { title: "Open Bounties — Live Creator Campaigns" };
 export const dynamic = "force-dynamic";
 
 export default async function BountiesPage() {
@@ -14,20 +14,22 @@ export default async function BountiesPage() {
   const brands = new Map(db.brands.map((b) => [b.id, b]));
 
   return (
-    <MarketingShell night>
-      <div className="chapter" style={{ marginTop: "3rem" }}>
-      <p className="chapter-kicker">Collection</p>
-      <h1 className="display-stack display-stack-sm">Open bounties</h1>
-      <p className="muted" style={{ marginTop: "0.5rem", maxWidth: "52ch" }}>
-        Public list of live and active campaigns. Sign in as a creator to see your eligibility on each card.
-      </p>
-      <div className="bounty-grid" style={{ marginTop: "1.25rem" }}>
+    <MarketingShell>
+      <div style={{ maxWidth: "700px", marginBottom: "2.5rem" }}>
+        <p className="kicker">Live Directory</p>
+        <h1 style={{ marginBottom: "0.65rem" }}>Open Reel Bounties</h1>
+        <p className="lede">
+          Funded Instagram reel campaigns currently accepting creator applications. Authenticate as a creator to view your personalized eligibility status.
+        </p>
+      </div>
+
+      <div className="bounty-grid">
         {live.length === 0 && (
           <EmptyState
-            title="No live bounties yet"
-            body="When a brand funds a campaign after KYC, it appears here for eligible creators."
+            title="No live bounties right now"
+            body="When a brand funds a campaign after KYC approval, it appears here for eligible creators."
             actionHref="/signup?role=brand"
-            actionLabel="Start as a brand"
+            actionLabel="Start as a Brand"
           />
         )}
         {live.map((c) => (
@@ -41,7 +43,6 @@ export default async function BountiesPage() {
             slots={c.slots}
           />
         ))}
-      </div>
       </div>
     </MarketingShell>
   );

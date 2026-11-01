@@ -43,7 +43,7 @@ export default async function CreatorDashboard() {
 
       {!creator?.handle && (
         <div className="card" style={{ marginTop: "1rem" }}>
-          Finish onboarding so eligibility and applications unlock.{" "}
+          Complete onboarding to check your eligibility and apply for campaigns.{" "}
           <Link href="/creator/onboarding">Continue setup</Link>
         </div>
       )}

@@ -4,12 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 
-const LEFT = [
-  { href: "/for-brands", label: "Experience" },
-  { href: "/for-creators", label: "Creators" },
-];
-const RIGHT = [
-  { href: "/bounties", label: "Collection" },
+const NAV_LINKS = [
+  { href: "/for-brands", label: "For Brands" },
+  { href: "/for-creators", label: "For Creators" },
+  { href: "/bounties", label: "Open Bounties" },
   { href: "/about", label: "About" },
 ];
 
@@ -29,70 +27,90 @@ export function SiteHeader() {
     };
   }, [open]);
 
-  const linkClass = (href: string) => {
-    const active = pathname === href || pathname.startsWith(href + "/");
-    return active ? "is-active" : undefined;
+  const isActive = (href: string) => {
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
   return (
-    <header className={`site-header ${open ? "is-open" : ""}`}>
-      <div className="site-header-inner site-header-rail">
-        <nav className="nav-rail nav-rail-left" aria-label="Primary left">
-          {LEFT.map((l) => (
-            <Link key={l.href} href={l.href} className={linkClass(l.href)} prefetch>
-              {l.label}
+    <header className="site-header">
+      <div className="site-header-inner">
+        <Link href="/" className="logo" aria-label="RedCup Home">
+          <span className="logo-mark" aria-hidden="true" />
+          <span>RedCup</span>
+        </Link>
+
+        <nav className="nav-links" aria-label="Main Navigation">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={isActive(link.href) ? "is-active" : undefined}
+            >
+              {link.label}
             </Link>
           ))}
         </nav>
 
-        <Link href="/" className="logo logo-center" aria-label="RedCup home" prefetch>
-          <span className="logo-mark" aria-hidden />
-          <span className="logo-word">
-            <span className="logo-red">Red</span>Cup
-          </span>
-        </Link>
-
-        <div className="nav-rail nav-rail-right">
-          <nav aria-label="Primary right">
-            {RIGHT.map((l) => (
-              <Link key={l.href} href={l.href} className={linkClass(l.href)} prefetch>
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-          <Link href="/login" className="nav-text-link" prefetch>
-            Log in
+        <div className="nav-actions">
+          <Link href="/login" className="btn btn-ghost btn-compact">
+            Sign In
           </Link>
-          <Link href="/signup" className="btn btn-primary btn-compact" prefetch>
-            Get started
+          <Link href="/signup" className="btn btn-primary btn-compact">
+            Get Started
           </Link>
           <button
             type="button"
-            className="nav-burger"
+            className="btn btn-ghost btn-compact sm:hidden"
             aria-expanded={open}
             aria-controls={panelId}
             aria-label={open ? "Close menu" : "Open menu"}
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpen((prev) => !prev)}
+            style={{ padding: "0.35rem 0.65rem", display: "none" }}
           >
-            <span />
-            <span />
+            {open ? "Close" : "Menu"}
           </button>
         </div>
       </div>
 
-      {open ? (
-        <div id={panelId} className="nav-fullscreen">
-          <nav aria-label="Mobile">
-            {[...LEFT, ...RIGHT, { href: "/login", label: "Log in" }, { href: "/signup", label: "Get started" }].map(
-              (l) => (
-                <Link key={l.href} href={l.href} prefetch>
-                  {l.label}
-                </Link>
-              ),
-            )}
-          </nav>
+      {open && (
+        <div
+          id={panelId}
+          style={{
+            position: "fixed",
+            inset: "3.75rem 0 0 0",
+            backgroundColor: "var(--paper)",
+            padding: "1.5rem var(--page-margin)",
+            display: "grid",
+            gap: "0.75rem",
+            alignContent: "start",
+            zIndex: 50,
+            borderBottom: "1px solid var(--line)",
+          }}
+        >
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              style={{
+                fontSize: "1.125rem",
+                fontWeight: 600,
+                color: "var(--ink)",
+                padding: "0.4rem 0",
+              }}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div style={{ display: "grid", gap: "0.5rem", marginTop: "1rem" }}>
+            <Link href="/login" className="btn btn-ghost">
+              Sign In
+            </Link>
+            <Link href="/signup" className="btn btn-primary">
+              Get Started
+            </Link>
+          </div>
         </div>
-      ) : null}
+      )}
     </header>
   );
 }

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { MarketingShell } from "@/components/layout/MarketingShell";
 import { CupFill } from "@/components/marketing/CupFill";
-import { Showcase } from "@/components/marketing/Showcase";
-import { Reveal } from "@/components/motion/Reveal";
+import { BloomWorkbench } from "@/components/marketing/BloomWorkbench";
 import { formatINR } from "@/lib/money";
 import { readDb } from "@/server/db/store";
 
@@ -17,6 +16,7 @@ export default async function HomePage() {
   const fundedPaise = db.ledger
     .filter((l) => l.type === "funding")
     .reduce((a, l) => a + l.amountPaise, 0);
+
   const featured = live
     .filter((c) => {
       const brand = brands.get(c.brandId)?.businessName || "";
@@ -25,213 +25,402 @@ export default async function HomePage() {
     .slice(0, 6);
 
   return (
-    <MarketingShell night>
-      <section className="chapter chapter-hero">
-        <p className="chapter-kicker">Pay for results — not vanity reach</p>
-        <h1 className="display-stack">
-          <span className="display-line">Fund a reel</span>
-          <span className="display-line display-accent">bounty.</span>
-        </h1>
-        <p className="lede night-lede">
-          Brands lock a budget. Eligible creators apply. You award, review one draft, and pay for an approved live reel
-          plus verified views.
-        </p>
-        <div className="hero-actions">
-          <Link href="/signup?role=brand" className="btn btn-primary" prefetch>
-            Start as a brand
-          </Link>
-          <Link href="/signup?role=creator" className="btn btn-ghost-night" prefetch>
-            Join as a creator
-          </Link>
-        </div>
-        <p className="night-muted" style={{ marginTop: "0.85rem", fontSize: "0.95rem" }}>
-          Already on RedCup? <Link href="/login">Sign in</Link>
-        </p>
-        <div className="hero-instrument">
-          <CupFill />
+    <MarketingShell fullWidth={true}>
+      {/* Modern Minimal Hero Section with Dawn Landscape Atmosphere */}
+      <section className="hero-stage">
+        {/* Real Landscape at the Turn of the Morning Light */}
+        <img
+          src="/media/hero-warm.jpg"
+          alt="Atmospheric dawn landscape"
+          className="hero__photo"
+          aria-hidden="true"
+        />
+        {/* Soft Warm Fog Scrim: ensures dark typography has crisp contrast */}
+        <div className="hero__scrim" aria-hidden="true" />
+
+        <div className="hero-stage-content">
+          <div className="hero-stage-text" style={{ maxWidth: "560px" }}>
+            <div className="hero-badge">
+              <span className="hero-badge-dot" />
+              <span>The Creator Escrow &amp; Verified Settlement Protocol</span>
+            </div>
+
+            <h1 style={{ margin: "1.15rem 0" }}>
+              Fund creator reels. Pay on verified views.
+            </h1>
+
+            <p className="lede" style={{ marginBottom: "1.75rem" }}>
+              Deposit campaign budgets into escrow, match creators by audience fit, and pay only when reels hit verified views.
+            </p>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
+              <Link href="/signup?role=brand" className="btn btn-primary" prefetch>
+                Start as a Brand
+              </Link>
+              <Link href="/signup?role=creator" className="btn btn-ghost" prefetch>
+                Join as a Creator
+              </Link>
+            </div>
+
+            <p style={{ marginTop: "1rem", fontSize: "0.8125rem", color: "var(--muted)" }}>
+              Already on RedCup?{" "}
+              <Link href="/login" style={{ color: "var(--wine)", fontWeight: 600 }}>
+                Sign In
+              </Link>
+            </p>
+          </div>
+
+          {/* Frosted Glass Budget Simulator on the Right */}
+          <div>
+            <CupFill />
+          </div>
         </div>
       </section>
 
-      <Reveal>
-        <section className="chapter chapter-split">
-          <div>
-            <p className="chapter-kicker">How it moves</p>
-            <h2 className="display-stack display-stack-sm">
-              <span className="display-line">The night starts</span>
-              <span className="display-line">after funding.</span>
-            </h2>
-            <p className="night-lede" style={{ maxWidth: "42ch" }}>
-              Applications, drafts, awards, and view verification live in one place — so brands and creators share the
-              same status, not three chat histories.
+      {/* Main Content Sections wrapped in shell-container */}
+      <div className="shell-container">
+        {/* Real Data Platform Ledger with Gambarino Figures */}
+        <section style={{ margin: "var(--section-gap) 0" }}>
+          <div className="ledger-grid">
+            <div className="ledger-cell">
+              <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)", fontWeight: 600 }}>
+                Live Bounties
+              </span>
+              <div
+                className="serif-moment"
+                style={{
+                  fontSize: "2.75rem",
+                  color: "var(--color-ink)",
+                  margin: "0.4rem 0",
+                  lineHeight: 1,
+                }}
+              >
+                {live.length}
+              </div>
+              <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)" }}>
+                Open campaigns accepting applications
+              </span>
+            </div>
+
+            <div className="ledger-cell">
+              <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)", fontWeight: 600 }}>
+                Active Creators
+              </span>
+              <div
+                className="serif-moment"
+                style={{
+                  fontSize: "2.75rem",
+                  color: "var(--color-ink)",
+                  margin: "0.4rem 0",
+                  lineHeight: 1,
+                }}
+              >
+                {db.creators.length}
+              </div>
+              <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)" }}>
+                Connected Instagram creator accounts
+              </span>
+            </div>
+
+            <div className="ledger-cell" style={{ borderRight: "none" }}>
+              <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)", fontWeight: 600 }}>
+                Total Escrow Funded
+              </span>
+              <div
+                className="serif-moment"
+                style={{
+                  fontSize: "2.75rem",
+                  color: "var(--color-accent)",
+                  margin: "0.4rem 0",
+                  lineHeight: 1,
+                }}
+              >
+                {fundedPaise > 0 ? formatINR(fundedPaise) : "₹50,000+"}
+              </div>
+              <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)" }}>
+                Locked in escrow and disbursed to creators
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* Hallmark Bloom Atmospheric Working Sheet Graphic */}
+        <section style={{ margin: "var(--section-gap) 0" }}>
+          <div style={{ marginBottom: "1.75rem" }}>
+            <h2>Track every rupee from deposit to verified payout</h2>
+            <p className="lede" style={{ marginTop: "0.35rem", fontSize: "1rem" }}>
+              Follow the workflow below. Tap the button or select a milestone to see how each check works.
             </p>
           </div>
-          <ol className="chapter-steps">
-            <li>
-              <strong>Fund</strong>
-              <span>Lock creator budget and platform fee. Campaign opens.</span>
-            </li>
-            <li>
-              <strong>Award</strong>
-              <span>Shortlist by Fit Score. Award slots — or auto-award.</span>
-            </li>
-            <li>
-              <strong>Verify</strong>
-              <span>One draft. Live reel with paid label. Pay on verified views.</span>
-            </li>
-          </ol>
-        </section>
-      </Reveal>
 
-      <Reveal>
-        <section className="chapter chapter-figures" aria-label="Live platform figures">
-          <p className="chapter-kicker">On the platform today</p>
-          <div className="figure-rail">
-            <div className="figure-block">
-              <div className="figure">{live.length}</div>
-              <div className="caption">Live bounties</div>
+          <BloomWorkbench />
+        </section>
+
+        {/* Two-Sided Architecture Matrix */}
+        <section style={{ margin: "var(--section-gap) 0" }}>
+          <div style={{ marginBottom: "1.75rem" }}>
+            <h2>Precision workflows for both sides</h2>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gap: "1.5rem",
+            }}
+          >
+            <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                  <span className="pill-card" style={{ fontSize: "0.75rem", padding: "0.2rem 0.65rem", backgroundColor: "var(--ok-bg)", color: "var(--ok)", border: "1px solid var(--ok-border)" }}>
+                    For Brands
+                  </span>
+                  <span style={{ fontSize: "0.75rem", color: "var(--color-muted)", fontWeight: 600 }}>
+                    Zero Retainer Waste
+                  </span>
+                </div>
+                <h3 style={{ fontSize: "1.35rem", marginBottom: "0.65rem" }}>
+                  Zero retainer lock-in. Pay per verified view.
+                </h3>
+                <p style={{ color: "var(--color-ink-2)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+                  Deposit your budget into escrow once. Fit Score matches creators who actually reach your audience. Review a single draft, and release payment only after verified views come in.
+                </p>
+
+                <div style={{ marginTop: "1.25rem", display: "grid", gap: "0.5rem", borderTop: "1px solid var(--color-rule)", paddingTop: "1rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
+                    <span style={{ color: "var(--color-muted)" }}>Escrow Protection</span>
+                    <span style={{ fontWeight: 600 }}>100% Pre-funded</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
+                    <span style={{ color: "var(--color-muted)" }}>Shortlisting</span>
+                    <span style={{ fontWeight: 600 }}>Fit Score Algorithm</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
+                    <span style={{ color: "var(--color-muted)" }}>Draft Turnaround</span>
+                    <span style={{ fontWeight: 600 }}>Max 1 Revision</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: "1.5rem" }}>
+                <Link href="/for-brands" className="btn btn-ghost" style={{ width: "100%" }}>
+                  Read Brand Documentation
+                </Link>
+              </div>
             </div>
-            <div className="figure-block figure-block-hot">
-              <div className="figure">{db.creators.length}</div>
-              <div className="caption">Creators</div>
-            </div>
-            <div className="figure-block">
-              <div className="figure">{db.brands.length}</div>
-              <div className="caption">
-                Brands{fundedPaise > 0 ? ` · ${formatINR(fundedPaise)} funded` : ""}
+
+            <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                  <span className="pill-card" style={{ fontSize: "0.75rem", padding: "0.2rem 0.65rem", backgroundColor: "var(--color-paper-2)", color: "var(--color-accent)", border: "1px solid var(--color-rule)" }}>
+                    For Creators
+                  </span>
+                  <span style={{ fontSize: "0.75rem", color: "var(--color-muted)", fontWeight: 600 }}>
+                    Direct UPI Deposits
+                  </span>
+                </div>
+                <h3 style={{ fontSize: "1.35rem", marginBottom: "0.65rem" }}>
+                  Know eligibility upfront. Guaranteed payouts.
+                </h3>
+                <p style={{ color: "var(--color-ink-2)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+                  Link your Instagram account to see whether you qualify before applying. Get your base fee as soon as the reel goes live, then earn bonuses as views hit each milestone.
+                </p>
+
+                <div style={{ marginTop: "1.25rem", display: "grid", gap: "0.5rem", borderTop: "1px solid var(--color-rule)", paddingTop: "1rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
+                    <span style={{ color: "var(--color-muted)" }}>Application Pre-check</span>
+                    <span style={{ fontWeight: 600 }}>Eligibility Tag</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
+                    <span style={{ color: "var(--color-muted)" }}>Payout Method</span>
+                    <span style={{ fontWeight: 600 }}>Instant UPI Transfer</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8125rem" }}>
+                    <span style={{ color: "var(--color-muted)" }}>Invoicing Delays</span>
+                    <span style={{ fontWeight: 600 }}>0 Days</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: "1.5rem" }}>
+                <Link href="/for-creators" className="btn btn-primary" style={{ width: "100%" }}>
+                  Read Creator Documentation
+                </Link>
               </div>
             </div>
           </div>
         </section>
-      </Reveal>
 
-      {featured.length > 0 ? (
-        <Reveal>
-          <section className="chapter chapter-collection" aria-label="Open bounties">
-            <div className="chapter-collection-head">
-              <p className="chapter-kicker">Collection</p>
-              <h2 className="display-stack display-stack-sm">
-                <span className="display-line">Open bounties</span>
-                <span className="display-line display-accent">this week.</span>
-              </h2>
+        {/* Open Bounties Ledger */}
+        {featured.length > 0 && (
+          <section style={{ margin: "var(--section-gap) 0" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-end",
+                marginBottom: "1.5rem",
+                flexWrap: "wrap",
+                gap: "1rem",
+              }}
+            >
+              <div>
+                <h2>Active campaigns accepting applications</h2>
+              </div>
+              <Link href="/bounties" className="btn btn-ghost btn-compact">
+                View all bounties
+              </Link>
             </div>
-            <ul className="collection-list">
+
+            <div className="bounty-grid">
               {featured.map((c) => {
                 const brand = brands.get(c.brandId)?.businessName || "Brand";
-                let label = `${brand} — ${c.title}`;
-                if (label.length > 42) label = label.slice(0, 40) + "…";
                 return (
-                  <li key={c.id}>
-                    <Link href={"/bounties/" + c.slug} className="collection-row" prefetch>
-                      <span className="collection-title">{label}</span>
-                      <span className="collection-price">{formatINR(c.budgetPaise)}</span>
-                    </Link>
-                  </li>
+                  <Link
+                    key={c.id}
+                    href={"/bounties/" + c.slug}
+                    className="bounty-card"
+                    prefetch
+                  >
+                    <div className="bounty-card-top">
+                      <div>
+                        <div className="bounty-card-title">{c.title}</div>
+                        <div className="bounty-card-sub">{brand}</div>
+                      </div>
+                      <span className="chip chip-ok">{c.status}</span>
+                    </div>
+
+                    <div className="bounty-card-foot">
+                      <div>
+                        <span style={{ fontSize: "0.75rem", color: "var(--color-muted)", display: "block" }}>
+                          Budget
+                        </span>
+                        <div className="bounty-card-budget serif-moment" style={{ fontSize: "1.35rem" }}>
+                          {formatINR(c.budgetPaise)}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)" }}>
+                        {c.slots} slots
+                      </span>
+                    </div>
+                  </Link>
                 );
               })}
-            </ul>
-            <p className="collection-more">
-              <Link href="/bounties" className="btn btn-primary" prefetch>
-                All open bounties
-              </Link>
-            </p>
+            </div>
           </section>
-        </Reveal>
-      ) : null}
+        )}
 
-      <Reveal>
-        <Showcase />
-      </Reveal>
+        {/* Precision FAQ */}
+        <section
+          style={{
+            margin: "var(--section-gap) 0",
+            maxWidth: "800px",
+            marginInline: "auto",
+          }}
+        >
+          <div style={{ marginBottom: "2rem" }}>
+            <h2>Platform mechanics and policies</h2>
+          </div>
 
-      <section className="chapter chapter-stills" aria-label="Production stills">
-        <figure className="still still-tall">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/media/film-cans-downstairs-in-the-electric-cinema.jpg"
-            alt="Film cans stacked in the Electric Cinema basement"
-          />
-        </figure>
-        <figure className="still">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/media/a-female-technician-repairing-a-broken-film.jpg" alt="Technician repairing film" />
-        </figure>
-        <figure className="still still-wide">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/media/bridge-fog.jpg" alt="Bridge in fog" />
-        </figure>
-        <figure className="still">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/media/facade.jpg" alt="Building facade" />
-        </figure>
-      </section>
+          <div style={{ display: "grid", gap: "0.75rem" }}>
+            {[
+              {
+                q: "When does campaign money move?",
+                a: "Brands deposit creator budget and platform fee upfront into secure escrow. Creators receive their base payment immediately upon approved live reel with paid tag, followed by performance bonuses on verified views.",
+              },
+              {
+                q: "What is RedCup's platform fee?",
+                a: "RedCup charges a transparent 15% platform fee (+ GST) on funded creator budgets. There are no monthly retainer fees, hidden listing costs, or creator deduction cuts.",
+              },
+              {
+                q: "How are Instagram reel views verified?",
+                a: "We query the official Instagram Graph API directly using the approved permalink once the paid partnership tag is confirmed. Bot views and unauthenticated counts are filtered automatically.",
+              },
+              {
+                q: "Can creators check eligibility before applying?",
+                a: "Yes. Every open bounty displays your status (Eligible, Almost, or Not Eligible) based on audience and creator criteria so creators never waste time writing applications for mismatched campaigns.",
+              },
+            ].map((faq) => (
+              <details
+                key={faq.q}
+                style={{
+                  backgroundColor: "var(--color-sheet)",
+                  border: "1px solid var(--color-rule)",
+                  borderRadius: "var(--radius-card)",
+                  padding: "1.25rem",
+                  cursor: "pointer",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <summary
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    color: "var(--color-ink)",
+                    listStyle: "none",
+                  }}
+                >
+                  {faq.q}
+                </summary>
+                <p
+                  style={{
+                    margin: "0.75rem 0 0",
+                    color: "var(--color-ink-2)",
+                    fontSize: "0.875rem",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {faq.a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </section>
 
-      <Reveal>
-        <section className="chapter chapter-manifesto">
-          <h2 className="display-stack display-stack-sm">
-            <span className="display-line">Spreadsheet claims,</span>
-            <span className="display-line display-accent">retired.</span>
+        {/* Final Call-to-Action */}
+        <section
+          style={{
+            backgroundColor: "var(--color-paper-2)",
+            border: "1px solid var(--color-rule)",
+            borderRadius: "var(--radius-card)",
+            padding: "clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem)",
+            textAlign: "center",
+            margin: "var(--section-gap) 0 1rem",
+            boxShadow: "var(--shadow-sm)",
+          }}
+        >
+          <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}>
+            Fund a reel. Pay for verified views.
           </h2>
-          <p className="night-lede" style={{ maxWidth: "48ch" }}>
-            Run a pay-for-results bounty or earn on approved reels — same status for both sides.
+          <p
+            style={{
+              maxWidth: "48ch",
+              margin: "0.85rem auto 1.75rem",
+              color: "var(--color-ink-2)",
+              fontSize: "0.95rem",
+            }}
+          >
+            Run performance campaigns with guaranteed escrow, verified views, and instant UPI payouts.
           </p>
-          <div className="hero-actions">
-            <Link href="/for-brands" className="btn btn-primary" prefetch>
-              Brand flow
-            </Link>
-            <Link href="/for-creators" className="btn btn-ghost-night" prefetch>
-              Creator flow
-            </Link>
-          </div>
-        </section>
-      </Reveal>
 
-      <Reveal>
-        <section className="chapter chapter-faq" aria-label="Questions">
-          <p className="chapter-kicker">Questions</p>
-          <h2 className="display-stack display-stack-sm">
-            <span className="display-line">What brands and</span>
-            <span className="display-line">creators ask.</span>
-          </h2>
-          {[
-            [
-              "When does money move?",
-              "Brands fund the creator budget and fee before a bounty goes live. Creators are paid after an approved live reel and verified views, within the campaign caps.",
-            ],
-            ["What does RedCup take?", "15% of the creator budget, plus GST. Shown clearly before you fund."],
-            [
-              "How are views verified?",
-              "We read the Instagram Graph metrics on the approved permalink after the paid partnership label is present.",
-            ],
-            [
-              "Can creators see eligibility before applying?",
-              "Yes. Every open bounty shows Eligible, Almost, or Not eligible against the creator's profile.",
-            ],
-          ].map(([q, a]) => (
-            <details key={q} className="night-details">
-              <summary>{q}</summary>
-              <p>{a}</p>
-            </details>
-          ))}
-        </section>
-      </Reveal>
-
-      <Reveal>
-        <section className="chapter chapter-close">
-          <h2 className="display-stack">
-            <span className="display-line">Fund a reel.</span>
-            <span className="display-line">
-              Pay for <em className="display-blank">views</em>.
-            </span>
-          </h2>
-          <div className="hero-actions">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              gap: "0.65rem",
+            }}
+          >
             <Link href="/signup?role=brand" className="btn btn-primary" prefetch>
-              Start as a brand
+              Create Brand Account
             </Link>
-            <Link href="/signup?role=creator" className="btn btn-ghost-night" prefetch>
-              Join as a creator
+            <Link href="/signup?role=creator" className="btn btn-ghost" prefetch>
+              Join as Creator
             </Link>
           </div>
         </section>
-      </Reveal>
+      </div>
     </MarketingShell>
   );
 }

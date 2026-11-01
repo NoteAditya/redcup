@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "avoid-ai-writing": {
+      "source": "conorbronsdon/avoid-ai-writing",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "f3ff5d0d56786ffb1fc240dbfad73ba2cdb87ae700f1e523c07addd2d04ba08e"
+    },
     "neon": {
       "source": "neondatabase/agent-skills",
       "sourceType": "github",

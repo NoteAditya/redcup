@@ -1,24 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Syne, DM_Sans } from "next/font/google";
+import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
 import { MotionProviders } from "@/components/motion/Providers";
 import "./globals.css";
 
-const instrument = Instrument_Serif({
+const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["500", "600", "700"],
   display: "swap",
 });
 
-const syne = Syne({
-  variable: "--font-ui",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-});
-
-const dmSans = DM_Sans({
-  variable: "--font-app",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
@@ -51,14 +44,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#140d0e",
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${instrument.variable} ${syne.variable} ${dmSans.variable}`}>
+    <html
+      lang="en"
+      className={`${spaceGrotesk.variable} ${plusJakartaSans.variable}`}
+    >
       <body>
         <MotionProviders>{children}</MotionProviders>
       </body>
