@@ -24,15 +24,23 @@ export function MarketingShell({
               </Link>
               <p
                 style={{
-                  marginTop: "0.85rem",
-                  maxWidth: "32ch",
+                  marginTop: "1rem",
+                  maxWidth: "34ch",
                   fontSize: "0.875rem",
-                  color: "var(--color-muted)",
-                  lineHeight: 1.6,
+                  color: "var(--muted)",
+                  lineHeight: 1.65,
                 }}
               >
-                Escrow-backed creator campaigns and verified view payouts for Instagram reels.
+                The escrow protocol for performance creator reels. Zero retainer waste, verified Instagram views, and instant UPI settlements.
               </p>
+              <div style={{ marginTop: "1.25rem", display: "flex", gap: "0.5rem" }}>
+                <span className="chip" style={{ fontSize: "0.75rem", background: "var(--paper-subtle)" }}>
+                  RBI-Compliant Escrow
+                </span>
+                <span className="chip" style={{ fontSize: "0.75rem", background: "var(--paper-subtle)" }}>
+                  Meta Graph API
+                </span>
+              </div>
             </div>
 
             <div>
@@ -49,6 +57,24 @@ export function MarketingShell({
                 </li>
                 <li>
                   <Link href="/creators">Creator Directory</Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p>Architecture</p>
+              <ul>
+                <li>
+                  <Link href="/about">About RedCup</Link>
+                </li>
+                <li>
+                  <Link href="/for-brands#escrow">Escrow Mechanics</Link>
+                </li>
+                <li>
+                  <Link href="/for-brands#pricing">Fee Structure (15%)</Link>
+                </li>
+                <li>
+                  <Link href="/signup?role=brand">Brand Verification</Link>
                 </li>
               </ul>
             </div>
@@ -73,11 +99,13 @@ export function MarketingShell({
           </div>
 
           <div className="site-footer-base">
-            <div>&copy; {new Date().getFullYear()} RedCup Protocol. All rights reserved.</div>
-            <div style={{ display: "flex", gap: "1rem" }}>
+            <div>&copy; {new Date().getFullYear()} RedCup Protocol. Registered under Indian commercial guidelines.</div>
+            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
               <span>100% Escrow Protection</span>
-              <span>•</span>
+              <span aria-hidden="true">•</span>
               <span>Official Instagram Graph API</span>
+              <span aria-hidden="true">•</span>
+              <span>Direct UPI Settlement</span>
             </div>
           </div>
         </div>

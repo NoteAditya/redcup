@@ -4,6 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { formatINR } from "@/lib/money";
 
+const PRESETS = [
+  { label: "₹25K", value: 25000 },
+  { label: "₹50K", value: 50000 },
+  { label: "₹1 Lakh", value: 100000 },
+  { label: "₹2.5 Lakh", value: 250000 },
+];
+
 export function CupFill({
   defaultBudget = 50000,
   feePct = 0.15,
@@ -19,24 +26,26 @@ export function CupFill({
   const estimatedReach = useMemo(() => {
     if (budget < 25000) return { slots: 2, estViews: "25,000+" };
     if (budget < 100000) return { slots: 5, estViews: "120,000+" };
-    return { slots: 10, estViews: "350,000+" };
+    if (budget < 250000) return { slots: 10, estViews: "350,000+" };
+    return { slots: 18, estViews: "800,000+" };
   }, [budget]);
 
   return (
     <div
       className="glass"
       style={{
-        padding: "1.75rem",
+        padding: "clamp(1.5rem, 3vw, 2.25rem)",
       }}
     >
+      {/* Header with Title and Escrow Calculation */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "baseline",
-          paddingBottom: "1rem",
+          alignItems: "flex-start",
+          paddingBottom: "1.25rem",
           borderBottom: "1px solid var(--line)",
-          marginBottom: "1.25rem",
+          marginBottom: "1.35rem",
         }}
       >
         <div>
@@ -44,26 +53,27 @@ export function CupFill({
             className="pill-card"
             style={{
               fontSize: "0.75rem",
-              padding: "0.2rem 0.65rem",
+              padding: "0.25rem 0.75rem",
               background: "var(--blush)",
               color: "var(--wine)",
               border: "1px solid var(--blush-deep)",
+              fontWeight: 600,
             }}
           >
-            Escrow Calculation
+            Escrow Calculator
           </span>
-          <h3 style={{ marginTop: "0.45rem", fontSize: "1.125rem", color: "var(--ink)" }}>
+          <h3 style={{ marginTop: "0.55rem", fontSize: "1.2rem", color: "var(--ink)", letterSpacing: "-0.02em" }}>
             Campaign Budget Simulator
           </h3>
         </div>
         <div style={{ textAlign: "right" }}>
-          <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block" }}>
-            Total Escrow Required
+          <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>
+            Total Escrow Deposit
           </span>
           <span
             className="serif-moment"
             style={{
-              fontSize: "1.85rem",
+              fontSize: "2.1rem",
               fontWeight: 400,
               color: "var(--cta)",
               lineHeight: 1.1,
@@ -76,22 +86,49 @@ export function CupFill({
         </div>
       </div>
 
-      <div style={{ marginBottom: "1.5rem" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            fontSize: "0.8125rem",
-            color: "var(--muted)",
-            marginBottom: "0.45rem",
-          }}
-        >
-          <span>Creator Payout Pool</span>
-          <strong style={{ fontFamily: "var(--font-mono)", color: "var(--ink)" }}>
+      {/* Preset Buttons */}
+      <div style={{ marginBottom: "1.25rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+          <span style={{ fontSize: "0.8125rem", color: "var(--muted)", fontWeight: 500 }}>
+            Quick Presets
+          </span>
+          <span style={{ fontSize: "0.8125rem", color: "var(--ink)", fontWeight: 600 }}>
             {formatINR(budgetPaise)}
-          </strong>
+          </span>
         </div>
 
+        <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+          {PRESETS.map((p) => {
+            const isSelected = budget === p.value;
+            return (
+              <button
+                key={p.value}
+                type="button"
+                onClick={() => setBudget(p.value)}
+                style={{
+                  flex: "1 1 0",
+                  minWidth: "64px",
+                  padding: "0.4rem 0.6rem",
+                  fontSize: "0.8125rem",
+                  fontWeight: 600,
+                  borderRadius: "var(--radius-pill)",
+                  border: isSelected ? "1px solid var(--ink)" : "1px solid var(--line)",
+                  backgroundColor: isSelected ? "var(--ink)" : "var(--sheet)",
+                  color: isSelected ? "var(--paper)" : "var(--ink)",
+                  cursor: "pointer",
+                  transition: "all 140ms ease",
+                  textAlign: "center",
+                }}
+              >
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Range Slider */}
+      <div style={{ marginBottom: "1.35rem" }}>
         <input
           type="range"
           min={10000}
@@ -99,15 +136,9 @@ export function CupFill({
           step={5000}
           value={budget}
           onChange={(e) => setBudget(Number(e.target.value))}
+          aria-label="Creator budget slider"
           aria-valuetext={formatINR(budgetPaise)}
-          style={{
-            width: "100%",
-            height: "6px",
-            backgroundColor: "var(--frame)",
-            accentColor: "var(--cta)",
-            cursor: "pointer",
-            borderRadius: "var(--radius-pill)",
-          }}
+          className="budget-slider"
         />
 
         <div
@@ -116,7 +147,7 @@ export function CupFill({
             justifyContent: "space-between",
             fontSize: "0.75rem",
             color: "var(--muted)",
-            marginTop: "0.35rem",
+            marginTop: "0.45rem",
             fontFamily: "var(--font-mono)",
           }}
         >
@@ -125,12 +156,13 @@ export function CupFill({
         </div>
       </div>
 
+      {/* Breakdown Matrix */}
       <div
         style={{
           border: "1px solid var(--line)",
           borderRadius: "var(--radius-inner)",
           overflow: "hidden",
-          marginBottom: "1.25rem",
+          marginBottom: "1.35rem",
           background: "var(--paper-subtle)",
         }}
       >
@@ -143,7 +175,7 @@ export function CupFill({
         >
           <div style={{ padding: "0.75rem 1rem", borderRight: "1px solid var(--line)" }}>
             <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block" }}>
-              Creator Pool
+              Creator Payout Pool
             </span>
             <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: "0.9375rem", color: "var(--ink)" }}>
               {formatINR(budgetPaise)}
@@ -167,20 +199,20 @@ export function CupFill({
             backgroundColor: "var(--sheet)",
           }}
         >
-          <div style={{ padding: "0.65rem 1rem", borderRight: "1px solid var(--line)" }}>
+          <div style={{ padding: "0.75rem 1rem", borderRight: "1px solid var(--line)" }}>
             <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block" }}>
               Allocated Slots
             </span>
-            <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--ink)" }}>
+            <span style={{ fontSize: "0.9375rem", fontWeight: 600, color: "var(--ink)" }}>
               {estimatedReach.slots} Creators
             </span>
           </div>
 
-          <div style={{ padding: "0.65rem 1rem" }}>
+          <div style={{ padding: "0.75rem 1rem" }}>
             <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block" }}>
               Verified View Target
             </span>
-            <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--cta)" }}>
+            <span style={{ fontSize: "0.9375rem", fontWeight: 600, color: "var(--cta)" }}>
               {estimatedReach.estViews}
             </span>
           </div>

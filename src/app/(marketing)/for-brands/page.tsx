@@ -39,14 +39,18 @@ const STEPS = [
 export default function ForBrandsPage() {
   return (
     <MarketingShell>
-      <div style={{ maxWidth: "680px", marginBottom: "3rem" }}>
-        <h1 style={{ marginBottom: "0.85rem" }}>
+      <div style={{ maxWidth: "720px", margin: "clamp(1.5rem, 4vw, 3rem) 0 clamp(2.5rem, 5vw, 4rem)" }}>
+        <div className="kicker">
+          <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--wine)" }} />
+          <span>Brand Performance Architecture</span>
+        </div>
+        <h1 style={{ marginBottom: "1.15rem", lineHeight: 1.08 }}>
           Run creator campaigns that guarantee verified views.
         </h1>
         <p className="lede">
           Lock your budget in escrow before production begins. Creators apply with pre-checked eligibility, Fit Score surfaces the best matches, and you pay only after the approved reel hits real view milestones.
         </p>
-        <div style={{ display: "flex", gap: "0.65rem", marginTop: "1.5rem", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "0.85rem", marginTop: "2rem", flexWrap: "wrap" }}>
           <Link href="/signup?role=brand" className="btn btn-primary">
             Create Brand Account
           </Link>
@@ -64,11 +68,12 @@ export default function ForBrandsPage() {
           overflow: "hidden",
           backgroundColor: "var(--sheet)",
           margin: "var(--section-gap) 0",
+          boxShadow: "var(--shadow-card)",
         }}
       >
-        <div style={{ padding: "1.5rem 1.75rem", borderBottom: "1px solid var(--line)", backgroundColor: "var(--paper-subtle)" }}>
+        <div style={{ padding: "1.75rem 2rem", borderBottom: "1px solid var(--line)", backgroundColor: "var(--paper-subtle)" }}>
           <span className="chip chip-cup">Standard SLA</span>
-          <h2 style={{ fontSize: "1.25rem", marginTop: "0.35rem" }}>From GSTIN verification to verified views</h2>
+          <h2 style={{ fontSize: "1.35rem", marginTop: "0.5rem" }}>From GSTIN verification to verified views</h2>
         </div>
 
         <div>
@@ -77,22 +82,22 @@ export default function ForBrandsPage() {
               key={step.step}
               style={{
                 display: "grid",
-                gridTemplateColumns: "100px 1fr",
-                gap: "1.5rem",
-                padding: "1.5rem 1.75rem",
+                gridTemplateColumns: "110px 1fr",
+                gap: "1.75rem",
+                padding: "1.75rem 2rem",
                 borderBottom: idx < STEPS.length - 1 ? "1px solid var(--line)" : "none",
                 alignItems: "start",
               }}
             >
-              <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--muted)" }}>
+              <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 {step.step}
               </div>
               <div>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                  <h3 style={{ fontSize: "1.0625rem" }}>{step.title}</h3>
+                <div style={{ display: "flex", gap: "0.65rem", alignItems: "center", flexWrap: "wrap" }}>
+                  <h3 style={{ fontSize: "1.125rem" }}>{step.title}</h3>
                   <span className="chip" style={{ fontSize: "0.6875rem" }}>{step.tag}</span>
                 </div>
-                <p style={{ margin: "0.35rem 0 0", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+                <p style={{ margin: "0.45rem 0 0", color: "var(--ink-secondary)", fontSize: "0.9375rem", lineHeight: 1.65 }}>
                   {step.desc}
                 </p>
               </div>
@@ -105,23 +110,23 @@ export default function ForBrandsPage() {
       <section
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: "1rem",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gap: "1.5rem",
           margin: "var(--section-gap) 0",
         }}
       >
         <div className="card">
-          <span className="chip chip-ok" style={{ marginBottom: "0.65rem" }}>Transparent Escrow</span>
-          <h3 style={{ fontSize: "1.15rem" }}>No surprise retainers</h3>
-          <p style={{ marginTop: "0.4rem", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+          <span className="chip chip-ok" style={{ marginBottom: "0.85rem" }}>Transparent Escrow</span>
+          <h3 style={{ fontSize: "1.25rem" }}>No surprise retainers</h3>
+          <p style={{ marginTop: "0.5rem", color: "var(--ink-secondary)", fontSize: "0.9375rem", lineHeight: 1.65 }}>
             Creator pool and platform fee are displayed and locked before your campaign launches. Never worry about scope creep or hidden talent markup fees.
           </p>
         </div>
 
         <div className="card">
-          <span className="chip chip-cup" style={{ marginBottom: "0.65rem" }}>Automated Shortlist</span>
-          <h3 style={{ fontSize: "1.15rem" }}>Fit Score ranking engine</h3>
-          <p style={{ marginTop: "0.4rem", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+          <span className="chip chip-cup" style={{ marginBottom: "0.85rem" }}>Automated Shortlist</span>
+          <h3 style={{ fontSize: "1.25rem" }}>Fit Score ranking engine</h3>
+          <p style={{ marginTop: "0.5rem", color: "var(--ink-secondary)", fontSize: "0.9375rem", lineHeight: 1.65 }}>
             Our matching algorithms evaluate audience match, engagement authenticity, and past performance. In case you miss the award window, top Fit Scores auto-award to keep production on track.
           </p>
         </div>
