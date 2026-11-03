@@ -1230,6 +1230,7 @@ label.field,
   color: inherit;
 }
 .field-req { color: var(--color-muted, var(--muted)); font-weight: 400; }
+.field-req::after { content: " *"; }
 .field-control {
   width: 100%;
   min-height: 44px;

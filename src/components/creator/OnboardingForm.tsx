@@ -150,7 +150,7 @@ export function CreatorOnboardingForm({ igMessage }: { igMessage?: string | null
               <div className={`field ${error ? "is-invalid" : ""}`} style={{ marginTop: "1.1rem" }}>
                 <label className="field-label" htmlFor={current.key}>
                   {current.label}
-                  {current.required ? <span className="field-req" aria-hidden="true"> *</span> : null}
+                  {current.required ? <span className="field-req" aria-hidden="true" /> : null}
                 </label>
                 <input
                   ref={inputRef}

@@ -29,12 +29,7 @@ export function Field({
     <div className={`field ${error ? "is-invalid" : ""} ${className || ""}`}>
       <label className="field-label" htmlFor={id}>
         {label}
-        {required ? (
-          <span className="field-req" aria-hidden="true">
-            {" "}
-            *
-          </span>
-        ) : null}
+        {required ? <span className="field-req" aria-hidden="true" /> : null}
       </label>
       {children({ id, describedBy })}
       <p className="field-helper" id={error ? errId : hintId} role={error ? "alert" : undefined}>

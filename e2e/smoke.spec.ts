@@ -35,7 +35,7 @@ async function signIn(page: Page, contact: string, password: string, expectPath?
   await page.context().clearCookies();
   await page.goto("/login");
   await page.locator("#contact").fill(contact);
-  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.locator("#password").fill(password);
   await Promise.all([
     page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 30_000 }),
     page.getByRole("button", { name: /^Sign in$/i }).click(),
@@ -56,7 +56,7 @@ test.describe("RedCup production flows", () => {
   test("marketing pages load without console errors", async ({ page }) => {
     const done = await noConsoleErrors(page);
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /Fund a reel bounty/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Fund creator reels/i })).toBeVisible();
     await shot(page, "home");
     await page.goto("/for-brands");
     await expect(page.getByRole("heading").first()).toBeVisible();
@@ -65,7 +65,7 @@ test.describe("RedCup production flows", () => {
     await expect(page.getByRole("heading").first()).toBeVisible();
     await shot(page, "for-creators");
     await page.goto("/bounties");
-    await expect(page.getByRole("heading", { name: /Open bounties/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Open Reel Bounties|Open bounties/i })).toBeVisible();
     await shot(page, "bounties");
     await page.goto("/creators");
     await expect(page.getByRole("heading").first()).toBeVisible();
@@ -90,13 +90,13 @@ test.describe("RedCup production flows", () => {
   test("cinematic role picker and both onboarding paths render", async ({ page }) => {
     const done = await noConsoleErrors(page);
     await page.goto("/signup");
-    await expect(page.getByRole("button", { name: /I'm a brand/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /I'm a creator/i })).toBeVisible();
-    await page.getByRole("button", { name: "Brand", exact: true }).click();
+    await expect(page.getByRole("button", { name: /I am a brand/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /I am a creator/i })).toBeVisible();
+    await page.getByRole("button", { name: /I am a brand/i }).click();
     await expect(page).toHaveURL(/signup\?role=brand/);
-    await expect(page.getByRole("button", { name: "Brand", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Create Brand Account/i })).toBeVisible();
     await page.goto("/signup?role=creator");
-    await expect(page.getByRole("button", { name: "Creator", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Create Creator Account/i })).toBeVisible();
     await done();
   });
 
@@ -115,10 +115,9 @@ test.describe("RedCup production flows", () => {
 
     // Brand signup + onboarding
     await page.goto("/signup?role=brand");
-    await page.getByRole("button", { name: "Brand", exact: true }).click();
     await page.getByLabel("Business name").fill(`Test Brand ${id}`);
     await page.getByLabel("Email", { exact: true }).fill(brandEmail);
-    await page.getByLabel("Password", { exact: true }).fill(password);
+    await page.locator("#password").fill(password);
     await page.getByRole("button", { name: /Create account/i }).click();
     await expect(page).toHaveURL(/\/brand\/onboarding/, { timeout: 30_000 });
     // Conversational brand onboarding — one field per screen
@@ -167,10 +166,9 @@ test.describe("RedCup production flows", () => {
 
     // Creator signup + onboarding + apply
     await page.goto("/signup?role=creator");
-    await page.getByRole("button", { name: "Creator", exact: true }).click();
     await page.getByLabel(/Display name/i).fill(`Creator ${id}`);
     await page.getByLabel("Email", { exact: true }).fill(creatorEmail);
-    await page.getByLabel("Password", { exact: true }).fill(password);
+    await page.locator("#password").fill(password);
     await page.getByRole("button", { name: /Create account/i }).click();
     await expect(page).toHaveURL(/\/creator\/onboarding/, { timeout: 30_000 });
     // Conversational creator onboarding — one field per screen
