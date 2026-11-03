@@ -56,7 +56,7 @@ test.describe("RedCup production flows", () => {
   test("marketing pages load without console errors", async ({ page }) => {
     const done = await noConsoleErrors(page);
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /Fund creator reels/i })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: /Fund creator reels/i })).toBeVisible();
     await shot(page, "home");
     await page.goto("/for-brands");
     await expect(page.getByRole("heading").first()).toBeVisible();
@@ -157,7 +157,7 @@ test.describe("RedCup production flows", () => {
     await page.getByLabel("Title").fill(`E2E bounty ${id}`);
     await page.getByLabel("Criteria preset").selectOption({ label: "Open India (1K+)" });
     await page.getByLabel("Brief").fill("Show a 20s morning routine with natural light.");
-    await page.getByLabel("Do / don't").fill("Do: paid partnership.\nDon't: competitors.");
+    await page.getByLabel(/Do and don.?t|Do \/ don.?t/i).fill("Do: paid partnership.\nDon't: competitors.");
     await page.getByRole("button", { name: /Create and fund/i }).click();
     await expect(page).toHaveURL(/\/brand\/bounties\//, { timeout: 45_000 });
     await expect(page.getByText(/E2E bounty/i).first()).toBeVisible();

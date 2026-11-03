@@ -115,12 +115,12 @@ export function BountyBuilder() {
         }}
       >
         <div className={`field ${fieldErr.title ? "is-invalid" : ""}`}>
-          <label className="field-label" htmlFor="title">Title <span className="field-req">required</span></label>
+          <label className="field-label" htmlFor="title">Title <span className="field-req" aria-hidden="true" /></label>
           <input id="title" name="title" className="field-control" value={title} onChange={(e) => { setTitle(e.target.value); setFieldErr((f) => ({ ...f, title: null })); }} placeholder="Weekend skincare reel" aria-invalid={fieldErr.title ? true : undefined} aria-describedby="title-help" />
           <p className="field-helper" id="title-help" role={fieldErr.title ? "alert" : undefined}>{fieldErr.title || "Shown on the open bounty list."}</p>
         </div>
         <div className={`field ${fieldErr.brief ? "is-invalid" : ""}`}>
-          <label className="field-label" htmlFor="brief">Brief <span className="field-req">required</span></label>
+          <label className="field-label" htmlFor="brief">Brief <span className="field-req" aria-hidden="true" /></label>
           <textarea id="brief" name="brief" className="field-control field-textarea" value={brief} onChange={(e) => { setBrief(e.target.value); setFieldErr((f) => ({ ...f, brief: null })); }} aria-invalid={fieldErr.brief ? true : undefined} aria-describedby="brief-help" />
           <p className="field-helper" id="brief-help" role={fieldErr.brief ? "alert" : undefined}>{fieldErr.brief || "What the reel should cover."}</p>
         </div>
@@ -161,7 +161,7 @@ export function BountyBuilder() {
           Refresh eligible count{eligible != null ? `: ${eligible}` : ""}
         </button>
         <div className={`field ${fieldErr.budget ? "is-invalid" : ""}`}>
-          <label className="field-label" htmlFor="budget">Budget (₹) <span className="field-req">required</span></label>
+          <label className="field-label" htmlFor="budget">Budget (₹) <span className="field-req" aria-hidden="true" /></label>
           <input
             id="budget"
             type="number"
