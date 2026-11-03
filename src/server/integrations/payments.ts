@@ -119,13 +119,16 @@ export async function createFundingOrder(input: {
         error: data.error?.description || `Razorpay HTTP ${res.status}`,
       };
     }
+    // rzp_test_* : create a real test order, then auto-capture so bounties go live
+    // without Checkout UI. Live rzp_live_* waits for payment confirmation.
+    const autoCapture = keyId.startsWith("rzp_test_");
     return {
       provider,
       orderId: localOrderId,
       razorpayOrderId: data.id,
       amountPaise: checkout.total,
       checkout,
-      demo: false,
+      demo: autoCapture,
       keyId,
     };
   }

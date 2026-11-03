@@ -125,7 +125,7 @@ export async function fundCampaign(campaignId: string) {
           brandId: brand.id,
           creatorId: null,
           createdAt: nowIso(),
-          note: "TEST MODE funding — no real money moved",
+          note: "TEST MODE funding — Razorpay test order or demo; no live charge",
         },
         {
           id: id("led"),

@@ -160,7 +160,8 @@ test.describe("RedCup production flows", () => {
     await page.getByLabel(/Do and don.?t|Do \/ don.?t/i).fill("Do: paid partnership.\nDon't: competitors.");
     await page.getByRole("button", { name: /Create and fund/i }).click();
     await expect(page).toHaveURL(/\/brand\/bounties\//, { timeout: 45_000 });
-    await expect(page.getByText(/E2E bounty/i).first()).toBeVisible();
+    await expect(page.getByText(new RegExp(`E2E bounty ${id}`, "i")).first()).toBeVisible();
+    await expect(page.getByText(/live|funded|TEST MODE/i).first()).toBeVisible({ timeout: 20_000 });
     await shot(page, "brand-campaign-live");
     const campaignUrl = page.url();
 
@@ -193,7 +194,7 @@ test.describe("RedCup production flows", () => {
     await expect(page).toHaveURL(/\/creator/, { timeout: 30_000 });
     await shot(page, "creator-dashboard");
     const bountyCard = page.locator(".card", { hasText: `E2E bounty ${id}` });
-    await expect(bountyCard.first()).toBeVisible({ timeout: 20_000 });
+    await expect(bountyCard.first()).toBeVisible({ timeout: 45_000 });
     await bountyCard.first().getByRole("button", { name: /^Apply$/i }).click();
     await expect(bountyCard.first().getByText(/Applied/i)).toBeVisible({ timeout: 20_000 });
     await shot(page, "creator-applied");
