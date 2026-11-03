@@ -28,7 +28,7 @@ test.describe("Form validation UX", () => {
     await page.getByRole("button", { name: /Create account/i }).click();
     await expect(page).toHaveURL(/\/brand\/onboarding/, { timeout: 30_000 });
     await page.getByRole("button", { name: /^Continue$/i }).click();
-    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(page.locator(".field-helper[role=\"alert\"]")).toBeVisible();
     await page.getByLabel("Business name").fill(`Form Brand ${id}`);
     await expect(page.getByLabel("Business name")).toHaveValue(`Form Brand ${id}`);
   });
@@ -45,7 +45,7 @@ test.describe("Form validation UX", () => {
     await page.getByRole("button", { name: /^Continue$/i }).click();
     await page.getByLabel("Instagram handle").fill("bad handle!!");
     await page.getByRole("button", { name: /^Continue$/i }).click();
-    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(page.locator(".field-helper[role=\"alert\"]")).toBeVisible();
     await expect(page.getByLabel("Instagram handle")).toHaveValue("bad handle!!");
   });
 });
