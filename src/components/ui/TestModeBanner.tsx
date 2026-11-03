@@ -1,15 +1,11 @@
 export function TestModeBanner({ detail }: { detail?: string }) {
   return (
-    <div
-      className="connect-banner"
-      role="status"
-      style={{ borderColor: "var(--warn)", background: "color-mix(in srgb, var(--warn) 10%, white)" }}
-    >
+    <div className="test-mode-banner" role="status">
       <strong>TEST MODE</strong>
-      <div className="muted" style={{ marginTop: 4 }}>
+      <span>
         {detail ||
-          "Payments are simulated. No real money moves until Razorpay or Cashfree keys are connected."}
-      </div>
+          "Payments run in test mode. No live charges until production Razorpay keys are connected."}
+      </span>
     </div>
   );
 }

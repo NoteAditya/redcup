@@ -1,3 +1,5 @@
+/* Hallmark · v5 evolve: remote dusk/modern-minimal + Squarespace scale kept; Kiln heat/forms layered (atmospheric restyle of Santioni dual-rail product). Floor: sentence labels on forms; dual-rail nav signature waived. */
+
 /* hallmark: stamp theme=dusk genre=modern-minimal shape=dusk-hero-workbench critique=money-software-turn-of-light */
 @import url("https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500;600;700&family=Wix+Madefor+Text:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap");
 @import url("https://api.fontshare.com/v2/css?f[]=ranade@400,500,600&display=swap");
@@ -130,7 +132,21 @@
   --step-display: clamp(2.75rem, 5.5vw, 4.35rem);
   --tracking-display: -0.038em;
   --display-weight: 700;
+
+  /* Kiln heat ramp → RedCup red family (Hallmark atmospheric layer) */
+  --heat-0: #140d0e;
+  --heat-1: #3a181a;
+  --heat-2: #592223;
+  --heat-3: #9b2d3a;
+  --heat-4: #c82924;
+  --heat-5: #e85a54;
+  --heat-6: #f0a8a8;
+  --color-error: var(--bad);
+  --color-ok: var(--ok);
+  --radius-well: var(--radius-clip);
+  --step-small: 0.8125rem;
 }
+
 
 @theme inline {
   --color-paper: var(--paper);
@@ -1202,3 +1218,78 @@ label.field,
     border-bottom: 1px solid var(--line);
   }
 }
+
+/* ——— Hallmark forms (Kiln restyle on dusk base) ——— */
+.field { display: grid; gap: 0.35rem; margin-bottom: 0.85rem; }
+.field-label {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: var(--step-small);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: inherit;
+}
+.field-req { color: var(--color-muted, var(--muted)); font-weight: 400; }
+.field-control {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-well, 8px);
+  background: var(--sheet);
+  color: var(--ink);
+  font: inherit;
+  outline: 2px solid transparent;
+  outline-offset: -3px;
+}
+.field-control:hover { background: var(--raised); }
+.field-control:focus-visible { outline-color: var(--color-focus, var(--cta)); border-color: var(--ink); }
+.field-textarea { min-height: 6rem; resize: vertical; }
+.field-helper {
+  min-height: 1.25em;
+  margin: 0;
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+.field.is-invalid .field-control { border-color: var(--color-error, var(--bad)); }
+.field.is-invalid .field-helper { color: var(--color-error, var(--bad)); }
+.form-card { max-width: 28rem; }
+.form-stack { display: grid; gap: 1rem; }
+.form-card-title { font-weight: 600; margin: 0 0 0.35rem; }
+.form-card-lede { margin: 0 0 0.75rem; font-size: 0.9rem; }
+.role-toggle { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+
+.shell-night .field-control {
+  background: var(--night-elev);
+  border-color: color-mix(in srgb, var(--cream) 18%, transparent);
+  color: var(--cream);
+}
+.shell-night .field-helper { color: color-mix(in srgb, var(--cream) 55%, transparent); }
+
+.chapter-kicker {
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-weight: 500;
+}
+
+html, body { overflow-x: clip; }
+
+:focus-visible {
+  outline: 2px solid var(--color-focus, var(--cta));
+  outline-offset: 2px;
+}
+
+.test-mode-banner {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; align-items: baseline;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-well, 8px);
+  background: var(--raised);
+  font-size: var(--step-small);
+}
+.test-mode-banner strong {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  color: var(--cup-deep);
+}
+

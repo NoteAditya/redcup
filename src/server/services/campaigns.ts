@@ -9,6 +9,7 @@ import { fitScore } from "@/server/eligibility/fit-score";
 import { CRITERIA_PRESETS } from "@/server/eligibility/presets";
 import { createFundingOrder, paymentConnectState } from "@/server/integrations/payments";
 import { id, nowIso, readDb, updateDb, type Campaign } from "@/server/db/store";
+import { sendApplicationNotice, sendAwardNotice } from "@/server/integrations/mail";
 
 export async function getPresets() {
   return CRITERIA_PRESETS;
@@ -178,7 +179,8 @@ export async function fundCampaign(campaignId: string) {
 
 export async function applyToCampaign(campaignId: string) {
   const session = await requireUser(["creator"]);
-  return updateDb((db) => {
+  const bag: { notify: { brandEmail: string; campTitle: string; creatorName: string } | null } = { notify: null };
+  const result = await updateDb((db) => {
     const creator = db.creators.find((c) => c.userId === session.userId);
     const campaign = db.campaigns.find((c) => c.id === campaignId);
     if (!creator || !campaign || campaign.status !== "live") {
@@ -212,8 +214,17 @@ export async function applyToCampaign(campaignId: string) {
       fitBreakdown: null,
       awardDeadlineAt: null,
     });
+    const brand = db.brands.find((b) => b.id === campaign.brandId);
+    const brandUser = brand ? db.users.find((u) => u.id === brand.userId) : null;
+    if (brandUser?.email) {
+      bag.notify = { brandEmail: brandUser.email, campTitle: campaign.title, creatorName: creator.displayName };
+    }
     return { ok: true as const };
   });
+  if (result.ok && bag.notify) {
+    await sendApplicationNotice(bag.notify.brandEmail, bag.notify.campTitle, bag.notify.creatorName);
+  }
+  return result;
 }
 
 export async function generateShortlist(campaignId: string) {
@@ -270,7 +281,7 @@ export async function generateShortlist(campaignId: string) {
 
 export async function awardCreators(campaignId: string, applicationIds: string[]) {
   const session = await requireUser(["brand", "admin"]);
-  return updateDb((db) => {
+  const result = await updateDb((db) => {
     const campaign = db.campaigns.find((c) => c.id === campaignId);
     if (!campaign) return { ok: false as const, error: "Not found" };
     if (session.role === "brand") {
@@ -306,7 +317,23 @@ export async function awardCreators(campaignId: string, applicationIds: string[]
     campaign.status = "in_production";
     return { ok: true as const };
   });
+
+  if (result && result.ok) {
+    const db = await (await import("@/server/db/store")).readDb();
+    const campaign = db.campaigns.find((c) => c.id === campaignId);
+    for (const appId of applicationIds) {
+      const app = db.applications.find((a) => a.id === appId);
+      if (!app) continue;
+      const creator = db.creators.find((c) => c.id === app.creatorId);
+      const user = creator ? db.users.find((u) => u.id === creator.userId) : null;
+      if (user?.email && campaign) {
+        await sendAwardNotice(user.email, campaign.title);
+      }
+    }
+  }
+  return result;
 }
+
 
 export async function autoAwardIfDue(campaignId: string) {
   return updateDb((db) => {

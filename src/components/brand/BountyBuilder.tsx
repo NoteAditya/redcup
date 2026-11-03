@@ -7,6 +7,7 @@ import { formatINR, brandCheckoutTotal, rupeesToPaise } from "@/lib/money";
 import { ConnectBanner } from "@/components/ui/ConnectBanner";
 import { TestModeBanner } from "@/components/ui/TestModeBanner";
 import type { CampaignCriteria } from "@/lib/types";
+import { requiredText, positiveRupees } from "@/lib/validate";
 
 const PRESETS: { id: string; label: string; criteria: CampaignCriteria }[] = [
   {
@@ -48,6 +49,10 @@ export function BountyBuilder() {
   const [rateRupees, setRateRupees] = useState(800);
   const [capRupees, setCapRupees] = useState(15000);
   const [slots, setSlots] = useState(3);
+  const [title, setTitle] = useState("");
+  const [brief, setBrief] = useState("");
+  const [dosDonts, setDosDonts] = useState("");
+  const [fieldErr, setFieldErr] = useState<Record<string, string | null>>({});
   const [error, setError] = useState<string | null>(null);
   const [payMsg, setPayMsg] = useState<{ provider: string; message: string } | null>(null);
   const [pending, start] = useTransition();
@@ -65,14 +70,24 @@ export function BountyBuilder() {
         className="card"
         onSubmit={(e) => {
           e.preventDefault();
-          const fd = new FormData(e.currentTarget);
           setError(null);
           setPayMsg(null);
+          const next = {
+            title: requiredText(title, "Title"),
+            brief: requiredText(brief, "Brief"),
+            budget: positiveRupees(budgetRupees, "Budget", 5000),
+            base: positiveRupees(baseRupees, "Base per creator", 100),
+            rate: positiveRupees(rateRupees, "Rate per 1K views", 1),
+            cap: positiveRupees(capRupees, "Cap per creator", 1000),
+            slots: slots < 1 ? "Slots must be at least 1." : null,
+          };
+          setFieldErr(next);
+          if (Object.values(next).some(Boolean)) return;
           start(async () => {
             const draft = await createCampaignDraft({
-              title: String(fd.get("title") || ""),
-              brief: String(fd.get("brief") || ""),
-              dosDonts: String(fd.get("dosDonts") || ""),
+              title: title.trim(),
+              brief: brief.trim(),
+              dosDonts: dosDonts.trim(),
               ratePer1000Paise: rupeesToPaise(rateRupees),
               budgetPaise: rupeesToPaise(budgetRupees),
               basePaise: rupeesToPaise(baseRupees),
@@ -99,17 +114,20 @@ export function BountyBuilder() {
           });
         }}
       >
-        <div className="field">
-          <label htmlFor="title">Title</label>
-          <input id="title" name="title" required placeholder="Weekend skincare reel" />
+        <div className={`field ${fieldErr.title ? "is-invalid" : ""}`}>
+          <label className="field-label" htmlFor="title">Title <span className="field-req">required</span></label>
+          <input id="title" name="title" className="field-control" value={title} onChange={(e) => { setTitle(e.target.value); setFieldErr((f) => ({ ...f, title: null })); }} placeholder="Weekend skincare reel" aria-invalid={fieldErr.title ? true : undefined} aria-describedby="title-help" />
+          <p className="field-helper" id="title-help" role={fieldErr.title ? "alert" : undefined}>{fieldErr.title || "Shown on the open bounty list."}</p>
+        </div>
+        <div className={`field ${fieldErr.brief ? "is-invalid" : ""}`}>
+          <label className="field-label" htmlFor="brief">Brief <span className="field-req">required</span></label>
+          <textarea id="brief" name="brief" className="field-control field-textarea" value={brief} onChange={(e) => { setBrief(e.target.value); setFieldErr((f) => ({ ...f, brief: null })); }} aria-invalid={fieldErr.brief ? true : undefined} aria-describedby="brief-help" />
+          <p className="field-helper" id="brief-help" role={fieldErr.brief ? "alert" : undefined}>{fieldErr.brief || "What the reel should cover."}</p>
         </div>
         <div className="field">
-          <label htmlFor="brief">Brief</label>
-          <textarea id="brief" name="brief" required />
-        </div>
-        <div className="field">
-          <label htmlFor="dosDonts">Do / don't</label>
-          <textarea id="dosDonts" name="dosDonts" />
+          <label className="field-label" htmlFor="dosDonts">Do and don't</label>
+          <textarea id="dosDonts" name="dosDonts" className="field-control field-textarea" value={dosDonts} onChange={(e) => setDosDonts(e.target.value)} />
+          <p className="field-helper">Optional creative guardrails.</p>
         </div>
         <div className="field">
           <label htmlFor="preset">Criteria preset</label>
@@ -142,31 +160,33 @@ export function BountyBuilder() {
         >
           Refresh eligible count{eligible != null ? `: ${eligible}` : ""}
         </button>
-        <div className="field">
-          <label htmlFor="budget">Budget (₹)</label>
+        <div className={`field ${fieldErr.budget ? "is-invalid" : ""}`}>
+          <label className="field-label" htmlFor="budget">Budget (₹) <span className="field-req">required</span></label>
           <input
             id="budget"
             type="number"
             min={5000}
             value={budgetRupees}
-            onChange={(e) => setBudgetRupees(Number(e.target.value))}
+            className="field-control" onChange={(e) => { setBudgetRupees(Number(e.target.value)); setFieldErr((f) => ({ ...f, budget: null })); }}
+            aria-invalid={fieldErr.budget ? true : undefined}
           />
+          <p className="field-helper" role={fieldErr.budget ? "alert" : undefined}>{fieldErr.budget || "Minimum ₹5,000."}</p>
         </div>
         <div className="field">
-          <label htmlFor="base">Base per creator (₹)</label>
-          <input id="base" type="number" value={baseRupees} onChange={(e) => setBaseRupees(Number(e.target.value))} />
+          <label className="field-label" htmlFor="base">Base per creator (₹)</label>
+          <input id="base" type="number" value={baseRupees} className="field-control" onChange={(e) => { setBaseRupees(Number(e.target.value)); setFieldErr((f) => ({ ...f, base: null })); }} />
         </div>
         <div className="field">
-          <label htmlFor="rate">₹ per 1K views</label>
-          <input id="rate" type="number" value={rateRupees} onChange={(e) => setRateRupees(Number(e.target.value))} />
+          <label className="field-label" htmlFor="rate">₹ per 1K views</label>
+          <input id="rate" type="number" value={rateRupees} className="field-control" onChange={(e) => { setRateRupees(Number(e.target.value)); setFieldErr((f) => ({ ...f, rate: null })); }} />
         </div>
         <div className="field">
-          <label htmlFor="cap">Cap per creator (₹)</label>
-          <input id="cap" type="number" value={capRupees} onChange={(e) => setCapRupees(Number(e.target.value))} />
+          <label className="field-label" htmlFor="cap">Cap per creator (₹)</label>
+          <input id="cap" type="number" value={capRupees} className="field-control" onChange={(e) => { setCapRupees(Number(e.target.value)); setFieldErr((f) => ({ ...f, cap: null })); }} />
         </div>
         <div className="field">
-          <label htmlFor="slots">Slots</label>
-          <input id="slots" type="number" min={1} value={slots} onChange={(e) => setSlots(Number(e.target.value))} />
+          <label className="field-label" htmlFor="slots">Slots</label>
+          <input id="slots" type="number" min={1} value={slots} className="field-control" onChange={(e) => { setSlots(Number(e.target.value)); setFieldErr((f) => ({ ...f, slots: null })); }} />
         </div>
         {error && <p className="err">{error}</p>}
         {payMsg && (

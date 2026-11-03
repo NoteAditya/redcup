@@ -10,7 +10,7 @@ if (fs.existsSync(artifactEnv)) {
   }
 }
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL || "https://redcup-notes-projects-01308c80.vercel.app";
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || "https://redcup-ten.vercel.app";
 const isRemote = /^https?:\/\//.test(baseURL) && !baseURL.includes("127.0.0.1") && !baseURL.includes("localhost");
 
 export default defineConfig({

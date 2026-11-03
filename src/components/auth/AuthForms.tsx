@@ -3,32 +3,52 @@
 import { useState, useTransition } from "react";
 import { demoSignIn, demoSignUp, requestOtp } from "@/server/auth/actions";
 import { ConnectBanner } from "@/components/ui/ConnectBanner";
+import { TextField } from "@/components/forms/Field";
+import { emailOk, passwordOk, requiredText } from "@/lib/validate";
 
 export function SignUpForm({ defaultRole = "brand" }: { defaultRole?: "brand" | "creator" }) {
   const [role, setRole] = useState<"brand" | "creator">(defaultRole);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErr, setFieldErr] = useState<Record<string, string | null>>({});
+  const [values, setValues] = useState({ name: "", email: "", phone: "", password: "" });
   const [pending, start] = useTransition();
+
+  const set = (k: keyof typeof values, v: string) => {
+    setValues((s) => ({ ...s, [k]: v }));
+    setFieldErr((e) => ({ ...e, [k]: null }));
+  };
+
+  const validate = () => {
+    const next: Record<string, string | null> = {
+      name: requiredText(values.name, role === "brand" ? "Business name" : "Display name"),
+      email: values.email.trim() || values.phone.trim() ? (values.email.trim() ? emailOk(values.email) : null) : "Add an email or phone so we can reach you.",
+      password: passwordOk(values.password),
+    };
+    setFieldErr(next);
+    return !Object.values(next).some(Boolean);
+  };
 
   return (
     <form
-      className="card"
+      className="card form-card"
+      noValidate
       onSubmit={(e) => {
         e.preventDefault();
-        const fd = new FormData(e.currentTarget);
         setError(null);
+        if (!validate()) return;
         start(async () => {
           const res = await demoSignUp({
             role,
-            name: String(fd.get("name") || ""),
-            email: String(fd.get("email") || "") || undefined,
-            phone: String(fd.get("phone") || "") || undefined,
-            password: String(fd.get("password") || ""),
+            name: values.name,
+            email: values.email.trim() || undefined,
+            phone: values.phone.trim() || undefined,
+            password: values.password,
           });
           if (res && !res.ok) setError(res.error);
         });
       }}
     >
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+      <div className="role-toggle" role="group" aria-label="Account type">
         <button type="button" className={`btn ${role === "brand" ? "btn-primary" : "btn-ghost"}`} onClick={() => setRole("brand")}>
           Brand
         </button>
@@ -36,23 +56,54 @@ export function SignUpForm({ defaultRole = "brand" }: { defaultRole?: "brand" | 
           Creator
         </button>
       </div>
-      <div className="field">
-        <label htmlFor="name">{role === "brand" ? "Business name" : "Display name"}</label>
-        <input id="name" name="name" className="input" required autoComplete="name" />
-      </div>
-      <div className="field">
-        <label htmlFor="email">Email</label>
-        <input id="email" name="email" className="input" type="email" autoComplete="email" />
-      </div>
-      <div className="field">
-        <label htmlFor="phone">Phone (optional)</label>
-        <input id="phone" name="phone" className="input" autoComplete="tel" />
-      </div>
-      <div className="field">
-        <label htmlFor="password">Password</label>
-        <input id="password" name="password" className="input" type="password" required minLength={6} autoComplete="new-password" />
-      </div>
-      {error && <p className="err">{error}</p>}
+      <TextField
+        label={role === "brand" ? "Business name" : "Display name"}
+        name="name"
+        autoComplete="organization"
+        required
+        value={values.name}
+        onChange={(e) => set("name", e.target.value)}
+        onBlur={() => setFieldErr((e) => ({ ...e, name: requiredText(values.name, "Name") }))}
+        error={fieldErr.name}
+        hint="Shown on your profile and bounty cards."
+      />
+      <TextField
+        label="Email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        inputMode="email"
+        value={values.email}
+        onChange={(e) => set("email", e.target.value)}
+        onBlur={() => values.email.trim() && setFieldErr((e) => ({ ...e, email: emailOk(values.email) }))}
+        error={fieldErr.email}
+        hint="Required unless you add a phone."
+        placeholder="you@brand.com"
+      />
+      <TextField
+        label="Phone"
+        name="phone"
+        autoComplete="tel"
+        inputMode="tel"
+        value={values.phone}
+        onChange={(e) => set("phone", e.target.value)}
+        hint="Optional when email is set."
+        placeholder="+91…"
+      />
+      <TextField
+        label="Password"
+        name="password"
+        type="password"
+        autoComplete="new-password"
+        required
+        minLength={6}
+        value={values.password}
+        onChange={(e) => set("password", e.target.value)}
+        onBlur={() => setFieldErr((e) => ({ ...e, password: passwordOk(values.password) }))}
+        error={fieldErr.password}
+        hint="At least 6 characters."
+      />
+      {error && <p className="err" role="alert">{error}</p>}
       <button className="btn btn-primary" disabled={pending} type="submit">
         {pending ? "Creating…" : "Create account"}
       </button>
@@ -63,41 +114,55 @@ export function SignUpForm({ defaultRole = "brand" }: { defaultRole?: "brand" | 
 export function SignInForm() {
   const [error, setError] = useState<string | null>(null);
   const [otpMsg, setOtpMsg] = useState<{ provider: string; message: string } | null>(null);
+  const [values, setValues] = useState({ contact: "", password: "" });
+  const [fieldErr, setFieldErr] = useState<Record<string, string | null>>({});
   const [pending, start] = useTransition();
 
   return (
-    <div style={{ display: "grid", gap: "1rem" }}>
+    <div className="form-stack">
       <form
-        className="card"
+        className="card form-card"
+        noValidate
         onSubmit={(e) => {
           e.preventDefault();
-          const fd = new FormData(e.currentTarget);
           setError(null);
+          const c = requiredText(values.contact, "Email or phone");
+          const p = passwordOk(values.password);
+          setFieldErr({ contact: c, password: p });
+          if (c || p) return;
           start(async () => {
-            const res = await demoSignIn({
-              contact: String(fd.get("contact") || ""),
-              password: String(fd.get("password") || ""),
-            });
+            const res = await demoSignIn({ contact: values.contact, password: values.password });
             if (res && !res.ok) setError(res.error);
           });
         }}
       >
-        <div className="field">
-          <label htmlFor="contact">Email or phone</label>
-          <input id="contact" name="contact" className="input" required autoComplete="username" />
-        </div>
-        <div className="field">
-          <label htmlFor="password">Password</label>
-          <input id="password" name="password" className="input" type="password" required autoComplete="current-password" />
-        </div>
-        {error && <p className="err">{error}</p>}
+        <TextField
+          label="Email or phone"
+          name="contact"
+          autoComplete="username"
+          required
+          value={values.contact}
+          onChange={(e) => setValues((s) => ({ ...s, contact: e.target.value }))}
+          error={fieldErr.contact}
+        />
+        <TextField
+          label="Password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+          value={values.password}
+          onChange={(e) => setValues((s) => ({ ...s, password: e.target.value }))}
+          error={fieldErr.password}
+        />
+        {error && <p className="err" role="alert">{error}</p>}
         <button className="btn btn-primary" disabled={pending} type="submit">
           {pending ? "Signing in…" : "Sign in"}
         </button>
       </form>
 
       <form
-        className="card"
+        className="card form-card"
         onSubmit={(e) => {
           e.preventDefault();
           const fd = new FormData(e.currentTarget);
@@ -110,18 +175,13 @@ export function SignInForm() {
           });
         }}
       >
-        <p style={{ marginBottom: "0.5rem", fontWeight: 700 }}>OTP sign-in</p>
-        <p className="muted" style={{ marginBottom: "0.75rem", fontSize: "0.85rem" }}>
-          Prefer a code? Add a Resend or SMS key later. Until then this shows Connect.
-        </p>
-        <div className="field">
-          <label htmlFor="otpContact">Email or phone</label>
-          <input id="otpContact" name="otpContact" className="input" required />
-        </div>
+        <p className="form-card-title">OTP sign-in</p>
+        <p className="muted form-card-lede">Prefer a one-time code? Works when Resend is connected.</p>
+        <TextField label="Email or phone" name="otpContact" required />
+        {otpMsg && <ConnectBanner provider={otpMsg.provider} message={otpMsg.message} />}
         <button className="btn btn-ghost" type="submit" disabled={pending}>
           Send code
         </button>
-        {otpMsg && <div style={{ marginTop: "0.75rem" }}><ConnectBanner provider={otpMsg.provider} message={otpMsg.message} /></div>}
       </form>
     </div>
   );

@@ -8,13 +8,14 @@ export default function BrandSettingsPage() {
     <div>
       <h1>Settings</h1>
       <div style={{ marginTop: "1rem", maxWidth: 520, display: "grid", gap: "0.75rem" }}>
+        {pay.testMode ? <TestModeBanner detail={pay.message} /> : null}
         {!pay.ready && pay.message ? (
-          <>
-            <TestModeBanner />
-            <ConnectBanner provider={pay.provider} message={pay.message} />
-          </>
+          <ConnectBanner provider={pay.provider} message={pay.message} />
         ) : (
-          <div className="card">Payments connected via {pay.provider}.</div>
+          <div className="card">
+            Payments connected via {pay.provider}
+            {pay.testMode ? " (test keys)." : "."}
+          </div>
         )}
       </div>
     </div>

@@ -1,0 +1,78 @@
+/* Additive Kiln reference — live source of truth is globals.css :root (dusk + Kiln heat). */
+/* Hallmark tokens · Kiln restyle adapted for RedCup red-family brand
+ * Maps Kiln heat ramp onto RedCup CTA / cup-deep; free faces stand in for Boska/Geist */
+:root {
+  /* Kiln paper/ink */
+  --color-paper: #140d0e;
+  --color-paper-2: #1c1214;
+  --color-paper-3: #26181a;
+  --color-ink: #f4eee9;
+  --color-ink-2: #e2d0cb;
+  --color-muted: #a8928e;
+  --color-rule: color-mix(in srgb, #f4eee9 12%, transparent);
+  --color-accent: #c82924;
+  --color-accent-ink: #ffffff;
+  --color-focus: #e85a54;
+  --color-error: #c82924;
+  --color-ok: #1f6b4a;
+
+  /* heat ramp → red family */
+  --heat-0: #140d0e;
+  --heat-1: #3a181a;
+  --heat-2: #592223;
+  --heat-3: #9b2d3a;
+  --heat-4: #c82924;
+  --heat-5: #e85a54;
+  --heat-6: #f0a8a8;
+
+  /* bridge to existing RedCup token names */
+  --ink: #140d0e;
+  --paper: #f4eee9;
+  --sheet: #ffffff;
+  --frame: #ebe3dd;
+  --raised: #faf6f2;
+  --line: #d9cfc8;
+  --muted: #6e5c5e;
+  --cta: var(--color-accent);
+  --cta-ink: var(--color-accent-ink);
+  --cup: #9b2d3a;
+  --cup-deep: #592223;
+  --blush: #f0e4e0;
+  --blush-deep: #e2d0cb;
+  --wine: #8e2f3c;
+  --night: var(--color-paper);
+  --night-elev: var(--color-paper-2);
+  --cream: var(--color-ink);
+  --mint: var(--blush);
+  --leaf: var(--wine);
+  --ok: var(--color-ok);
+  --warn: #8a5b0a;
+  --bad: var(--color-error);
+
+  --font-display-stack: "Instrument Serif", Georgia, serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --font-ui-stack: Syne, system-ui, sans-serif;
+  --font-label: var(--font-body);
+
+  --radius: 999px;
+  --radius-soft: 4px;
+  --radius-sheet: 2px;
+  --radius-card: 4px;
+  --radius-well: 8px;
+  --radius-pill: 999px;
+  --rule-hair: 1px;
+
+  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-body: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --step-lead: clamp(1.0625rem, 1rem + 0.3vw, 1.2rem);
+  --step-head: clamp(1.65rem, 1.25rem + 1.5vw, 2.4rem);
+  --step-display: clamp(2.5rem, 1.6rem + 3.2vw, 4.25rem);
+
+  --page-margin: clamp(1.25rem, 3vw, 2.5rem);
+  --page-max: 1120px;
+  --section-gap: clamp(4.5rem, 9vw, 8rem);
+
+  --dur-short: 160ms;
+  --dur-long: 420ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}

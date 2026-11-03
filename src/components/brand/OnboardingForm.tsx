@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { saveBrandOnboarding } from "@/server/services/brand";
 import { CupProgress } from "@/components/onboarding/CupProgress";
 import { useDraft } from "@/components/onboarding/useDraft";
+import { requiredText, urlOptional, gstinOptional } from "@/lib/validate";
 
 type Draft = {
   businessName: string;
@@ -92,8 +93,12 @@ export function BrandOnboardingForm() {
 
   const advance = () => {
     const val = data[current.key]?.trim() || "";
-    if (current.required && !val) {
-      setError("This one is required.");
+    let msg: string | null = null;
+    if (current.required) msg = requiredText(val, current.label);
+    if (!msg && current.key === "website") msg = urlOptional(val);
+    if (!msg && current.key === "gstin") msg = gstinOptional(val);
+    if (msg) {
+      setError(msg);
       return;
     }
     setError(null);
@@ -158,19 +163,27 @@ export function BrandOnboardingForm() {
               <p className="muted" style={{ marginTop: "0.4rem", fontSize: "0.88rem" }}>
                 {current.hint}
               </p>
-              <div className="field" style={{ marginTop: "1.1rem" }}>
-                <label htmlFor={current.key}>{current.label}</label>
+              <div className={`field ${error ? "is-invalid" : ""}`} style={{ marginTop: "1.1rem" }}>
+                <label className="field-label" htmlFor={current.key}>
+                  {current.label}
+                  {current.required ? <span className="field-req" aria-hidden="true"> *</span> : null}
+                </label>
                 <input
                   ref={inputRef}
                   id={current.key}
                   name={current.key}
-                  className="input"
+                  className="field-control"
                   value={data[current.key]}
                   maxLength={"maxLength" in current ? current.maxLength : undefined}
                   type={"type" in current ? (current.type as string) : "text"}
                   placeholder={current.placeholder}
-                  required={current.required}
-                  onChange={(e) => save({ [current.key]: e.target.value, step } as Partial<Draft>)}
+                  aria-required={current.required || undefined}
+                  aria-invalid={error ? true : undefined}
+                  aria-describedby={error ? `${current.key}-err` : `${current.key}-hint`}
+                  onChange={(e) => {
+                    setError(null);
+                    save({ [current.key]: e.target.value, step } as Partial<Draft>);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -178,8 +191,10 @@ export function BrandOnboardingForm() {
                     }
                   }}
                 />
+                <p className="field-helper" id={error ? `${current.key}-err` : `${current.key}-hint`} role={error ? "alert" : undefined}>
+                  {error || current.hint}
+                </p>
               </div>
-              {error && <p className="err">{error}</p>}
               <div className="onboard-actions">
                 <button type="button" className="btn btn-ghost" onClick={back} disabled={step === 0 || pending}>
                   Back

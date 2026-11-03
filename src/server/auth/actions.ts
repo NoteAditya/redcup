@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { id, nowIso, readDb, updateDb } from "@/server/db/store";
 import { getSession } from "./session";
+import { sendWelcomeEmail, sendMail } from "@/server/integrations/mail";
 
 function normalizeContact(contact: string) {
   return contact.trim().toLowerCase();
@@ -91,6 +92,10 @@ export async function demoSignUp(input: {
   session.isLoggedIn = true;
   await session.save();
 
+  if (input.email) {
+    await sendWelcomeEmail(normalizeContact(input.email), input.name.trim(), input.role);
+  }
+
   redirect(input.role === "brand" ? "/brand/onboarding" : "/creator/onboarding");
 }
 
@@ -147,5 +152,13 @@ export async function requestOtp(contact: string) {
       expiresAt: new Date(Date.now() + 10 * 60_000).toISOString(),
     });
   });
+  if (contact.includes("@") && process.env.RESEND_API_KEY) {
+    await sendMail({
+      to: normalizeContact(contact),
+      subject: "Your RedCup sign-in code",
+      html: `<p>Your code is <strong>${code}</strong>. It expires in 10 minutes.</p>`,
+    });
+    return { ok: true as const };
+  }
   return { ok: true as const, demoCode: process.env.NODE_ENV === "production" ? undefined : code };
 }
