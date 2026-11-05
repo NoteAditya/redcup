@@ -22,6 +22,7 @@ export type User = {
   name: string;
   status: "active" | "inactive";
   passwordHash?: string;
+  clerkId?: string | null;
   createdAt: string;
 };
 

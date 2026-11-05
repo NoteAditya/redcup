@@ -11,6 +11,7 @@ const nav = [
 
 export default async function BrandLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
+  if (session.needsRole) redirect("/signup?claim=1");
   if (!session.isLoggedIn) redirect("/login");
   if (session.role !== "brand") redirect("/");
   return <AppShell nav={nav}>{children}</AppShell>;

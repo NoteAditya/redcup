@@ -3,7 +3,8 @@
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { id, nowIso, readDb, updateDb } from "@/server/db/store";
-import { getSession } from "./session";
+import { getIronSessionHandle } from "./session";
+import { ROLE_COOKIE } from "./clerk-sync";
 import { sendWelcomeEmail, sendMail } from "@/server/integrations/mail";
 
 function normalizeContact(contact: string) {
@@ -85,7 +86,7 @@ export async function demoSignUp(input: {
 
   if (!result.ok) return result;
 
-  const session = await getSession();
+  const session = await getIronSessionHandle();
   session.userId = userId;
   session.role = input.role;
   session.name = input.name.trim();
@@ -115,7 +116,7 @@ export async function demoSignIn(input: { contact: string; password: string }) {
   const ok = await bcrypt.compare(input.password, user.passwordHash);
   if (!ok) return { ok: false as const, error: "Wrong password." };
 
-  const session = await getSession();
+  const session = await getIronSessionHandle();
   session.userId = user.id;
   session.role = user.role;
   session.name = user.name;
@@ -128,7 +129,7 @@ export async function demoSignIn(input: { contact: string; password: string }) {
 }
 
 export async function signOut() {
-  const session = await getSession();
+  const session = await getIronSessionHandle();
   session.destroy();
   redirect("/");
 }
@@ -161,4 +162,29 @@ export async function requestOtp(contact: string) {
     return { ok: true as const };
   }
   return { ok: true as const, demoCode: process.env.NODE_ENV === "production" ? undefined : code };
+}
+
+/** Persist brand/creator choice for the next Google SSO completion. */
+export async function setPendingRole(role: "brand" | "creator") {
+  const { cookies } = await import("next/headers");
+  const jar = await cookies();
+  jar.set(ROLE_COOKIE, role, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 15,
+    path: "/",
+  });
+  return { ok: true as const };
+}
+
+/** Claim a role for a Clerk user who signed in without a pending role. */
+export async function claimClerkRole(role: "brand" | "creator") {
+  await setPendingRole(role);
+  const { syncClerkToLocalUser } = await import("./clerk-sync");
+  const synced = await syncClerkToLocalUser();
+  if (!synced.ok) {
+    return { ok: false as const, error: "Could not create your RedCup profile. Try Google again." };
+  }
+  redirect(role === "brand" ? "/brand/onboarding" : "/creator/onboarding");
 }

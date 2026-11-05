@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import { MotionProviders } from "@/components/motion/Providers";
 import "./globals.css";
+import { redcupClerkAppearance } from "@/components/auth/clerkAppearance";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
@@ -56,7 +58,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${spaceGrotesk.variable} ${plusJakartaSans.variable}`}
     >
       <body>
-        <MotionProviders>{children}</MotionProviders>
+        <ClerkProvider appearance={redcupClerkAppearance} afterSignOutUrl="/">
+          <MotionProviders>{children}</MotionProviders>
+        </ClerkProvider>
       </body>
     </html>
   );

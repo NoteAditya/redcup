@@ -11,6 +11,7 @@ const nav = [
 
 export default async function CreatorLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
+  if (session.needsRole) redirect("/signup?claim=1");
   if (!session.isLoggedIn) redirect("/login");
   if (session.role !== "creator") redirect("/");
   return <AppShell nav={nav}>{children}</AppShell>;

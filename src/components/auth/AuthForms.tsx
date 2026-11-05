@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { demoSignIn, demoSignUp, requestOtp } from "@/server/auth/actions";
 import { ConnectBanner } from "@/components/ui/ConnectBanner";
+import { AuthDivider, GoogleButton } from "@/components/auth/GoogleButton";
 import { TextField } from "@/components/forms/Field";
 import { emailOk, passwordOk, requiredText } from "@/lib/validate";
 
@@ -56,6 +57,8 @@ export function SignUpForm({ defaultRole = "brand" }: { defaultRole?: "brand" | 
           Creator
         </button>
       </div>
+      <GoogleButton mode="sign-up" role={role} />
+      <AuthDivider />
       <TextField
         label={role === "brand" ? "Business name" : "Display name"}
         name="name"
@@ -120,6 +123,10 @@ export function SignInForm() {
 
   return (
     <div className="form-stack">
+      <div className="card form-card" style={{ gap: "0.85rem" }}>
+        <GoogleButton mode="sign-in" completeUrl="/auth/continue" />
+        <AuthDivider label="or use password" />
+      </div>
       <form
         className="card form-card"
         noValidate

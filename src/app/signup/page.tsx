@@ -2,15 +2,30 @@ import Link from "next/link";
 import { MarketingShell } from "@/components/layout/MarketingShell";
 import { SignUpForm } from "@/components/auth/AuthForms";
 import { RolePicker } from "@/components/onboarding/RolePicker";
+import { ClaimRoleForm } from "@/components/auth/ClaimRoleForm";
+import { getSession } from "@/server/auth/session";
 
 export const metadata = { title: "Sign Up — RedCup" };
 
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ role?: string }>;
+  searchParams: Promise<{ role?: string; claim?: string }>;
 }) {
   const sp = await searchParams;
+  const session = await getSession();
+  const claiming = sp.claim === "1" || session.needsRole;
+
+  if (claiming) {
+    return (
+      <MarketingShell>
+        <div style={{ maxWidth: 440, margin: "2rem auto 4rem" }}>
+          <ClaimRoleForm />
+        </div>
+      </MarketingShell>
+    );
+  }
+
   const hasRole = sp.role === "brand" || sp.role === "creator";
   const role = sp.role === "creator" ? "creator" : "brand";
 
@@ -47,13 +62,12 @@ export default async function SignupPage({
             <Link href="/login" style={{ color: "var(--ink)", fontWeight: 600 }}>
               Sign in
             </Link>
-            {" &bull; "}
+            {" • "}
             <Link href="/signup" style={{ color: "var(--muted)" }}>
               Switch role
             </Link>
           </p>
         </div>
-
         <div>
           <SignUpForm defaultRole={role} />
         </div>
