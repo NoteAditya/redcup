@@ -4,6 +4,7 @@ import { MarketingShell } from "@/components/layout/MarketingShell";
 import { formatINR } from "@/lib/money";
 import { formatIST } from "@/lib/format";
 import { readDb } from "@/server/db/store";
+import { campaignApproval } from "@/server/access";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,14 @@ export default async function BountyDetailPage({ params }: { params: Promise<{ s
   const { slug } = await params;
   const db = await readDb();
   const campaign = db.campaigns.find((c) => c.slug === slug);
-  if (!campaign) notFound();
+  // Pending, sent-back, rejected, paused and draft campaigns are never public.
+  if (
+    !campaign ||
+    campaignApproval(campaign) !== "approved" ||
+    !["live", "applications_closed", "shortlisted", "in_production", "tracking", "ranked", "closed"].includes(campaign.status)
+  ) {
+    notFound();
+  }
   const brand = db.brands.find((b) => b.id === campaign.brandId);
 
   return (

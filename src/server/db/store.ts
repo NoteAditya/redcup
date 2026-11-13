@@ -5,12 +5,14 @@ import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import type {
   ApplicationStatus,
   BrandKyc,
+  CampaignApproval,
   CampaignCriteria,
   CampaignStatus,
   CreatorLevel,
   CreatorMetrics,
   EligibilityResult,
   FitBreakdown,
+  ReviewStatus,
   Role,
 } from "@/lib/types";
 
@@ -35,6 +37,9 @@ export type Brand = {
   city: string;
   gstin: string | null;
   kycStatus: BrandKyc;
+  /** Admin note on the last approval decision (typed by the admin). */
+  kycNote?: string | null;
+  kycReviewedAt?: string | null;
   website: string | null;
   createdAt: string;
 };
@@ -68,6 +73,12 @@ export type Campaign = {
   criteria: CampaignCriteria;
   presetId: string | null;
   status: CampaignStatus;
+  /** Admin approval gate. Campaigns only go live once this is "approved". */
+  approvalStatus?: CampaignApproval;
+  approvalNote?: string | null;
+  approvalReviewedAt?: string | null;
+  /** Set when an admin created the campaign on the brand's behalf. */
+  createdByAdminId?: string | null;
   applicationClosesAt: string | null;
   awardDeadlineAt: string | null;
   createdAt: string;
@@ -85,6 +96,11 @@ export type Application = {
   fitScore: number | null;
   fitBreakdown: FitBreakdown | null;
   awardDeadlineAt: string | null;
+  /** Admin review gate. Brands only ever see "approved" applications. */
+  reviewStatus?: ReviewStatus;
+  reviewNote?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: string | null;
 };
 
 export type Draft = {
@@ -169,6 +185,8 @@ export type Db = {
     targetType: string;
     targetId: string;
     reason: string;
+    /** Extra context, e.g. which fields changed. */
+    details?: string | null;
     createdAt: string;
   }[];
   otps: { contact: string; code: string; expiresAt: string }[];
@@ -190,6 +208,29 @@ export const empty = (): Db => ({
   adminActions: [],
   otps: [],
 });
+
+/**
+ * Additive, idempotent migration applied on every read. Older documents have no
+ * admin-review fields, so we derive them without touching anything else:
+ * - applications already past APPLIED were effectively accepted → approved;
+ *   plain APPLIED ones go to the admin queue as pending.
+ * - campaigns that already went live/funded are approved; drafts/verifying are pending.
+ */
+export function normalizeDb(raw: Db): Db {
+  const db = { ...empty(), ...raw } as Db;
+  for (const a of db.applications) {
+    if (!a.reviewStatus) a.reviewStatus = a.status === "APPLIED" ? "pending" : "approved";
+  }
+  for (const c of db.campaigns) {
+    if (!c.approvalStatus) {
+      c.approvalStatus = c.status === "draft" || c.status === "verifying" ? "pending" : "approved";
+    }
+  }
+  for (const u of db.users) {
+    if (u.status !== "active" && u.status !== "inactive") u.status = "active";
+  }
+  return db;
+}
 
 function dataDir(): string {
   if (process.env.VERCEL || process.env.DATA_DIR === "/tmp") {
@@ -270,9 +311,8 @@ async function loadFromNeon(sql: NeonQueryFunction<false, false>): Promise<Db> {
               ON CONFLICT (id) DO NOTHING`;
     return db;
   }
-  const db = rows[0].data as Db;
   // Ensure all keys exist for older documents
-  return { ...empty(), ...db };
+  return normalizeDb(rows[0].data as Db);
 }
 
 async function saveToNeon(sql: NeonQueryFunction<false, false>, db: Db) {
@@ -288,7 +328,7 @@ async function loadFromFile(): Promise<Db> {
   try {
     await fs.mkdir(dataDir(), { recursive: true });
     const raw = await fs.readFile(storePath(), "utf8");
-    return { ...empty(), ...(JSON.parse(raw) as Db) };
+    return normalizeDb(JSON.parse(raw) as Db);
   } catch {
     // Empty local store — no fake seed. Admin is bootstrapped when env is set.
     const db = await bootstrapAdminIfNeeded(empty());
@@ -328,12 +368,12 @@ async function loadFromNeonVersioned(
               ON CONFLICT (id) DO NOTHING`;
     const again = await sql`SELECT data, EXTRACT(EPOCH FROM updated_at) AS epoch FROM redcup_store WHERE id = 1`;
     return {
-      db: again.length ? ({ ...empty(), ...(again[0].data as Db) } as Db) : db,
+      db: again.length ? normalizeDb(again[0].data as Db) : db,
       epoch: again.length ? Number(again[0].epoch) : null,
     };
   }
   return {
-    db: { ...empty(), ...(rows[0].data as Db) } as Db,
+    db: normalizeDb(rows[0].data as Db),
     epoch: Number(rows[0].epoch),
   };
 }

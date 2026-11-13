@@ -1,7 +1,8 @@
 "use server";
 
 import { requireUser } from "@/server/auth/session";
-import { nowIso, updateDb } from "@/server/db/store";
+import { updateDb } from "@/server/db/store";
+import { isAdminApproved, isBrandApproved } from "@/server/access";
 
 export async function saveBrandOnboarding(input: {
   businessName: string;
@@ -18,10 +19,9 @@ export async function saveBrandOnboarding(input: {
     brand.category = input.category.trim();
     brand.city = input.city.trim();
     brand.website = input.website?.trim() || null;
-    if (input.gstin?.trim()) {
-      brand.gstin = input.gstin.trim().toUpperCase();
-      brand.kycStatus = "submitted";
-    }
+    if (input.gstin?.trim()) brand.gstin = input.gstin.trim().toUpperCase();
+    // Finishing the profile submits the brand to RedCup for approval.
+    if (brand.kycStatus !== "approved") brand.kycStatus = "submitted";
   });
   return { ok: true as const };
 }
@@ -36,6 +36,7 @@ export async function reviewDraft(draftId: string, decision: "approved" | "revis
     const campaign = db.campaigns.find((c) => c.id === app.campaignId);
     const brand = db.brands.find((b) => b.userId === session.userId);
     if (!campaign || !brand || campaign.brandId !== brand.id) return { ok: false as const, error: "Forbidden" };
+    if (!isBrandApproved(brand) || !isAdminApproved(app)) return { ok: false as const, error: "Forbidden" };
 
     draft.reviewStatus = decision;
     draft.reviewReason = reason || null;

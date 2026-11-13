@@ -9,7 +9,10 @@ import { fitScore } from "@/server/eligibility/fit-score";
 import { CRITERIA_PRESETS } from "@/server/eligibility/presets";
 import { createFundingOrder, paymentConnectState } from "@/server/integrations/payments";
 import { id, nowIso, readDb, updateDb, type Campaign } from "@/server/db/store";
-import { sendApplicationNotice, sendAwardNotice } from "@/server/integrations/mail";
+import { sendAwardNotice } from "@/server/integrations/mail";
+import { campaignApproval, isAdminApproved, isBrandApproved, recomputeEligibility } from "@/server/access";
+
+const BRAND_PENDING = "RedCup has not approved your brand account yet. You can create bounties once it is approved.";
 
 export async function getPresets() {
   return CRITERIA_PRESETS;
@@ -42,6 +45,7 @@ export async function createCampaignDraft(input: {
   const campaign = await updateDb((db) => {
     const brand = db.brands.find((b) => b.userId === session.userId);
     if (!brand) throw new Error("NO_BRAND");
+    if (!isBrandApproved(brand)) return null;
     const c: Campaign = {
       id: id("cmp"),
       brandId: brand.id,
@@ -57,6 +61,10 @@ export async function createCampaignDraft(input: {
       criteria: input.criteria,
       presetId: input.presetId ?? null,
       status: "draft",
+      approvalStatus: "pending",
+      approvalNote: null,
+      approvalReviewedAt: null,
+      createdByAdminId: null,
       applicationClosesAt: new Date(
         Date.now() + (input.applicationDays ?? 7) * 86400000,
       ).toISOString(),
@@ -68,6 +76,7 @@ export async function createCampaignDraft(input: {
     return c;
   });
 
+  if (!campaign) return { ok: false as const, error: BRAND_PENDING };
   return { ok: true as const, campaign };
 }
 
@@ -79,11 +88,11 @@ export async function fundCampaign(campaignId: string) {
   if (!brand || !campaign || campaign.brandId !== brand.id) {
     return { ok: false as const, error: "Campaign not found." };
   }
-  if (brand.kycStatus !== "approved") {
-    return {
-      ok: false as const,
-      error: "An admin must approve your KYC before the first bounty goes live.",
-    };
+  if (!isBrandApproved(brand)) {
+    return { ok: false as const, error: BRAND_PENDING };
+  }
+  if (campaignApproval(campaign) === "rejected") {
+    return { ok: false as const, error: "RedCup rejected this campaign, so it cannot be funded." };
   }
   if (campaign.status !== "draft" && campaign.status !== "verifying") {
     return { ok: false as const, error: "This campaign is already funded or closed." };
@@ -113,7 +122,9 @@ export async function fundCampaign(campaignId: string) {
 
     if (order.demo) {
       const c = db2.campaigns.find((x) => x.id === campaign.id)!;
-      c.status = "live";
+      // Funded campaigns wait in "verifying" until a RedCup admin approves them.
+      const approved = campaignApproval(c) === "approved";
+      c.status = approved ? "live" : "verifying";
       c.fundedAt = nowIso();
       db2.ledger.push(
         {
@@ -151,20 +162,7 @@ export async function fundCampaign(campaignId: string) {
         },
       );
 
-      // Recompute eligibility for all creators
-      for (const m of db2.creatorMetrics) {
-        const result = evaluate(m, c.criteria);
-        db2.eligibility = db2.eligibility.filter(
-          (e) => !(e.campaignId === c.id && e.creatorId === m.creatorId),
-        );
-        db2.eligibility.push({
-          campaignId: c.id,
-          creatorId: m.creatorId,
-          status: result.status,
-          reasons: result.reasons,
-          computedAt: nowIso(),
-        });
-      }
+      if (approved) recomputeEligibility(db2, c);
     }
   });
 
@@ -179,11 +177,10 @@ export async function fundCampaign(campaignId: string) {
 
 export async function applyToCampaign(campaignId: string) {
   const session = await requireUser(["creator"]);
-  const bag: { notify: { brandEmail: string; campTitle: string; creatorName: string } | null } = { notify: null };
-  const result = await updateDb((db) => {
+  return updateDb((db) => {
     const creator = db.creators.find((c) => c.userId === session.userId);
     const campaign = db.campaigns.find((c) => c.id === campaignId);
-    if (!creator || !campaign || campaign.status !== "live") {
+    if (!creator || !campaign || campaign.status !== "live" || campaignApproval(campaign) !== "approved") {
       return { ok: false as const, error: "Campaign is not open." };
     }
     const metrics = db.creatorMetrics.find((m) => m.creatorId === creator.id);
@@ -213,18 +210,14 @@ export async function applyToCampaign(campaignId: string) {
       fitScore: null,
       fitBreakdown: null,
       awardDeadlineAt: null,
+      // Every application goes to RedCup first; the brand is told only after approval.
+      reviewStatus: "pending",
+      reviewNote: null,
+      reviewedAt: null,
+      reviewedBy: null,
     });
-    const brand = db.brands.find((b) => b.id === campaign.brandId);
-    const brandUser = brand ? db.users.find((u) => u.id === brand.userId) : null;
-    if (brandUser?.email) {
-      bag.notify = { brandEmail: brandUser.email, campTitle: campaign.title, creatorName: creator.displayName };
-    }
     return { ok: true as const };
   });
-  if (result.ok && bag.notify) {
-    await sendApplicationNotice(bag.notify.brandEmail, bag.notify.campTitle, bag.notify.creatorName);
-  }
-  return result;
 }
 
 export async function generateShortlist(campaignId: string) {
@@ -235,11 +228,19 @@ export async function generateShortlist(campaignId: string) {
     if (session.role === "brand") {
       const brand = db.brands.find((b) => b.userId === session.userId);
       if (!brand || brand.id !== campaign.brandId) return { ok: false as const, error: "Forbidden" };
+      if (!isBrandApproved(brand)) return { ok: false as const, error: BRAND_PENDING };
     }
 
+    // Only admin-approved applications can ever be shortlisted.
     const apps = db.applications.filter(
-      (a) => a.campaignId === campaignId && (a.status === "APPLIED" || a.status === "SHORTLISTED"),
+      (a) =>
+        a.campaignId === campaignId &&
+        isAdminApproved(a) &&
+        (a.status === "APPLIED" || a.status === "SHORTLISTED"),
     );
+    if (apps.length === 0) {
+      return { ok: false as const, error: "No RedCup-approved applications to shortlist yet." };
+    }
     const metricsPool = apps.map((a) => a.metricsSnapshot);
     const scored = apps.map((a) => {
       const { score, breakdown } = fitScore(a.metricsSnapshot, campaign.criteria, metricsPool);
@@ -287,14 +288,18 @@ export async function awardCreators(campaignId: string, applicationIds: string[]
     if (session.role === "brand") {
       const brand = db.brands.find((b) => b.userId === session.userId);
       if (!brand || brand.id !== campaign.brandId) return { ok: false as const, error: "Forbidden" };
+      if (!isBrandApproved(brand)) return { ok: false as const, error: BRAND_PENDING };
     }
     if (applicationIds.length > campaign.slots) {
       return { ok: false as const, error: `You can award at most ${campaign.slots} creators.` };
     }
 
     const shortlisted = db.applications.filter(
-      (a) => a.campaignId === campaignId && a.status === "SHORTLISTED",
+      (a) => a.campaignId === campaignId && a.status === "SHORTLISTED" && isAdminApproved(a),
     );
+    if (applicationIds.some((pid) => !shortlisted.some((a) => a.id === pid))) {
+      return { ok: false as const, error: "You can only award shortlisted, RedCup-approved creators." };
+    }
     const pick = new Set(applicationIds);
     for (const a of shortlisted) {
       if (pick.has(a.id)) {
@@ -342,7 +347,7 @@ export async function autoAwardIfDue(campaignId: string) {
     if (new Date(campaign.awardDeadlineAt).getTime() > Date.now()) return { ok: false as const };
     if (campaign.status !== "shortlisted") return { ok: false as const };
     const shortlisted = db.applications
-      .filter((a) => a.campaignId === campaignId && a.status === "SHORTLISTED")
+      .filter((a) => a.campaignId === campaignId && a.status === "SHORTLISTED" && isAdminApproved(a))
       .sort((a, b) => (b.fitScore ?? 0) - (a.fitScore ?? 0));
     const winners = shortlisted.slice(0, campaign.slots);
     const winIds = new Set(winners.map((w) => w.id));
@@ -366,5 +371,34 @@ export async function autoAwardIfDue(campaignId: string) {
     }
     campaign.status = "in_production";
     return { ok: true as const, awarded: winners.length };
+  });
+}
+
+/**
+ * Brand edits a campaign RedCup has not approved yet (or sent back) and resubmits it.
+ * Approved campaigns are only edited by admins.
+ */
+export async function brandResubmitCampaign(
+  campaignId: string,
+  input: { title: string; brief: string; dosDonts: string },
+) {
+  const session = await requireUser(["brand"]);
+  const title = input.title.trim();
+  const brief = input.brief.trim();
+  if (!title || !brief) return { ok: false as const, error: "Title and brief are required." };
+  return updateDb((db) => {
+    const brand = db.brands.find((b) => b.userId === session.userId);
+    const c = db.campaigns.find((x) => x.id === campaignId);
+    if (!brand || !c || c.brandId !== brand.id) return { ok: false as const, error: "Campaign not found." };
+    if (!isBrandApproved(brand)) return { ok: false as const, error: BRAND_PENDING };
+    const ap = campaignApproval(c);
+    if (ap !== "pending" && ap !== "changes_requested") {
+      return { ok: false as const, error: "Only campaigns waiting on RedCup can be edited here." };
+    }
+    c.title = title;
+    c.brief = brief;
+    c.dosDonts = input.dosDonts.trim();
+    c.approvalStatus = "pending";
+    return { ok: true as const };
   });
 }

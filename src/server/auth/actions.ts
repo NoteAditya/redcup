@@ -115,6 +115,9 @@ export async function demoSignIn(input: { contact: string; password: string }) {
   }
   const ok = await bcrypt.compare(input.password, user.passwordHash);
   if (!ok) return { ok: false as const, error: "Wrong password." };
+  if (user.status === "inactive") {
+    return { ok: false as const, error: "This account has been turned off. Contact RedCup support." };
+  }
 
   const session = await getIronSessionHandle();
   session.userId = user.id;

@@ -4,13 +4,16 @@ import { CupFill } from "@/components/marketing/CupFill";
 import { BloomWorkbench } from "@/components/marketing/BloomWorkbench";
 import { formatINR } from "@/lib/money";
 import { readDb } from "@/server/db/store";
+import { campaignApproval } from "@/server/access";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const db = await readDb();
-  const live = db.campaigns.filter((c) =>
-    ["live", "shortlisted", "in_production", "tracking"].includes(c.status),
+  const live = db.campaigns.filter(
+    (c) =>
+      ["live", "shortlisted", "in_production", "tracking"].includes(c.status) &&
+      campaignApproval(c) === "approved",
   );
   const brands = new Map(db.brands.map((b) => [b.id, b]));
   const fundedPaise = db.ledger

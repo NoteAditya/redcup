@@ -4,7 +4,12 @@ import { SignInForm } from "@/components/auth/AuthForms";
 
 export const metadata = { title: "Sign In — RedCup" };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ deactivated?: string }>;
+}) {
+  const { deactivated } = await searchParams;
   return (
     <MarketingShell>
       <div
@@ -31,6 +36,11 @@ export default function LoginPage() {
           </p>
         </div>
 
+        {deactivated ? (
+          <p className="err" role="alert" style={{ marginBottom: "1rem" }}>
+            This account has been turned off by RedCup. Contact support if you think this is a mistake.
+          </p>
+        ) : null}
         <div>
           <SignInForm />
         </div>

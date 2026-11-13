@@ -25,3 +25,23 @@ export function slugify(s: string): string {
     .replace(/^-|-$/g, "")
     .slice(0, 64);
 }
+
+/** ISO → value for <input type="datetime-local">, expressed in IST. */
+export function toISTInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const ist = new Date(d.getTime() + 330 * 60_000);
+  return ist.toISOString().slice(0, 16);
+}
+
+/** <input type="datetime-local"> value (read as IST) → ISO string, or null when empty. */
+export function fromISTInput(v: string | null | undefined): string | null {
+  if (!v) return null;
+  const d = new Date(`${v}:00+05:30`);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+export function labelize(s: string): string {
+  return s.replace(/_/g, " ");
+}

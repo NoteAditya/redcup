@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatINR } from "@/lib/money";
 import { getSession } from "@/server/auth/session";
 import { readDb } from "@/server/db/store";
+import { campaignApproval } from "@/server/access";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ApplyButton } from "@/components/creator/ApplyButton";
 
@@ -12,7 +13,7 @@ export default async function CreatorDashboard() {
   const db = await readDb();
   const creator = db.creators.find((c) => c.userId === session.userId);
   const metrics = db.creatorMetrics.find((m) => m.creatorId === creator?.id);
-  const live = db.campaigns.filter((c) => c.status === "live");
+  const live = db.campaigns.filter((c) => c.status === "live" && campaignApproval(c) === "approved");
   const brands = new Map(db.brands.map((b) => [b.id, b]));
   const applied = new Set(
     db.applications.filter((a) => a.creatorId === creator?.id).map((a) => a.campaignId),

@@ -22,7 +22,14 @@ export default async function CreatorApplicationPage({ params }: { params: Promi
         ← Applications
       </Link>
       <h1 style={{ marginTop: "0.5rem" }}>{campaign?.title}</h1>
-      <p className="muted">Status: {app.status}</p>
+      <p className="muted">
+        Status:{" "}
+        {(app.reviewStatus ?? "pending") === "pending"
+          ? "Under RedCup review. The brand sees your application once RedCup approves it."
+          : app.reviewStatus === "rejected"
+            ? "Not approved by RedCup" + (app.reviewNote ? ` · ${app.reviewNote}` : "")
+            : app.status}
+      </p>
       <div style={{ marginTop: "1rem", display: "grid", gap: "1rem", maxWidth: 520 }}>
         {(app.status === "AWARDED" || app.status === "REVISION") && <DraftUploadForm applicationId={app.id} />}
         {app.status === "APPROVED" && <ReelLinkForm applicationId={app.id} />}

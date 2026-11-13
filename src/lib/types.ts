@@ -5,6 +5,7 @@ export type CampaignStatus =
   | "draft"
   | "verifying"
   | "live"
+  | "paused"
   | "applications_closed"
   | "shortlisted"
   | "awarding"
@@ -13,6 +14,10 @@ export type CampaignStatus =
   | "ranked"
   | "closed"
   | "cancelled";
+
+/** RedCup admin gate in front of brands (campaign approval) and applications. */
+export type ReviewStatus = "pending" | "approved" | "rejected";
+export type CampaignApproval = "pending" | "approved" | "rejected" | "changes_requested";
 
 export type ApplicationStatus =
   | "APPLIED"

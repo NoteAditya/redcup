@@ -141,7 +141,7 @@ export function BrandOnboardingForm() {
       <div className="onboard-celebrate card" role="status">
         <div className="onboard-celebrate-mark" aria-hidden />
         <h2>Brand path unlocked</h2>
-        <p className="muted">Taking you to the dashboard — KYC review comes next.</p>
+        <p className="muted">Sending your profile to RedCup for approval.</p>
       </div>
     );
   }

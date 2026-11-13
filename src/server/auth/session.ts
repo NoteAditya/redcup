@@ -2,6 +2,7 @@ import { getIronSession, type SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
 import type { Role } from "@/lib/types";
 import { syncClerkToLocalUser } from "./clerk-sync";
+import { readDb } from "@/server/db/store";
 
 export type SessionData = {
   userId?: string;
@@ -10,6 +11,8 @@ export type SessionData = {
   isLoggedIn: boolean;
   clerkUserId?: string;
   needsRole?: boolean;
+  /** Set when the account exists but an admin turned it off. */
+  deactivated?: boolean;
 };
 
 const DEV_ONLY_SECRET = "dev-only-session-secret-change-me-32chars!!";
@@ -57,6 +60,7 @@ export async function getSession(): Promise<SessionData & { save?: () => Promise
     try {
       const synced = await syncClerkToLocalUser();
       if (synced.ok) {
+        if (synced.user.status === "inactive") return { isLoggedIn: false, deactivated: true };
         return {
           userId: synced.user.id,
           role: synced.user.role,
@@ -72,7 +76,17 @@ export async function getSession(): Promise<SessionData & { save?: () => Promise
       // Fall through to iron-session when Clerk is misconfigured.
     }
   }
-  return getIron();
+  const iron = await getIron();
+  if (iron.isLoggedIn && iron.userId) {
+    // Cookie alone is not enough: re-check the account so admins can switch it off.
+    const db = await readDb();
+    const user = db.users.find((u) => u.id === iron.userId);
+    if (!user || user.status === "inactive") {
+      return { isLoggedIn: false, deactivated: Boolean(user) };
+    }
+    if (user.role !== iron.role) iron.role = user.role;
+  }
+  return iron;
 }
 
 export async function requireUser(roles?: Role[]) {

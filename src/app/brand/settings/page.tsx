@@ -2,7 +2,13 @@ import { paymentConnectState } from "@/server/integrations/payments";
 import { ConnectBanner } from "@/components/ui/ConnectBanner";
 import { TestModeBanner } from "@/components/ui/TestModeBanner";
 
-export default function BrandSettingsPage() {
+import { BrandPendingScreen, getBrandAccess } from "@/components/brand/BrandGate";
+
+export const dynamic = "force-dynamic";
+
+export default async function BrandSettingsPage() {
+  const { brand, approved } = await getBrandAccess();
+  if (!approved) return <BrandPendingScreen brand={brand} />;
   const pay = paymentConnectState();
   return (
     <div>

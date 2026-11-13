@@ -20,7 +20,11 @@ export default async function CreatorApplicationsPage() {
           <Link key={a.id} href={"/creator/applications/" + a.id} className="card" style={{ display: "block" }}>
             <strong>{campaigns.get(a.campaignId)?.title || a.campaignId}</strong>
             <div className="muted" style={{ fontSize: "0.85rem", marginTop: 4 }}>
-              {a.status}
+              {(a.reviewStatus ?? "pending") === "pending"
+                ? "Under RedCup review"
+                : a.reviewStatus === "rejected"
+                  ? "Not approved by RedCup" + (a.reviewNote ? " · " + a.reviewNote : "")
+                  : a.status}
               {a.fitScore != null ? " · Fit " + a.fitScore : ""}
             </div>
           </Link>

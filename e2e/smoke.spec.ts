@@ -139,13 +139,13 @@ test.describe("RedCup production flows", () => {
     await expect(page).toHaveURL(/\/admin/, { timeout: 30_000 });
     await shot(page, "admin");
     await page.goto("/admin/verification");
-    const brandCard = page.locator(".card", { hasText: `Test Brand ${id}` });
+    const brandCard = page.locator(".adm-panel", { hasText: `Test Brand ${id}` });
     if (!(await brandCard.count())) {
       await page.waitForTimeout(1500);
       await page.reload();
     }
     await expect(brandCard.first()).toBeVisible({ timeout: 30_000 });
-    await brandCard.first().getByRole("button", { name: /Approve KYC/i }).click();
+    await brandCard.first().getByRole("button", { name: /Approve brand/i }).click();
     await page.waitForTimeout(800);
     await shot(page, "admin-verification");
 
@@ -161,9 +161,16 @@ test.describe("RedCup production flows", () => {
     await page.getByRole("button", { name: /Create and fund/i }).click();
     await expect(page).toHaveURL(/\/brand\/bounties\//, { timeout: 45_000 });
     await expect(page.getByText(new RegExp(`E2E bounty ${id}`, "i")).first()).toBeVisible();
-    await expect(page.getByText(/live|funded|TEST MODE/i).first()).toBeVisible({ timeout: 20_000 });
-    await shot(page, "brand-campaign-live");
+    await expect(page.getByText("Waiting for RedCup approval")).toBeVisible({ timeout: 20_000 });
     const campaignUrl = page.url();
+
+    // Admin approves the campaign so creators can see it
+    await signIn(page, adminEmail, adminPassword!, /\/admin/);
+    await page.goto("/admin/campaign-approvals");
+    const campPanel = page.locator(".adm-panel", { hasText: `E2E bounty ${id}` });
+    await campPanel.getByRole("button", { name: /^Approve$/ }).click();
+    await expect(page.locator(".adm-panel", { hasText: `E2E bounty ${id}` })).toHaveCount(0, { timeout: 30_000 });
+    await shot(page, "brand-campaign-live");
 
     // Creator signup + onboarding + apply
     await page.goto("/signup?role=creator");
@@ -198,6 +205,13 @@ test.describe("RedCup production flows", () => {
     await bountyCard.first().getByRole("button", { name: /^Apply$/i }).click();
     await expect(bountyCard.first().getByText(/Applied/i)).toBeVisible({ timeout: 20_000 });
     await shot(page, "creator-applied");
+
+    // Admin approves the application so the brand can see it
+    await signIn(page, adminEmail, adminPassword!, /\/admin/);
+    await page.goto("/admin/applications");
+    const appRow = page.locator("tr", { hasText: `Creator ${id}` });
+    await appRow.getByRole("button", { name: /^Approve$/ }).click();
+    await expect(page.locator("tr", { hasText: `Creator ${id}` })).toHaveCount(0, { timeout: 30_000 });
 
     // Brand shortlist + award
     await signIn(page, brandEmail, password, /\/brand/);

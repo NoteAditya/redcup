@@ -2,14 +2,17 @@ import { MarketingShell } from "@/components/layout/MarketingShell";
 import { BountyCard } from "@/components/bounty/BountyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { readDb } from "@/server/db/store";
+import { campaignApproval } from "@/server/access";
 
 export const metadata = { title: "Open Bounties — Live Creator Campaigns" };
 export const dynamic = "force-dynamic";
 
 export default async function BountiesPage() {
   const db = await readDb();
-  const live = db.campaigns.filter((c) =>
-    ["live", "shortlisted", "in_production", "tracking"].includes(c.status),
+  const live = db.campaigns.filter(
+    (c) =>
+      ["live", "shortlisted", "in_production", "tracking"].includes(c.status) &&
+      campaignApproval(c) === "approved",
   );
   const brands = new Map(db.brands.map((b) => [b.id, b]));
 

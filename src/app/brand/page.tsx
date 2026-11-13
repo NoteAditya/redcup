@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatINR } from "@/lib/money";
-import { getSession } from "@/server/auth/session";
-import { readDb } from "@/server/db/store";
+import { BrandPendingScreen, getBrandAccess } from "@/components/brand/BrandGate";
+import { brandCampaignLabel } from "@/server/access";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatBars } from "@/components/ui/StatBars";
 import { BountyCard } from "@/components/bounty/BountyCard";
@@ -9,13 +9,13 @@ import { BountyCard } from "@/components/bounty/BountyCard";
 export const dynamic = "force-dynamic";
 
 export default async function BrandDashboard() {
-  const session = await getSession();
-  const db = await readDb();
-  const brand = db.brands.find((b) => b.userId === session.userId);
+  const { db, brand, approved } = await getBrandAccess();
+  if (!approved) return <BrandPendingScreen brand={brand} />;
   const campaigns = db.campaigns.filter((c) => c.brandId === brand?.id);
   const byStatus = Object.entries(
     campaigns.reduce<Record<string, number>>((acc, c) => {
-      acc[c.status] = (acc[c.status] || 0) + 1;
+      const k = brandCampaignLabel(c);
+      acc[k] = (acc[k] || 0) + 1;
       return acc;
     }, {}),
   ).map(([label, value]) => ({ label, value, tone: "cup" as const }));
@@ -35,7 +35,7 @@ export default async function BrandDashboard() {
         <div>
           <h1>Brand dashboard</h1>
           <p className="muted" style={{ marginTop: "0.35rem" }}>
-            {brand?.businessName || "Your brand"} · KYC {brand?.kycStatus || "—"}
+            {brand?.businessName || "Your brand"} · approved by RedCup
           </p>
         </div>
         <Link href="/brand/bounties/new" className="btn btn-primary" prefetch>
@@ -43,12 +43,9 @@ export default async function BrandDashboard() {
         </Link>
       </div>
 
-      {brand?.kycStatus !== "approved" && (
-        <div className="card" style={{ marginTop: "1rem", background: "color-mix(in srgb, var(--warn) 10%, var(--sheet))" }}>
-          Finish onboarding and wait for admin KYC approval before funding a bounty.{" "}
-          <Link href="/brand/onboarding">Open profile</Link>
-        </div>
-      )}
+      <p className="muted" style={{ marginTop: "0.75rem", fontSize: "0.875rem" }}>
+        New bounties are reviewed by RedCup before creators can see them.
+      </p>
 
       <dl className="app-kpi">
         <div>
@@ -72,7 +69,7 @@ export default async function BrandDashboard() {
         {campaigns.length === 0 && (
           <EmptyState
             title="No bounties yet"
-            body="Fund your first reel bounty after KYC. Creators apply only where they match."
+            body="Create and fund your first reel bounty. RedCup reviews it, then matching creators can apply."
             actionHref="/brand/bounties/new"
             actionLabel="Create bounty"
           />
@@ -83,7 +80,7 @@ export default async function BrandDashboard() {
             href={"/brand/bounties/" + c.id}
             title={c.title}
             brandName={brand?.businessName}
-            status={c.status}
+            status={brandCampaignLabel(c)}
             budgetPaise={c.budgetPaise}
             slots={c.slots}
           />

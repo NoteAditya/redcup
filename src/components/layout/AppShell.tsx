@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Show, UserButton } from "@clerk/nextjs";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 
-type NavItem = { href: string; label: string };
+type NavItem = { href: string; label: string; count?: number };
 
 export function AppShell({ nav, children }: { nav: NavItem[]; children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,13 +21,19 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: React.Re
 
           <div style={{ display: "grid", gap: "0.2rem" }}>
             {nav.map((item) => {
+              // Section roots (/admin, /brand, /creator) only match exactly; other items match their subpaths.
+              const isRoot = /^\/(brand|creator|admin)$/.test(item.href);
               const active =
                 pathname === item.href ||
-                (item.href !== "/" && pathname.startsWith(item.href + "/")) ||
-                (item.href.match(/\/(brand|creator|admin)$/) && pathname === item.href);
+                (!isRoot && item.href !== "/" && pathname.startsWith(item.href + "/"));
               return (
                 <Link key={item.href} href={item.href} className={active ? "active" : undefined}>
                   {item.label}
+                  {item.count ? (
+                    <span className="adm-count" aria-label={`${item.count} waiting`}>
+                      {item.count}
+                    </span>
+                  ) : null}
                 </Link>
               );
             })}
