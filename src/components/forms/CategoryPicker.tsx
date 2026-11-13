@@ -71,10 +71,10 @@ export function CategoryMulti({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && ref.current?.open) ref.current.open = false;
     };
-    document.addEventListener("mousedown", onDown);
+    document.addEventListener("click", onDown);
     document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("click", onDown);
       document.removeEventListener("keydown", onKey);
     };
   }, []);
