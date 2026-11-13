@@ -21,6 +21,7 @@ const title = `QA bounty ${id}`;
 async function signIn(page: Page, contact: string, pw: string) {
   await page.context().clearCookies();
   await page.goto("/login");
+  await page.waitForLoadState("networkidle");
   await page.locator("#contact").fill(contact);
   await page.locator("#password").fill(pw);
   await page.getByRole("button", { name: /^Sign in$/i }).click();
@@ -53,6 +54,7 @@ async function signInCreator(page: Page, expectDashboard = true) {
     },
   ]);
   await page.goto("/creator");
+  await page.waitForLoadState("networkidle");
   if (expectDashboard) await expect(page).toHaveURL(/\/creator/, { timeout: 30_000 });
 }
 
@@ -68,6 +70,7 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
 
   // 1. Brand signs up and finishes profile → sees pending screen, can't reach bounty builder.
   await page.goto("/signup?role=brand");
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Business name").fill(brandName);
   await page.getByLabel("Email", { exact: true }).fill(brandEmail);
   await page.locator("#password").fill(password);
@@ -87,12 +90,14 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /waiting for RedCup approval/i })).toBeVisible();
   await shot(page, "01-brand-pending");
   await page.goto("/brand/bounties/new");
+  await page.waitForLoadState("networkidle");
   await expect(page.getByRole("heading", { name: /waiting for RedCup approval/i })).toBeVisible();
   await expect(page.getByLabel("Title")).toHaveCount(0);
 
   // 2. Creator signup offers Instagram only (no Google, no email/password).
   await page.context().clearCookies();
   await page.goto("/signup?role=creator");
+  await page.waitForLoadState("networkidle");
   await expect(page.getByTestId("instagram-login")).toBeVisible();
   await expect(page.getByRole("button", { name: /Continue with Google/i })).toHaveCount(0);
   await expect(page.getByLabel("Email", { exact: true })).toHaveCount(0);
@@ -102,6 +107,7 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   // Creator (session as if from Instagram login) onboards immediately, no approval.
   await signInCreator(page);
   await page.goto("/creator/onboarding");
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Display name").fill(creatorName);
   await page.getByRole("button", { name: /^Continue$/i }).click();
   await page.getByLabel("City").fill("Mumbai");
@@ -121,6 +127,7 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   // 3. Admin approves the brand from Brand approvals.
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto("/admin/verification");
+  await page.waitForLoadState("networkidle");
   const brandPanel = page.locator(".adm-panel:visible", { hasText: brandName });
   await expect(brandPanel).toBeVisible({ timeout: 30_000 });
   // Reject without a reason must fail
@@ -134,6 +141,7 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   // 4. Brand creates + funds a bounty → pending approval, not visible to creators.
   await signInOk(page, brandEmail, password, /\/brand/);
   await page.goto("/brand/bounties/new");
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Title").fill(title);
   await page.getByLabel("Criteria preset").selectOption({ label: "Open India (1K+)" });
   await page.getByLabel("Brief").fill("QA run: 20s morning routine reel.");
@@ -146,6 +154,7 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
 
   await page.context().clearCookies();
   await page.goto("/bounties");
+  await page.waitForLoadState("networkidle");
   await expect(page.getByText(title)).toHaveCount(0);
   await signInCreator(page);
   await expect(page.locator(".card:visible", { hasText: title })).toHaveCount(0);
@@ -153,6 +162,7 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   // 5. Admin approves the campaign.
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto("/admin/campaign-approvals");
+  await page.waitForLoadState("networkidle");
   const campPanel = page.locator(".adm-panel:visible", { hasText: title });
   await expect(campPanel).toBeVisible({ timeout: 30_000 });
   await campPanel.getByRole("button", { name: /^Approve$/ }).click();
@@ -165,12 +175,14 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await card.first().getByRole("button", { name: /^Apply$/i }).click();
   await expect(card.first().getByText(/Applied/i)).toBeVisible({ timeout: 20_000 });
   await page.goto("/creator/applications");
+  await page.waitForLoadState("networkidle");
   await expect(page.getByText("Under RedCup review").first()).toBeVisible();
   await shot(page, "04-creator-under-review");
 
   // 7. Brand can't see the application yet.
   await signInOk(page, brandEmail, password, /\/brand/);
   await page.goto(campaignUrl);
+  await page.waitForLoadState("networkidle");
   await expect(page.getByText(/Creators appear here once RedCup approves them/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "Applications (0)" })).toBeVisible();
   await expect(page.getByText(creatorName)).toHaveCount(0);
@@ -180,10 +192,11 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   // 8. Admin approves the application from the queue (bulk path with filter).
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto(`/admin/applications?campaign=${campaignId}`);
+  await page.waitForLoadState("networkidle");
   const row = page.locator("tr:visible", { hasText: creatorName });
   await expect(row).toBeVisible({ timeout: 30_000 });
   await row.getByRole("checkbox").check();
-  await page.getByPlaceholder(/Optional note/).fill("QA: good fit");
+  await page.getByPlaceholder(/Optional note/).filter({ visible: true }).fill("QA: good fit");
   await page.getByRole("button", { name: /Approve selected \(1\)/ }).click();
   await expect(page.locator("tr:visible", { hasText: creatorName })).toHaveCount(0, { timeout: 30_000 });
   await shot(page, "06-admin-app-approved");
@@ -191,6 +204,7 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   // 9. Brand now sees the creator.
   await signInOk(page, brandEmail, password, /\/brand/);
   await page.goto(campaignUrl);
+  await page.waitForLoadState("networkidle");
   await expect(page.getByRole("heading", { name: "Applications (1)" })).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText(creatorName).first()).toBeVisible();
   await expect(page.getByRole("button", { name: /Generate shortlist/i })).toBeVisible();
@@ -212,20 +226,25 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
     "/admin/payouts",
   ]) {
     const res = await page.goto(p);
+    await page.waitForLoadState("networkidle");
     expect(res?.status(), p).toBeLessThan(400);
     await expect(page.locator("h1").first()).toBeVisible();
   }
   await page.goto(`/admin/bounties/${campaignId}`);
+  await page.waitForLoadState("networkidle");
   await shot(page, "08-admin-campaign-detail");
   await page.goto("/admin");
+  await page.waitForLoadState("networkidle");
   await shot(page, "09-admin-overview");
   await page.goto(`/admin/activity?q=${encodeURIComponent(id)}`);
+  await page.waitForLoadState("networkidle");
   for (const a of ["brand approve", "campaign approve", "application approve"]) {
     await expect(page.locator("td .chip", { hasText: a }).first()).toBeVisible();
   }
   await shot(page, "10-admin-activity");
 
   await page.goto(`/admin/users?q=${encodeURIComponent(creatorEmail)}`);
+  await page.waitForLoadState("networkidle");
   await page.getByRole("link", { name: creatorName }).click();
   await expect(page).toHaveURL(/\/admin\/users\/usr_/);
   await page.getByLabel(/Reason \(required/).fill("QA: deactivation test");
@@ -248,6 +267,7 @@ test("admin edits, status changes, create-for-brand, send back and reject", asyn
   // Admin creates a campaign for the QA brand.
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto("/admin/campaigns/new");
+  await page.waitForLoadState("networkidle");
   const brandOpt = page.locator("select option", { hasText: brandName });
   const brandValue = await brandOpt.getAttribute("value");
   await page.getByLabel("Brand").selectOption(brandValue!);
@@ -259,6 +279,7 @@ test("admin edits, status changes, create-for-brand, send back and reject", asyn
 
   // Edit + pause/resume on the first QA bounty.
   await page.goto(`/admin/campaigns?q=${encodeURIComponent(title)}`);
+  await page.waitForLoadState("networkidle");
   await page.getByRole("link", { name: title, exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/bounties\//);
   await page.getByLabel("Creator slots").fill("4");
@@ -278,6 +299,7 @@ test("admin edits, status changes, create-for-brand, send back and reject", asyn
 
   // Brand creates another bounty → admin sends it back → brand resubmits → admin rejects.
   await page.goto("/brand/bounties/new");
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Title").fill(backTitle);
   await page.getByLabel("Brief").fill("QA: send back flow.");
   await page.getByRole("button", { name: /Create and fund/i }).click();
@@ -286,6 +308,7 @@ test("admin edits, status changes, create-for-brand, send back and reject", asyn
 
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto("/admin/campaign-approvals");
+  await page.waitForLoadState("networkidle");
   let panel = page.locator(".adm-panel:visible", { hasText: backTitle });
   await panel.getByRole("button", { name: /Send back/ }).click();
   await expect(panel.getByText(/Type a note/)).toBeVisible();
@@ -295,6 +318,7 @@ test("admin edits, status changes, create-for-brand, send back and reject", asyn
 
   await signInOk(page, brandEmail, password, /\/brand/);
   await page.goto(backUrl);
+  await page.waitForLoadState("networkidle");
   await expect(page.getByText("RedCup asked for changes")).toBeVisible();
   await expect(page.getByText(/QA: please add a CTA/)).toBeVisible();
   await page.getByLabel("Brief").fill("QA: send back flow. CTA: link in bio.");
@@ -304,6 +328,7 @@ test("admin edits, status changes, create-for-brand, send back and reject", asyn
 
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto("/admin/campaign-approvals");
+  await page.waitForLoadState("networkidle");
   panel = page.locator(".adm-panel:visible", { hasText: backTitle });
   await expect(panel).toBeVisible();
   await panel.getByLabel(/Note to the brand/).fill("QA: rejecting for test");
@@ -311,11 +336,14 @@ test("admin edits, status changes, create-for-brand, send back and reject", asyn
   await expect(page.locator(".adm-panel:visible", { hasText: backTitle })).toHaveCount(0, { timeout: 20_000 });
 
   await page.goto(`/admin/activity?q=${encodeURIComponent(id)}`);
+  await page.waitForLoadState("networkidle");
   for (const a of ["campaign create", "campaign edit", "campaign status", "campaign send back", "campaign reject", "user deactivate"]) {
     await expect(page.locator("td .chip", { hasText: a }).first()).toBeVisible();
   }
   await page.goto("/admin/campaigns");
+  await page.waitForLoadState("networkidle");
   await shot(page, "13-admin-campaigns");
   await page.goto("/admin/users");
+  await page.waitForLoadState("networkidle");
   await shot(page, "14-admin-users");
 });
