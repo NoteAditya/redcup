@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { CATEGORIES, MAX_CREATOR_CATEGORIES } from "@/lib/categories";
 
 /** Single category dropdown (brands). Keeps an older free-text value selectable until changed. */
@@ -61,8 +62,24 @@ export function CategoryMulti({
   const legacy = value.filter((v) => !(CATEGORIES as readonly string[]).includes(v));
   const options = [...legacy, ...CATEGORIES];
   const full = value.length >= max;
+  const ref = useRef<HTMLDetailsElement>(null);
+  // Close on a click outside or Escape, like a normal dropdown.
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      if (ref.current?.open && !ref.current.contains(e.target as Node)) ref.current.open = false;
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && ref.current?.open) ref.current.open = false;
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
   return (
-    <details className="cat-drop" id={id}>
+    <details className="cat-drop" id={id} ref={ref}>
       <summary className="field-control cat-drop-summary" aria-describedby={describedBy}>
         {value.length ? (
           <span className="cat-drop-chips">
