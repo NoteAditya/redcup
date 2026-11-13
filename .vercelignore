@@ -1,0 +1,10 @@
+.env*
+!.env.example
+.netlify
+.taste-skill
+/assets
+playwright-report
+test-results
+data/store.json
+.agents
+.skills
