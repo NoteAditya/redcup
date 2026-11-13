@@ -58,8 +58,9 @@ describe("admin logins", () => {
   it("parses ADMIN_LOGINS defensively", () => {
     expect(parseAdminLogins(undefined)).toEqual([]);
     expect(parseAdminLogins("not json")).toEqual([]);
-    expect(parseAdminLogins('[{"email":"A@x.com","password":"longenough"},{"email":"bad","password":"longenough"},{"email":"b@x.com","password":"short"}]')).toEqual([
+    expect(parseAdminLogins('[{"email":"A@x.com","password":"longenough"},{"email":"bad","password":"longenough"},{"email":"b@x.com","password":"short"},{"email":"c@x.com","password":""}]')).toEqual([
       { email: "a@x.com", password: "longenough" },
+      { email: "b@x.com", password: "short" },
     ]);
     const env = { ADMIN_LOGINS: '[{"email":"a@x.com","password":"longenough"}]', ADMIN_BOOTSTRAP_EMAIL: "boot@x.com", ADMIN_BOOTSTRAP_PASSWORD: "bootpass1" } as unknown as NodeJS.ProcessEnv;
     expect(adminLoginFor("A@X.com", env)?.email).toBe("a@x.com");

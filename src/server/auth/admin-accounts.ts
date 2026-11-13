@@ -25,7 +25,7 @@ export function parseAdminLogins(raw: string | undefined | null): AdminLogin[] {
   for (const row of data) {
     const email = typeof row?.email === "string" ? row.email.trim().toLowerCase() : "";
     const password = typeof row?.password === "string" ? row.password : "";
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && password.length >= 8 && !out.some((x) => x.email === email)) {
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && password.length > 0 && !out.some((x) => x.email === email)) {
       out.push({ email, password });
     }
   }
