@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MarketingShell } from "@/components/layout/MarketingShell";
+import { AuthStage } from "@/components/auth/AuthStage";
 import { SignUpForm } from "@/components/auth/AuthForms";
 import { RolePicker } from "@/components/onboarding/RolePicker";
 import { ClaimRoleForm } from "@/components/auth/ClaimRoleForm";
@@ -41,24 +42,16 @@ export default async function SignupPage({
   if (role === "creator") {
     return (
       <MarketingShell>
-        <div
-          style={{
-            maxWidth: 440,
-            margin: "2rem auto 4rem",
-            backgroundColor: "var(--sheet)",
-            border: "1px solid var(--line)",
-            borderRadius: "var(--radius-card)",
-            padding: "2rem",
-            boxShadow: "var(--shadow-card)",
-          }}
+        <AuthStage
+          eyebrow="Creator sign up"
+          title="Your Instagram,"
+          accent="ready for brands."
+          sub="Sign up with your Instagram professional account. Your profile and top reels fill in for you."
         >
-          <span className="chip" style={{ marginBottom: "0.5rem" }}>
-            Creator Registration
-          </span>
-          <h1 style={{ fontSize: "1.5rem", marginBottom: "0.35rem" }}>Join RedCup with Instagram</h1>
+          <h2 className="auth-sheet-title">Join RedCup with Instagram</h2>
           <p className="muted" style={{ fontSize: "0.875rem", marginBottom: "1.25rem" }}>
             Creators sign up and log in with Instagram only. We read your username, name, bio, profile picture,
-            follower and post counts, and later the views on reels you post for a campaign. We never post for you.{" "}
+            follower and post counts, and the views on your reels. We never post for you.{" "}
             <Link href="/privacy" style={{ color: "var(--ink)" }}>
               Privacy
             </Link>
@@ -77,44 +70,32 @@ export default async function SignupPage({
               Switch role
             </Link>
           </p>
-        </div>
+        </AuthStage>
       </MarketingShell>
     );
   }
 
   return (
     <MarketingShell>
-      <div
-        style={{
-          maxWidth: 440,
-          margin: "2rem auto 4rem",
-          backgroundColor: "var(--sheet)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--radius-card)",
-          padding: "2rem",
-          boxShadow: "var(--shadow-card)",
-        }}
+      <AuthStage
+        eyebrow="Brand sign up"
+        title="Find creators who"
+        accent="actually deliver."
+        sub="Create a brand account, add your GST, and RedCup approves you before your first campaign."
       >
-        <div style={{ marginBottom: "1.25rem" }}>
-          <span className="chip" style={{ marginBottom: "0.5rem" }}>
-            Brand Registration
-          </span>
-          <h1 style={{ fontSize: "1.5rem", marginBottom: "0.25rem" }}>Create Brand Account</h1>
-          <p className="muted" style={{ fontSize: "0.875rem" }}>
-            Already have an account?{" "}
-            <Link href="/login" style={{ color: "var(--ink)", fontWeight: 600 }}>
-              Sign in
-            </Link>
-            {" • "}
-            <Link href="/signup" style={{ color: "var(--muted)" }}>
-              Switch role
-            </Link>
-          </p>
-        </div>
-        <div>
-          <SignUpForm />
-        </div>
-      </div>
+        <h2 className="auth-sheet-title">Create a brand account</h2>
+        <p className="muted" style={{ fontSize: "0.875rem", marginBottom: "1rem" }}>
+          Already have an account?{" "}
+          <Link href="/login" style={{ color: "var(--ink)", fontWeight: 600 }}>
+            Sign in
+          </Link>
+          {" • "}
+          <Link href="/signup" style={{ color: "var(--muted)" }}>
+            Switch role
+          </Link>
+        </p>
+        <SignUpForm />
+      </AuthStage>
     </MarketingShell>
   );
 }

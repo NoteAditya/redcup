@@ -8,6 +8,7 @@ import type { CampaignCriteria, CampaignStatus } from "@/lib/types";
 import { id, nowIso, readDb, updateDb, type Campaign } from "@/server/db/store";
 import { campaignApproval, logAdmin, recomputeEligibility } from "@/server/access";
 import { sendApplicationNotice } from "@/server/integrations/mail";
+import { brandHasGst } from "@/lib/profile";
 
 type Result = { ok: true } | { ok: false; error: string };
 
@@ -17,25 +18,42 @@ function clean(s: string | null | undefined): string {
 
 /* ---------------------------------------------------------------- Brands */
 
-/** Approve or reject a brand account. Rejection needs a typed reason. */
-export async function reviewBrand(brandId: string, approve: boolean, reason: string): Promise<Result> {
+/**
+ * Approve or reject a brand account. Rejection needs a typed reason.
+ * A brand without a GSTIN can only be approved with an explicit admin override and a reason,
+ * which is logged as "brand_approve_gst_override".
+ */
+export async function reviewBrand(
+  brandId: string,
+  approve: boolean,
+  reason: string,
+  opts: { overrideGst?: boolean } = {},
+): Promise<Result> {
   const session = await requireUser(["admin"]);
   const note = clean(reason);
   if (!approve && !note) return { ok: false, error: "Type a reason for the rejection." };
   return updateDb((db): Result => {
     const brand = db.brands.find((b) => b.id === brandId);
     if (!brand) return { ok: false, error: "Brand not found." };
+    const gstMissing = !brandHasGst(brand);
+    if (approve && gstMissing) {
+      if (!opts.overrideGst) {
+        return { ok: false, error: "This brand hasn't added a GSTIN. Tick \"Approve without GST\" and type a reason to override." };
+      }
+      if (!note) return { ok: false, error: "Type a reason for approving without a GSTIN." };
+    }
     const before = brand.kycStatus;
     brand.kycStatus = approve ? "approved" : "rejected";
     brand.kycNote = note || null;
     brand.kycReviewedAt = nowIso();
+    const override = approve && gstMissing;
     logAdmin(db, {
       adminId: session.userId,
-      action: approve ? "brand_approve" : "brand_reject",
+      action: approve ? (override ? "brand_approve_gst_override" : "brand_approve") : "brand_reject",
       targetType: "brand",
       targetId: brandId,
       reason: note,
-      details: `${brand.businessName}: ${before} → ${brand.kycStatus}`,
+      details: `${brand.businessName}: ${before} → ${brand.kycStatus}${override ? " · approved without GSTIN (admin override)" : ""}`,
     });
     return { ok: true };
   });

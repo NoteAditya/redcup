@@ -20,6 +20,15 @@ const title = `QA bounty ${id}`;
 
 async function signIn(page: Page, contact: string, pw: string) {
   await page.context().clearCookies();
+  if (contact === process.env.ADMIN_BOOTSTRAP_EMAIL) {
+    // Admins have their own sign-in page at /admin.
+    await page.goto("/admin");
+    await expect(page).toHaveURL(/\/admin\/login/);
+    await page.locator('input[name="email"]').fill(contact);
+    await page.locator('input[name="password"]').fill(pw);
+    await page.getByRole("button", { name: /^Sign in$/i }).click();
+    return;
+  }
   await page.goto("/login");
   await page.waitForLoadState("networkidle");
   await page.locator("#contact").fill(contact);
@@ -29,7 +38,7 @@ async function signIn(page: Page, contact: string, pw: string) {
 
 async function signInOk(page: Page, contact: string, pw: string, expectPath: RegExp) {
   await signIn(page, contact, pw);
-  await page.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 30_000 });
+  await page.waitForURL((u) => !u.pathname.startsWith("/login") && !u.pathname.startsWith("/admin/login"), { timeout: 30_000 });
   await expect(page).toHaveURL(expectPath, { timeout: 15_000 });
 }
 
@@ -78,21 +87,47 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await expect(page).toHaveURL(/\/brand\/onboarding/, { timeout: 30_000 });
   await page.getByLabel("Business name").fill(brandName);
   await page.getByRole("button", { name: /^Continue$/i }).click();
-  await page.getByLabel("Category").fill("Beauty");
+  await page.getByLabel("Category").selectOption("Beauty");
   await page.getByRole("button", { name: /^Continue$/i }).click();
   await page.getByLabel("City").fill("Mumbai");
   await page.getByRole("button", { name: /^Continue$/i }).click();
   await page.getByLabel("Website").fill("https://example.com");
   await page.getByRole("button", { name: /^Continue$/i }).click();
-  await page.getByLabel("GSTIN (for KYC)").fill("27AABCU9603R1ZM");
-  await page.getByRole("button", { name: /Save and continue/i }).click();
+  // Skip GST: onboarding finishes but the brand stays pending with "GST missing".
+  await page.getByRole("button", { name: /Skip for now/i }).click();
   await expect(page).toHaveURL(/\/brand$/, { timeout: 30_000 });
-  await expect(page.getByRole("heading", { name: /waiting for RedCup approval/i })).toBeVisible();
-  await shot(page, "01-brand-pending");
+  await expect(page.getByRole("heading", { name: /Add your GST to get approved/i })).toBeVisible();
+  await shot(page, "01-brand-pending-gst-missing");
   await page.goto("/brand/bounties/new");
   await page.waitForLoadState("networkidle");
-  await expect(page.getByRole("heading", { name: /waiting for RedCup approval/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Add your GST/i })).toBeVisible();
   await expect(page.getByLabel("Title")).toHaveCount(0);
+
+  // Profile opens as a normal editable page, not the wizard.
+  await page.goto("/brand/onboarding");
+  await expect(page).toHaveURL(/\/brand\/profile/, { timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "Edit profile" })).toBeVisible();
+  await expect(page.getByLabel("Business name")).toHaveValue(brandName);
+  await expect(page.getByLabel(/Category/)).toHaveValue("Beauty");
+
+  // Admin queue: brand sits under "GST missing", approval is blocked without an override.
+  await signInOk(page, process.env.ADMIN_BOOTSTRAP_EMAIL!, process.env.ADMIN_BOOTSTRAP_PASSWORD!, /\/admin/);
+  await page.goto("/admin/verification?show=gst_missing");
+  await page.waitForLoadState("networkidle");
+  const missingPanel = page.locator(".adm-panel:visible", { hasText: brandName });
+  await expect(missingPanel.getByText("GST missing").first()).toBeVisible({ timeout: 30_000 });
+  await expect(missingPanel.getByRole("button", { name: /Approve without GST/i })).toBeDisabled();
+  await shot(page, "01c-admin-gst-missing");
+
+  // Brand adds GST from the profile → goes to the Submitted queue.
+  await signInOk(page, brandEmail, password, /\/brand/);
+  await page.goto("/brand/profile#gst");
+  await page.getByLabel("GSTIN").fill("27AABCU9603R1ZM");
+  await page.getByRole("button", { name: /Save and submit for approval/i }).click();
+  await expect(page.getByText(/approval queue/i)).toBeVisible({ timeout: 30_000 });
+  await page.goto("/brand");
+  await expect(page.getByRole("heading", { name: /waiting for RedCup approval/i })).toBeVisible();
+  await shot(page, "01-brand-pending");
 
   // 2. Creator signup offers Instagram only (no Google, no email/password).
   await page.context().clearCookies();
@@ -114,15 +149,25 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await page.getByRole("button", { name: /^Continue$/i }).click();
   await page.getByLabel(/Languages/i).fill("Hindi, English");
   await page.getByRole("button", { name: /^Continue$/i }).click();
-  await page.getByLabel(/Categories/i).fill("Beauty, Lifestyle");
+  await page.locator("#categories summary").click();
+  await page.getByRole("checkbox", { name: "Beauty" }).check();
+  await page.getByRole("checkbox", { name: "Lifestyle" }).check();
   await page.getByRole("button", { name: /^Continue$/i }).click();
   await page.getByLabel(/WhatsApp/i).fill("+919876543210");
   await page.getByRole("button", { name: /^Continue$/i }).click();
-  await page.getByLabel("PAN").fill("ABCDE1234F");
-  await page.getByRole("button", { name: /^Continue$/i }).click();
+  // PAN can be skipped.
+  await expect(page.getByRole("button", { name: /^Skip$/ })).toBeVisible();
+  await page.getByRole("button", { name: /^Skip$/ }).click();
   await page.getByLabel("UPI ID").fill(`qa${id}@upi`);
   await page.getByRole("button", { name: /Save and continue/i }).click();
-  await expect(page).toHaveURL(/\/creator/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/\/creator$/, { timeout: 30_000 });
+  // Profile opens as a normal page with Instagram data and the top-reels empty state (QA creator has no token).
+  await page.goto("/creator/onboarding");
+  await expect(page).toHaveURL(/\/creator\/profile/, { timeout: 30_000 });
+  await expect(page.getByLabel("Display name")).toHaveValue(creatorName);
+  await expect(page.getByText(/Instagram connection is missing or expired|after logging in with Instagram/i)).toBeVisible();
+  await expect(page.getByText(/You skipped this/i)).toBeVisible();
+  await shot(page, "01d-creator-profile");
 
   // 3. Admin approves the brand from Brand approvals.
   await signInOk(page, adminEmail, adminPassword, /\/admin/);

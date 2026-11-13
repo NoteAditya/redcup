@@ -34,7 +34,7 @@ export function ring1Failures(m: CreatorMetrics): EligibilityReason[] {
 
   const missing: string[] = [];
   if (!m.whatsapp) missing.push("WhatsApp");
-  if (!m.pan) missing.push("PAN");
+  // PAN is optional at signup and is only asked for before a payout, so it never blocks applying.
   if (!m.upi) missing.push("UPI");
   if (missing.length) {
     fails.push({

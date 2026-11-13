@@ -15,6 +15,7 @@ import type {
   ReviewStatus,
   Role,
 } from "@/lib/types";
+import { mapCategories, toCategory } from "@/lib/categories";
 
 export type User = {
   id: string;
@@ -42,6 +43,12 @@ export type Brand = {
   kycReviewedAt?: string | null;
   website: string | null;
   createdAt: string;
+  /** Free-text category from before the dropdown, kept when it was mapped to a list category. */
+  categoryRaw?: string | null;
+  /** When the brand first finished onboarding (older brands: derived from category + city). */
+  onboardedAt?: string | null;
+  /** When the GSTIN was last added or changed by the brand. */
+  gstSubmittedAt?: string | null;
 };
 
 export type Creator = {
@@ -56,6 +63,12 @@ export type Creator = {
   panMasked: string | null;
   upiMasked: string | null;
   createdAt: string;
+  /** Free-text categories from before the dropdown, kept when they were mapped to list categories. */
+  categoriesRaw?: string[] | null;
+  /** When the creator first finished onboarding (older creators: derived from city + categories). */
+  onboardedAt?: string | null;
+  /** Creator chose "Skip" for PAN during onboarding; asked again before a payout. */
+  panSkippedAt?: string | null;
   /** Present once the creator has logged in with Instagram. */
   instagram?: InstagramLink | null;
 };
@@ -92,6 +105,27 @@ export type InstagramLink = {
   profileRefreshedAt: string;
   /** How an older email/Google creator record got linked, for admins. */
   linkNote?: string | null;
+  /** Cached top reels from the Instagram API (up to 5), refreshed on login and every few hours. */
+  topReels?: TopReel[] | null;
+  topReelsFetchedAt?: string | null;
+  /** Why the cache is empty or partial: no token, missing insights permission, or Instagram error. */
+  topReelsStatus?: TopReelsStatus | null;
+};
+
+export type TopReelsStatus = "ok" | "no_reels" | "no_token" | "no_insights" | "error";
+
+export type TopReel = {
+  mediaId: string;
+  permalink: string;
+  /** First ~140 characters of the caption. */
+  caption: string | null;
+  /** Meta CDN URL (expires); served through /api/creators/[id]/reels/[mediaId]/thumb. */
+  thumbnailUrl: string | null;
+  postedAt: string | null;
+  /** From media insights; null when Instagram did not share it. */
+  views: number | null;
+  likes: number | null;
+  comments: number | null;
 };
 
 export type DataDeletionRequest = {
@@ -236,6 +270,15 @@ export type Db = {
   }[];
   otps: { contact: string; code: string; expiresAt: string }[];
   dataDeletionRequests: DataDeletionRequest[];
+  /** Failed admin sign-in attempts per email / client, for lockout. */
+  loginThrottle: LoginThrottle[];
+};
+
+export type LoginThrottle = {
+  key: string;
+  failures: number;
+  firstFailureAt: string;
+  lockedUntil: string | null;
 };
 
 export const empty = (): Db => ({
@@ -254,6 +297,7 @@ export const empty = (): Db => ({
   adminActions: [],
   otps: [],
   dataDeletionRequests: [],
+  loginThrottle: [],
 });
 
 /**
@@ -275,6 +319,28 @@ export function normalizeDb(raw: Db): Db {
   }
   for (const u of db.users) {
     if (u.status !== "active" && u.status !== "inactive") u.status = "active";
+  }
+  // Category dropdown: map obvious free-text values to the shared list, keeping the original.
+  for (const b of db.brands) {
+    if (!b.category) continue;
+    const c = toCategory(b.category);
+    if (c && c !== b.category) {
+      if (b.categoryRaw == null) b.categoryRaw = b.category;
+      b.category = c;
+    }
+  }
+  for (const cr of db.creators) {
+    if (!Array.isArray(cr.categories) || !cr.categories.length) continue;
+    const { mapped, changed } = mapCategories(cr.categories);
+    if (changed) {
+      if (cr.categoriesRaw == null) cr.categoriesRaw = cr.categories;
+      cr.categories = mapped;
+    }
+  }
+  for (const m of db.creatorMetrics) {
+    if (!Array.isArray(m.niches) || !m.niches.length) continue;
+    const { mapped, changed } = mapCategories(m.niches);
+    if (changed) m.niches = mapped;
   }
   return db;
 }

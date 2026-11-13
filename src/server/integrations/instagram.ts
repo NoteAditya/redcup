@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "crypto";
-import type { InstagramFlow, InstagramLink } from "@/server/db/store";
+import type { InstagramFlow, InstagramLink, TopReel, TopReelsStatus } from "@/server/db/store";
 import { open, seal } from "@/server/crypto/secretbox";
 
 /**
@@ -469,6 +469,128 @@ export async function fetchReelViews(
   const views = row?.total_value?.value ?? row?.values?.[0]?.value;
   if (typeof views !== "number") throw new InstagramError("no_insights", "Instagram returned no view count for this reel.");
   return { mediaId, views };
+}
+
+/* ------------------------------------------------------------ Top reels */
+
+export const TOP_REELS_LIMIT = 5;
+/** How many recent reels we look at (and fetch insights for) when ranking. Keeps calls well under Meta's limits. */
+const TOP_REELS_SCAN = 25;
+
+type MediaRow = {
+  id: string;
+  caption?: string;
+  media_type?: string;
+  media_product_type?: string;
+  thumbnail_url?: string;
+  media_url?: string;
+  permalink?: string;
+  timestamp?: string;
+  like_count?: number;
+  comments_count?: number;
+};
+
+export type TopReelsFetch = {
+  status: TopReelsStatus;
+  reels: TopReel[];
+};
+
+function snippet(caption: string | undefined): string | null {
+  const c = (caption || "").replace(/\s+/g, " ").trim();
+  if (!c) return null;
+  return c.length > 140 ? `${c.slice(0, 137)}…` : c;
+}
+
+/** Rank by views when Instagram shares them, otherwise by likes + comments. */
+export function rankReels(reels: TopReel[], limit = TOP_REELS_LIMIT): TopReel[] {
+  const score = (r: TopReel) => (r.views != null ? r.views : -1);
+  const eng = (r: TopReel) => (r.likes ?? 0) + (r.comments ?? 0);
+  return [...reels]
+    .sort((a, b) => score(b) - score(a) || eng(b) - eng(a) || (b.postedAt || "").localeCompare(a.postedAt || ""))
+    .slice(0, limit);
+}
+
+/**
+ * The creator's top reels from the Instagram API: recent reels with like/comment counts, plus
+ * views from media insights when the insights permission was granted. Never invents numbers;
+ * anything Instagram doesn't share stays null.
+ */
+export async function fetchTopReels(link: InstagramLink, cfg = instagramConfig()): Promise<TopReelsFetch> {
+  const token = storedToken(link);
+  if (!token || !cfg) return { status: "no_token", reels: [] };
+  const path = link.flow === "unified" ? `${link.igUserId}/media` : "me/media";
+  const fields = "id,caption,media_type,media_product_type,thumbnail_url,media_url,permalink,timestamp,like_count,comments_count";
+  const rows: MediaRow[] = [];
+  let after: string | undefined;
+  try {
+    for (let page = 0; page < 3 && rows.length < TOP_REELS_SCAN; page++) {
+      const res = await graphGet<{ data?: MediaRow[]; paging?: { cursors?: { after?: string }; next?: string } }>(
+        cfg,
+        link.flow,
+        token,
+        path,
+        { fields, limit: "50", ...(after ? { after } : {}) },
+      );
+      for (const m of res.data ?? []) {
+        const isReel = m.media_product_type === "REELS" || (m.media_type === "VIDEO" && m.media_product_type !== "STORY");
+        if (isReel && m.permalink) rows.push(m);
+      }
+      after = res.paging?.cursors?.after;
+      if (!after || !res.paging?.next) break;
+    }
+  } catch (e) {
+    if (e instanceof InstagramError && e.code === "token") return { status: "no_token", reels: [] };
+    return { status: "error", reels: [] };
+  }
+  if (!rows.length) return { status: "no_reels", reels: [] };
+
+  const scan = rows.slice(0, TOP_REELS_SCAN);
+  let insightsDenied = 0;
+  const views = new Map<string, number>();
+  // A few at a time to stay polite with Meta's rate limits.
+  for (let i = 0; i < scan.length; i += 5) {
+    await Promise.all(
+      scan.slice(i, i + 5).map(async (m) => {
+        try {
+          const res = await graphGet<{ data?: { name: string; values?: { value: number }[]; total_value?: { value: number } }[] }>(
+            cfg,
+            link.flow,
+            token,
+            `${m.id}/insights`,
+            { metric: "views" },
+          );
+          const row = res.data?.find((d) => d.name === "views");
+          const v = row?.total_value?.value ?? row?.values?.[0]?.value;
+          if (typeof v === "number") views.set(m.id, v);
+        } catch {
+          insightsDenied++;
+        }
+      }),
+    );
+  }
+  const reels: TopReel[] = scan.map((m) => ({
+    mediaId: m.id,
+    permalink: m.permalink!,
+    caption: snippet(m.caption),
+    thumbnailUrl: m.thumbnail_url || null,
+    postedAt: m.timestamp || null,
+    views: views.get(m.id) ?? null,
+    likes: num(m.like_count),
+    comments: num(m.comments_count),
+  }));
+  return { status: insightsDenied === scan.length ? "no_insights" : "ok", reels: rankReels(reels) };
+}
+
+/** A fresh thumbnail URL for one reel (Meta CDN links expire). */
+export async function fetchReelThumbnail(link: InstagramLink, mediaId: string, cfg = instagramConfig()): Promise<string | null> {
+  const token = storedToken(link);
+  if (!token || !cfg) return null;
+  try {
+    const m = await graphGet<MediaRow>(cfg, link.flow, token, mediaId, { fields: "thumbnail_url,media_url" });
+    return m.thumbnail_url || null;
+  } catch {
+    return null;
+  }
 }
 
 /* ------------------------------------------------- Meta data deletion */

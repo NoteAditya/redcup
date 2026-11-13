@@ -44,7 +44,14 @@ export default async function PayoutsPage() {
                 <tr key={r.id}>
                   <td className="muted" style={{ fontSize: "0.8125rem", whiteSpace: "nowrap" }}>{formatIST(r.createdAt).replace(" IST", "")}</td>
                   <td>{r.type}</td>
-                  <td>{cr ? <Link href={"/admin/creators/" + cr.id}>{cr.displayName}</Link> : "—"}</td>
+                  <td>
+                    {cr ? <Link href={"/admin/creators/" + cr.id}>{cr.displayName}</Link> : "—"}
+                    {cr && r.type === "earning" && !cr.panMasked ? (
+                      <span className="chip chip-warn" style={{ marginLeft: 6 }} title="Creator skipped PAN; ask them to add it on their profile before paying out.">
+                        PAN needed
+                      </span>
+                    ) : null}
+                  </td>
                   <td>{c ? <Link href={"/admin/bounties/" + c.id}>{c.title}</Link> : "—"}</td>
                   <td className="adm-num">{formatINR(r.amountPaise)}</td>
                   <td className="muted">{r.note}</td>

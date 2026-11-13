@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { saveBrandOnboarding } from "@/server/services/brand";
+import { saveBrandProfile } from "@/server/services/brand";
+import { CategorySelect } from "@/components/forms/CategoryPicker";
 import { CupProgress } from "@/components/onboarding/CupProgress";
 import { useDraft } from "@/components/onboarding/useDraft";
 import { requiredText, urlOptional, gstinOptional } from "@/lib/validate";
+import { isCategory } from "@/lib/categories";
 
 type Draft = {
   businessName: string;
@@ -30,8 +32,8 @@ const STEPS = [
     key: "category" as const,
     label: "Category",
     question: "Which category feels closest?",
-    hint: "Beauty, D2C, Food, Fintech — keep it short.",
-    placeholder: "Beauty",
+    hint: "Pick the closest one. Creators see it on your bounty cards.",
+    placeholder: "Choose a category",
     required: true,
   },
   {
@@ -53,27 +55,28 @@ const STEPS = [
   },
   {
     key: "gstin" as const,
-    label: "GSTIN (for KYC)",
-    question: "GSTIN for KYC?",
-    hint: "Admin review before your first bounty goes live.",
+    label: "GSTIN",
+    question: "Your GSTIN?",
+    hint: "RedCup approves brands once a GSTIN is on file. You can skip for now and add it from your profile later.",
     placeholder: "15 characters",
     required: false,
     maxLength: 15,
   },
 ];
 
-export function BrandOnboardingForm() {
+export function BrandOnboardingForm({ initial }: { initial?: { businessName?: string; city?: string; website?: string } }) {
   const router = useRouter();
   const reduce = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
+  const selectRef = useRef<HTMLSelectElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const [celebrate, setCelebrate] = useState(false);
   const { data, save, clear, hydrated } = useDraft<Draft>("redcup.brand.onboarding", {
-    businessName: "",
+    businessName: initial?.businessName || "",
     category: "",
-    city: "",
-    website: "",
+    city: initial?.city || "",
+    website: initial?.website || "",
     gstin: "",
     step: 0,
   });
@@ -83,7 +86,7 @@ export function BrandOnboardingForm() {
   const progress = (step + (data[current.key] ? 0.55 : 0)) / STEPS.length;
 
   useEffect(() => {
-    if (hydrated) inputRef.current?.focus();
+    if (hydrated) (inputRef.current ?? selectRef.current)?.focus();
   }, [step, hydrated]);
 
   const previewReady = useMemo(
@@ -91,10 +94,11 @@ export function BrandOnboardingForm() {
     [data.businessName, data.category, data.city],
   );
 
-  const advance = () => {
-    const val = data[current.key]?.trim() || "";
+  const advance = (skipGst = false) => {
+    const val = skipGst ? "" : data[current.key]?.trim() || "";
     let msg: string | null = null;
     if (current.required) msg = requiredText(val, current.label);
+    if (!msg && current.key === "category" && !isCategory(val)) msg = "Pick a category from the list.";
     if (!msg && current.key === "website") msg = urlOptional(val);
     if (!msg && current.key === "gstin") msg = gstinOptional(val);
     if (msg) {
@@ -108,13 +112,19 @@ export function BrandOnboardingForm() {
     }
     start(async () => {
       try {
-        await saveBrandOnboarding({
+        const res = await saveBrandProfile({
           businessName: data.businessName,
           category: data.category,
           city: data.city,
           website: data.website || undefined,
-          gstin: data.gstin || undefined,
+          gstin: skipGst ? undefined : data.gstin || undefined,
         });
+        if (!res.ok) {
+          setError(res.error);
+          const idx = STEPS.findIndex((s) => s.key === res.field);
+          if (idx >= 0) save({ step: idx });
+          return;
+        }
         clear();
         setCelebrate(true);
         setTimeout(() => {
@@ -141,7 +151,7 @@ export function BrandOnboardingForm() {
       <div className="onboard-celebrate card" role="status">
         <div className="onboard-celebrate-mark" aria-hidden />
         <h2>Brand path unlocked</h2>
-        <p className="muted">Sending your profile to RedCup for approval.</p>
+        <p className="muted">Profile saved. Taking you to your approval status.</p>
       </div>
     );
   }
@@ -168,7 +178,20 @@ export function BrandOnboardingForm() {
                   {current.label}
                   {current.required ? <span className="field-req" aria-hidden="true" /> : null}
                 </label>
-                <input
+                {current.key === "category" ? (
+                  <CategorySelect
+                    id="category"
+                    selectRef={selectRef}
+                    value={data.category}
+                    invalid={Boolean(error)}
+                    describedBy={error ? "category-err" : "category-hint"}
+                    onChange={(v) => {
+                      setError(null);
+                      save({ category: v, step });
+                    }}
+                  />
+                ) : (
+                  <input
                   ref={inputRef}
                   id={current.key}
                   name={current.key}
@@ -191,6 +214,7 @@ export function BrandOnboardingForm() {
                     }
                   }}
                 />
+                )}
                 <p className="field-helper" id={error ? `${current.key}-err` : `${current.key}-hint`} role={error ? "alert" : undefined}>
                   {error || current.hint}
                 </p>
@@ -199,10 +223,15 @@ export function BrandOnboardingForm() {
                 <button type="button" className="btn btn-ghost" onClick={back} disabled={step === 0 || pending}>
                   Back
                 </button>
+                {current.key === "gstin" ? (
+                  <button type="button" className="btn btn-ghost" onClick={() => advance(true)} disabled={pending}>
+                    Skip for now
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={advance}
+                  onClick={() => advance()}
                   disabled={pending}
                 >
                   {pending ? "Saving…" : step === STEPS.length - 1 ? "Save and continue" : "Continue"}
@@ -231,7 +260,7 @@ export function BrandOnboardingForm() {
             </div>
             <div className="bounty-card-foot">
               <span className="bounty-card-budget">{data.website ? "Site linked" : "Budget TBD"}</span>
-              <span className="bounty-card-cta muted">{data.gstin ? "KYC ready" : "KYC pending"}</span>
+              <span className="bounty-card-cta muted">{data.gstin ? "GST added" : "GST needed for approval"}</span>
             </div>
           </div>
         </aside>

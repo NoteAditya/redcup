@@ -120,6 +120,9 @@ export async function demoSignIn(input: { contact: string; password: string }) {
   if (user.role === "creator") {
     return { ok: false as const, error: "Creators log in with Instagram now. Use \"Continue with Instagram\" above." };
   }
+  if (user.role === "admin") {
+    return { ok: false as const, error: "RedCup admins sign in at /admin." };
+  }
   const ok = await bcrypt.compare(input.password, user.passwordHash);
   if (!ok) return { ok: false as const, error: "Wrong password." };
   if (user.status === "inactive") {

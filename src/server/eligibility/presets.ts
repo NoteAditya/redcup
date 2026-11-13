@@ -18,7 +18,7 @@ export const CRITERIA_PRESETS: { id: string; name: string; criteria: CampaignCri
     name: "Food · nano · Hindi",
     criteria: {
       followers: { mode: "must", min: 1000, max: 10000 },
-      niches: { mode: "must", any_of: ["food", "beverage"], require_verified: false },
+      niches: { mode: "must", any_of: ["food"], require_verified: false },
       languages: { mode: "must", any_of: ["hi"] },
       audience_country: { mode: "must", country: "IN", min_pct: 70 },
     },

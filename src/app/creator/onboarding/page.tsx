@@ -3,6 +3,8 @@ import { instagramConnectState } from "@/server/integrations/instagram";
 import { getSession } from "@/server/auth/session";
 import { readDb } from "@/server/db/store";
 import { requirePageRole } from "@/server/auth/guard";
+import { redirect } from "next/navigation";
+import { creatorOnboarded } from "@/lib/profile";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,8 @@ export default async function CreatorOnboardingPage() {
   const session = await getSession();
   const db = await readDb();
   const creator = db.creators.find((c) => c.userId === session.userId);
+  // The step-by-step setup is only for creators that haven't finished it; everyone else edits their profile.
+  if (creatorOnboarded(creator)) redirect("/creator/profile");
   const link = creator?.instagram;
   return (
     <div>

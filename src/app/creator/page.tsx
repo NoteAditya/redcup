@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ApplyButton } from "@/components/creator/ApplyButton";
 import { CreatorAvatar } from "@/components/creator/CreatorAvatar";
 import { requirePageRole } from "@/server/auth/guard";
+import { creatorOnboarded } from "@/lib/profile";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default async function CreatorDashboard() {
     db.applications.filter((a) => a.creatorId === creator?.id).map((a) => a.campaignId),
   );
   const myApps = db.applications.filter((a) => a.creatorId === creator?.id);
+  const won = myApps.filter((a) => ["AWARDED", "DRAFT_SENT", "REVISION", "APPROVED", "POSTED", "TRACKING", "VERIFIED", "PAID"].includes(a.status)).length;
 
   return (
     <div>
@@ -47,8 +49,8 @@ export default async function CreatorDashboard() {
             </p>
           </div>
         </div>
-        <Link href="/creator/onboarding" className="btn btn-ghost" prefetch>
-          Edit profile
+        <Link href={creatorOnboarded(creator) ? "/creator/profile" : "/creator/onboarding"} className="btn btn-ghost" prefetch>
+          {creatorOnboarded(creator) ? "Edit profile" : "Finish setup"}
         </Link>
       </div>
 
@@ -65,7 +67,14 @@ export default async function CreatorDashboard() {
         </p>
       ) : null}
 
-      {(!creator?.handle || !creator?.city) && (
+      {creator && creatorOnboarded(creator) && !creator.panMasked && won > 0 && (
+        <div className="card" role="status" style={{ marginTop: "1rem" }}>
+          You won a campaign. Add your PAN before your first payout.{" "}
+          <Link href="/creator/profile#pan">Add PAN</Link>
+        </div>
+      )}
+
+      {!creatorOnboarded(creator) && (
         <div className="card" style={{ marginTop: "1rem" }}>
           Complete onboarding to check your eligibility and apply for campaigns.{" "}
           <Link href="/creator/onboarding">Continue setup</Link>

@@ -6,12 +6,13 @@ import { redirect } from "next/navigation";
 const fullNav = [
   { href: "/brand", label: "Dashboard" },
   { href: "/brand/bounties/new", label: "New bounty" },
-  { href: "/brand/onboarding", label: "Profile" },
+  { href: "/brand/explore", label: "Explore creators" },
+  { href: "/brand/profile", label: "Profile" },
   { href: "/brand/settings", label: "Settings" },
 ];
 const pendingNav = [
   { href: "/brand", label: "Approval status" },
-  { href: "/brand/onboarding", label: "Profile" },
+  { href: "/brand/profile", label: "Profile" },
 ];
 
 export default async function BrandLayout({ children }: { children: React.ReactNode }) {

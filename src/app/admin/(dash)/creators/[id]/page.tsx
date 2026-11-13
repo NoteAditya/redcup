@@ -5,6 +5,7 @@ import { formatINR } from "@/lib/money";
 import { formatIST, labelize } from "@/lib/format";
 import { ReviewChip } from "@/components/admin/AdminActions";
 import { CreatorAvatar } from "@/components/creator/CreatorAvatar";
+import { TopReels } from "@/components/creator/TopReels";
 import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
@@ -85,6 +86,16 @@ export default async function AdminCreatorPage({ params }: { params: Promise<{ i
           <dd>{creator.upiMasked ? "UPI on file" : "no UPI"} · {creator.panMasked ? "PAN on file" : "no PAN"}</dd>
         </dl>
       </div>
+
+      {ig && (
+        <div className="adm-panel">
+          <h3>Top reels</h3>
+          <p className="muted" style={{ fontSize: "0.8rem", margin: "0 0 0.75rem" }}>
+            {ig.topReelsFetchedAt ? `From Instagram, updated ${formatIST(ig.topReelsFetchedAt)}` : "Not fetched yet"}
+          </p>
+          <TopReels creatorId={creator.id} reels={ig.topReels} status={ig.topReelsStatus ?? null} />
+        </div>
+      )}
 
       {ig && (
         <div className="adm-panel">

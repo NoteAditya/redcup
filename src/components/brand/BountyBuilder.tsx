@@ -26,7 +26,7 @@ const PRESETS: { id: string; label: string; criteria: CampaignCriteria }[] = [
     label: "Food nano (1K–10K)",
     criteria: {
       followers: { mode: "must", min: 1000, max: 10000 },
-      niches: { mode: "must", any_of: ["Food", "Cafe"] },
+      niches: { mode: "must", any_of: ["Food"] },
       audience_country: { mode: "must", country: "IN", min_pct: 70 },
       audience_cities: { mode: "nice", any_of: ["Mumbai", "Delhi", "Bengaluru"], min_pct: 15 },
     },

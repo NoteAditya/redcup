@@ -98,7 +98,9 @@ export default async function BrandCampaignPage({ params }: { params: Promise<{ 
             <tbody>
               {apps.map((a) => (
                 <tr key={a.id}>
-                  <td>{creators.get(a.creatorId)?.displayName || a.creatorId}</td>
+                  <td>
+                    <Link href={`/brand/creators/${a.creatorId}`}>{creators.get(a.creatorId)?.displayName || a.creatorId}</Link>
+                  </td>
                   <td>{a.status}</td>
                   <td>{a.fitScore ?? "—"}</td>
                 </tr>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MarketingShell } from "@/components/layout/MarketingShell";
+import { AuthStage } from "@/components/auth/AuthStage";
 import { SignInForm } from "@/components/auth/AuthForms";
 import { IG_ERRORS, InstagramButton, ProfessionalAccountHelp } from "@/components/auth/InstagramButton";
 
@@ -14,22 +15,14 @@ export default async function LoginPage({
   const igError = ig_error ? IG_ERRORS[ig_error] ?? IG_ERRORS.failed : null;
   return (
     <MarketingShell>
-      <div
-        style={{
-          maxWidth: 420,
-          margin: "2rem auto 4rem",
-          backgroundColor: "var(--sheet)",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--radius-card)",
-          padding: "2rem",
-          boxShadow: "var(--shadow-card)",
-        }}
+      <AuthStage
+        eyebrow="Sign in"
+        title="Your creator work,"
+        accent="verified."
+        sub="Creators log in with Instagram. Brands log in with email or Google."
       >
         <div style={{ marginBottom: "1.25rem" }}>
-          <span className="chip" style={{ marginBottom: "0.5rem" }}>
-            Authentication
-          </span>
-          <h1 style={{ fontSize: "1.5rem", marginBottom: "0.25rem" }}>Sign in to RedCup</h1>
+          <h2 className="auth-sheet-title">Log in to RedCup</h2>
           <p className="muted" style={{ fontSize: "0.875rem" }}>
             New to the platform?{" "}
             <Link href="/signup" style={{ color: "var(--ink)", fontWeight: 600 }}>
@@ -44,9 +37,9 @@ export default async function LoginPage({
           </p>
         ) : null}
         <section aria-labelledby="creator-login" style={{ marginBottom: "1.75rem" }}>
-          <h2 id="creator-login" style={{ fontSize: "1rem", marginBottom: "0.35rem" }}>
+          <h3 id="creator-login" style={{ fontSize: "1rem", marginBottom: "0.35rem" }}>
             Creators
-          </h2>
+          </h3>
           <p className="muted" style={{ fontSize: "0.85rem", marginBottom: "0.85rem" }}>
             Creators log in with their Instagram professional account. Your profile, followers and picture come from
             Instagram.
@@ -68,12 +61,12 @@ export default async function LoginPage({
           <InstagramButton />
         </section>
         <section aria-labelledby="brand-login" style={{ paddingTop: "1.25rem", borderTop: "1px solid var(--line)" }}>
-          <h2 id="brand-login" style={{ fontSize: "1rem", marginBottom: "0.85rem" }}>
-            Brands and RedCup team
-          </h2>
+          <h3 id="brand-login" style={{ fontSize: "1rem", marginBottom: "0.85rem" }}>
+            Brands
+          </h3>
           <SignInForm />
         </section>
-      </div>
+      </AuthStage>
     </MarketingShell>
   );
 }

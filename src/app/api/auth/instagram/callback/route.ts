@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { getIronSessionHandle } from "@/server/auth/session";
 import { completeInstagramLogin, knownInstagramIds } from "@/server/auth/instagram-login";
 import {
@@ -13,6 +13,8 @@ import {
   isProfessional,
   resolveAccount,
 } from "@/server/integrations/instagram";
+import { syncTopReels } from "@/server/instagram-sync";
+import { creatorOnboarded } from "@/lib/profile";
 
 export const dynamic = "force-dynamic";
 
@@ -62,8 +64,11 @@ export async function GET(req: NextRequest) {
     session.needsRole = undefined;
     await session.save();
 
-    const needsSetup = !result.creator.city || !result.creator.categories.length;
-    return back(req, needsSetup ? "/creator/onboarding" : "/creator");
+    // Refresh the cached top reels after the redirect is sent, so login stays fast.
+    const creatorId = result.creator.id;
+    after(() => syncTopReels(creatorId, { force: true }).catch(() => null));
+
+    return back(req, creatorOnboarded(result.creator) ? "/creator" : "/creator/onboarding");
   } catch (e) {
     const code = e instanceof InstagramError ? e.code : "graph";
     // Log the category only; never the code, token or Meta's raw response.

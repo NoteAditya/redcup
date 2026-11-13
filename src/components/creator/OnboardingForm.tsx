@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { saveCreatorOnboarding } from "@/server/services/creator";
+import { saveCreatorProfile } from "@/server/services/creator";
 import { CupProgress } from "@/components/onboarding/CupProgress";
 import { useDraft } from "@/components/onboarding/useDraft";
 import { ConnectBanner } from "@/components/ui/ConnectBanner";
 import { requiredText, handleOk, phoneOk, panOk, upiOk } from "@/lib/validate";
+import { CategoryMulti } from "@/components/forms/CategoryPicker";
+import { creatorCategoriesOk } from "@/lib/categories";
 
 type Draft = {
   displayName: string;
@@ -17,19 +19,23 @@ type Draft = {
   categories: string;
   whatsapp: string;
   pan: string;
+  /** "1" when the creator chose Skip for PAN. */
+  panSkipped: string;
   upi: string;
   followers: string;
   step: number;
 };
+
+const splitCats = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
 
 const ALL_STEPS = [
   { key: "displayName" as const, label: "Display name", question: "What name should brands see?", hint: "Your creator face on RedCup.", placeholder: "Ananya", required: true },
   { key: "handle" as const, label: "Instagram handle", question: "Your Instagram handle?", hint: "Without the @.", placeholder: "ananya.creates", required: true },
   { key: "city" as const, label: "City", question: "Which city are you based in?", hint: "Helps city-weighted eligibility.", placeholder: "Mumbai", required: true },
   { key: "languages" as const, label: "Languages (comma-separated)", question: "Languages you create in?", hint: "Comma-separated is fine.", placeholder: "Hindi, English", required: true },
-  { key: "categories" as const, label: "Categories (comma-separated)", question: "Your niches?", hint: "Beauty, Lifestyle, Food…", placeholder: "Beauty, Lifestyle", required: true },
+  { key: "categories" as const, label: "Categories", question: "What do you create?", hint: "Pick up to 3. Brands filter creators by these.", placeholder: "", required: true },
   { key: "whatsapp" as const, label: "WhatsApp number", question: "WhatsApp for campaign pings?", hint: "Brands never see this raw — ops may.", placeholder: "+91…", required: true },
-  { key: "pan" as const, label: "PAN", question: "PAN for payouts?", hint: "Stored masked after save.", placeholder: "ABCDE1234F", required: true, maxLength: 10 },
+  { key: "pan" as const, label: "PAN (optional)", question: "PAN for payouts?", hint: "Optional now. You can skip and add it before your first payout. Stored masked.", placeholder: "ABCDE1234F", required: false, maxLength: 10 },
   { key: "upi" as const, label: "UPI ID", question: "UPI ID for earnings?", hint: "Stored masked after save.", placeholder: "you@upi", required: true },
   { key: "followers" as const, label: "Followers (self-reported until Instagram connects)", question: "About how many followers?", hint: "Self-reported until Meta connect is live.", placeholder: "15000", required: false, type: "number" },
 ];
@@ -68,6 +74,7 @@ export function CreatorOnboardingForm({
     categories: "",
     whatsapp: "",
     pan: "",
+    panSkipped: "",
     upi: "",
     followers: "",
     step: 0,
@@ -83,13 +90,15 @@ export function CreatorOnboardingForm({
 
   const previewReady = useMemo(() => Boolean(data.displayName || data.handle), [data.displayName, data.handle]);
 
-  const advance = () => {
-    const val = String(data[current.key] || "").trim();
+  const advance = (skipPan = false) => {
+    if (current.key === "pan") save({ panSkipped: skipPan ? "1" : "", ...(skipPan ? { pan: "" } : {}) });
+    const val = skipPan ? "" : String(data[current.key] || "").trim();
     let msg: string | null = null;
-    if (current.required) msg = requiredText(val, current.label);
+    if (current.key === "categories") msg = creatorCategoriesOk(splitCats(val));
+    else if (current.required) msg = requiredText(val, current.label);
     if (!msg && current.key === "handle") msg = handleOk(val);
     if (!msg && current.key === "whatsapp") msg = phoneOk(val);
-    if (!msg && current.key === "pan") msg = panOk(val);
+    if (!msg && current.key === "pan" && val) msg = panOk(val);
     if (!msg && current.key === "upi") msg = upiOk(val);
     if (msg) {
       setError(msg);
@@ -103,18 +112,26 @@ export function CreatorOnboardingForm({
     start(async () => {
       try {
         const langs = data.languages.split(",").map((s) => s.trim()).filter(Boolean);
-        const cats = data.categories.split(",").map((s) => s.trim()).filter(Boolean);
-        await saveCreatorOnboarding({
+        const cats = splitCats(data.categories);
+        const panSkipped = data.panSkipped === "1" || !data.pan.trim();
+        const res = await saveCreatorProfile({
           displayName: data.displayName,
           handle: instagram?.username || data.handle,
           city: data.city,
           languages: langs,
           categories: cats,
           whatsapp: data.whatsapp,
-          pan: data.pan,
+          pan: panSkipped ? "" : data.pan,
+          skipPan: panSkipped,
           upi: data.upi,
           followers: instagram ? undefined : Number(data.followers || 0) || undefined,
         });
+        if (!res.ok) {
+          setError(res.error);
+          const idx = STEPS.findIndex((s) => s.key === res.field);
+          if (idx >= 0) save({ step: idx });
+          return;
+        }
         clear();
         setCelebrate(true);
         setTimeout(() => {
@@ -171,6 +188,17 @@ export function CreatorOnboardingForm({
                   {current.label}
                   {current.required ? <span className="field-req" aria-hidden="true" /> : null}
                 </label>
+                {current.key === "categories" ? (
+                  <CategoryMulti
+                    id="categories"
+                    value={splitCats(data.categories)}
+                    describedBy={error ? "categories-err" : "categories-hint"}
+                    onChange={(v) => {
+                      setError(null);
+                      save({ categories: v.join(", "), step });
+                    }}
+                  />
+                ) : (
                 <input
                   ref={inputRef}
                   id={current.key}
@@ -194,6 +222,7 @@ export function CreatorOnboardingForm({
                     }
                   }}
                 />
+                )}
                 <p className="field-helper" id={error ? `${current.key}-err` : `${current.key}-hint`} role={error ? "alert" : undefined}>
                   {error || current.hint}
                 </p>
@@ -202,7 +231,12 @@ export function CreatorOnboardingForm({
                 <button type="button" className="btn btn-ghost" onClick={back} disabled={step === 0 || pending}>
                   Back
                 </button>
-                <button type="button" className="btn btn-primary" onClick={advance} disabled={pending}>
+                {current.key === "pan" ? (
+                  <button type="button" className="btn btn-ghost" onClick={() => advance(true)} disabled={pending}>
+                    Skip
+                  </button>
+                ) : null}
+                <button type="button" className="btn btn-primary" onClick={() => advance()} disabled={pending}>
                   {pending ? "Saving…" : step === STEPS.length - 1 ? "Save and continue" : "Continue"}
                 </button>
               </div>

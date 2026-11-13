@@ -18,6 +18,7 @@ import {
 import type { CampaignCriteria, RuleMode } from "@/lib/types";
 import { fetchViewsFromInstagram } from "@/server/services/instagram";
 import { fromISTInput, toISTInput } from "@/lib/format";
+import { CategoryMulti } from "@/components/forms/CategoryPicker";
 
 type R = { ok: boolean; error?: string };
 
@@ -53,18 +54,30 @@ function Feedback({ err, done }: { err: string | null; done: string | null }) {
 
 /* ----------------------------------------------------------- Brand review */
 
-export function BrandReview({ brandId, compact }: { brandId: string; compact?: boolean }) {
+export function BrandReview({ brandId, compact, gstMissing }: { brandId: string; compact?: boolean; gstMissing?: boolean }) {
   const [note, setNote] = useState("");
+  const [override, setOverride] = useState(false);
   const { pending, err, done, run } = useAction();
   return (
     <div>
       <label className="field" style={{ marginBottom: "0.5rem" }}>
-        <span>Reason {compact ? "" : "(required to reject, shown to the brand)"}</span>
+        <span>Reason {compact ? "" : "(required to reject or to approve without GST, shown to the brand)"}</span>
         <textarea className="input adm-note" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
       </label>
+      {gstMissing ? (
+        <label style={{ display: "flex", gap: "0.5rem", alignItems: "center", fontSize: "0.8125rem", marginBottom: "0.5rem" }}>
+          <input type="checkbox" checked={override} onChange={(e) => setOverride(e.target.checked)} />
+          Approve without GST (admin override, needs a reason, logged)
+        </label>
+      ) : null}
       <div className="adm-actions">
-        <button className="btn btn-primary btn-compact" disabled={pending} onClick={() => run(() => reviewBrand(brandId, true, note), "Brand approved.")}>
-          Approve brand
+        <button
+          className="btn btn-primary btn-compact"
+          disabled={pending || (gstMissing && !override)}
+          title={gstMissing && !override ? "This brand hasn't added a GSTIN yet." : undefined}
+          onClick={() => run(() => reviewBrand(brandId, true, note, { overrideGst: Boolean(gstMissing && override) }), "Brand approved.")}
+        >
+          {gstMissing ? "Approve without GST" : "Approve brand"}
         </button>
         <button className="btn btn-ghost btn-compact" disabled={pending} onClick={() => run(() => reviewBrand(brandId, false, note), "Brand rejected.")}>
           Reject
@@ -311,7 +324,15 @@ export function CampaignForm({
         <label className="field"><span>Min followers</span><input className="input" type="number" min={0} value={crit.fMin} onChange={setC("fMin")} /></label>
         <label className="field"><span>Max followers</span><input className="input" type="number" min={0} value={crit.fMax} onChange={setC("fMax")} /></label>
         <label className="field"><span>Followers rule</span><ModeSelect value={crit.fMode} onChange={setC("fMode")} /></label>
-        <label className="field"><span>Niches (comma separated)</span><input className="input" value={crit.niches} onChange={setC("niches")} /></label>
+        <div className="field">
+          <span>Niches</span>
+          <CategoryMulti
+            id="crit-niches"
+            max={99}
+            value={crit.niches.split(",").map((x) => x.trim()).filter(Boolean)}
+            onChange={(v) => setCrit((s) => ({ ...s, niches: v.join(", ") }))}
+          />
+        </div>
         <label className="field"><span>Niches rule</span><ModeSelect value={crit.nMode} onChange={setC("nMode")} /></label>
         <label className="field"><span>Languages (comma separated)</span><input className="input" value={crit.langs} onChange={setC("langs")} /></label>
         <label className="field"><span>Languages rule</span><ModeSelect value={crit.lMode} onChange={setC("lMode")} /></label>

@@ -9,6 +9,8 @@ import { getSession } from "./session";
  */
 export async function requirePageRole(role: Role) {
   const session = await getSession();
+  // Admin pages never reveal anything to non-admins: they get the dedicated admin sign-in page.
+  if (role === "admin" && (!session.isLoggedIn || !session.userId || session.role !== "admin")) redirect("/admin/login");
   if (session.deactivated) redirect("/login?deactivated=1");
   if (session.creatorUseInstagram) redirect("/login?creator=instagram");
   if (session.needsRole) redirect("/signup?claim=1");

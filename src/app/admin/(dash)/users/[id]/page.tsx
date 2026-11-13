@@ -66,7 +66,7 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
               <dt>City</dt>
               <dd>{brand.city || "—"}</dd>
               <dt>GSTIN</dt>
-              <dd>{brand.gstin || "—"}</dd>
+              <dd>{brand.gstin || <span className="chip chip-warn">GST missing</span>}</dd>
               <dt>Website</dt>
               <dd>{brand.website || "—"}</dd>
               {brand.kycNote ? (
@@ -76,7 +76,7 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
                 </>
               ) : null}
             </dl>
-            <BrandReview brandId={brand.id} compact />
+            <BrandReview brandId={brand.id} compact gstMissing={!brand.gstin?.trim()} />
           </div>
         )}
 

@@ -6,10 +6,8 @@ import { redirect } from "next/navigation";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
-  if (session.deactivated) redirect("/login?deactivated=1");
-  if (session.needsRole) redirect("/signup?claim=1");
-  if (!session.isLoggedIn) redirect("/login");
-  if (session.role !== "admin") redirect("/");
+  // Anyone who isn't a signed-in admin only ever sees the admin sign-in page.
+  if (!session.isLoggedIn || session.role !== "admin") redirect("/admin/login");
   const counts = pendingCounts(await readDb());
   const nav = [
     { href: "/admin", label: "Overview" },
