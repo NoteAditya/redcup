@@ -111,3 +111,8 @@ export async function adminSignIn(input: { email: string; password: string }): P
   await session.save();
   redirect("/admin");
 }
+
+/** Form-action wrapper for useActionState (progressive POST, works before hydration). */
+export async function adminSignInForm(_prev: Result | null, form: FormData): Promise<Result> {
+  return adminSignIn({ email: String(form.get("email") || ""), password: String(form.get("password") || "") });
+}

@@ -32,6 +32,7 @@ export function SignUpForm() {
 
   return (
     <form
+      method="post"
       className="card form-card"
       noValidate
       onSubmit={(e) => {
@@ -121,6 +122,7 @@ export function SignInForm() {
         <AuthDivider label="or use password" />
       </div>
       <form
+      method="post"
         className="card form-card"
         noValidate
         onSubmit={(e) => {
@@ -162,6 +164,7 @@ export function SignInForm() {
       </form>
 
       <form
+      method="post"
         className="card form-card"
         onSubmit={(e) => {
           e.preventDefault();
