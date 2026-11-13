@@ -4,12 +4,14 @@ import { formatINR } from "@/lib/money";
 import { formatIST, labelize } from "@/lib/format";
 import { campaignApproval, isAdminApproved } from "@/server/access";
 import { ReviewChip } from "@/components/admin/AdminActions";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 type SP = Promise<{ q?: string; status?: string; brand?: string; approval?: string }>;
 
 export default async function AdminCampaignsPage({ searchParams }: { searchParams: SP }) {
+  await requirePageRole("admin");
   const { q = "", status = "", brand = "", approval = "" } = await searchParams;
   const db = await readDb();
   const brands = new Map(db.brands.map((b) => [b.id, b]));

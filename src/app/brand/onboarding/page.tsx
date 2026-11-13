@@ -1,6 +1,8 @@
 import { BrandOnboardingForm } from "@/components/brand/OnboardingForm";
+import { requirePageRole } from "@/server/auth/guard";
 
-export default function BrandOnboardingPage() {
+export default async function BrandOnboardingPage() {
+  await requirePageRole("brand");
   return (
     <div>
       <h1>Brand onboarding</h1>

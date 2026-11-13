@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { readDb } from "@/server/db/store";
 import { formatIST, labelize } from "@/lib/format";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 type SP = Promise<{ q?: string; role?: string; state?: string }>;
 
 export default async function UsersPage({ searchParams }: { searchParams: SP }) {
+  await requirePageRole("admin");
   const { q = "", role = "", state = "" } = await searchParams;
   const db = await readDb();
   const brands = new Map(db.brands.map((b) => [b.userId, b]));

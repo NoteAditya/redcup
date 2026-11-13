@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { getSession } from "@/server/auth/session";
 import { readDb } from "@/server/db/store";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function CreatorApplicationsPage() {
+  await requirePageRole("creator");
   const session = await getSession();
   const db = await readDb();
   const creator = db.creators.find((c) => c.userId === session.userId);

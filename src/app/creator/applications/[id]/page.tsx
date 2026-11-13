@@ -3,10 +3,12 @@ import { notFound } from "next/navigation";
 import { getSession } from "@/server/auth/session";
 import { readDb } from "@/server/db/store";
 import { DraftUploadForm, ReelLinkForm } from "@/components/creator/ApplicationActions";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function CreatorApplicationPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePageRole("creator");
   const { id } = await params;
   const session = await getSession();
   const db = await readDb();

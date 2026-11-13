@@ -5,10 +5,12 @@ import { formatINR } from "@/lib/money";
 import { formatIST, labelize } from "@/lib/format";
 import { ReviewChip } from "@/components/admin/AdminActions";
 import { CreatorAvatar } from "@/components/creator/CreatorAvatar";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCreatorPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePageRole("admin");
   const { id } = await params;
   const db = await readDb();
   const creator = db.creators.find((c) => c.id === id);

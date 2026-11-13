@@ -3,10 +3,12 @@ import { ConnectBanner } from "@/components/ui/ConnectBanner";
 import { TestModeBanner } from "@/components/ui/TestModeBanner";
 
 import { BrandPendingScreen, getBrandAccess } from "@/components/brand/BrandGate";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function BrandSettingsPage() {
+  await requirePageRole("brand");
   const { brand, approved } = await getBrandAccess();
   if (!approved) return <BrandPendingScreen brand={brand} />;
   const pay = paymentConnectState();

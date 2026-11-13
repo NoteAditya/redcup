@@ -2,10 +2,12 @@ import Link from "next/link";
 import { formatINR } from "@/lib/money";
 import { formatIST } from "@/lib/format";
 import { readDb } from "@/server/db/store";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function PayoutsPage() {
+  await requirePageRole("admin");
   const db = await readDb();
   const rows = db.ledger
     .filter((l) => l.type === "earning" || l.type === "commission")

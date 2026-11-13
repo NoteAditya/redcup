@@ -5,10 +5,12 @@ import { formatIST } from "@/lib/format";
 import { AwardForm, DraftReviewButtons, FundButton, ResubmitForm, ShortlistButton } from "@/components/brand/CampaignActions";
 import { BrandPendingScreen, getBrandAccess } from "@/components/brand/BrandGate";
 import { brandCampaignLabel, brandVisibleApplications, campaignApproval } from "@/server/access";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function BrandCampaignPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePageRole("brand");
   const { id } = await params;
   const { db, brand, approved } = await getBrandAccess();
   if (!approved) return <BrandPendingScreen brand={brand} />;

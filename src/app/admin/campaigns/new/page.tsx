@@ -2,10 +2,12 @@ import Link from "next/link";
 import { readDb } from "@/server/db/store";
 import { CampaignForm } from "@/components/admin/AdminActions";
 import { CRITERIA_PRESETS } from "@/server/eligibility/presets";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewAdminCampaignPage() {
+  await requirePageRole("admin");
   const db = await readDb();
   const brands = db.brands
     .map((b) => ({ id: b.id, name: b.businessName, kyc: b.kycStatus }))

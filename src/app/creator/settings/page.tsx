@@ -5,10 +5,12 @@ import { readDb } from "@/server/db/store";
 import { formatIST } from "@/lib/format";
 import { CreatorAvatar } from "@/components/creator/CreatorAvatar";
 import { DeleteInstagramDataButton } from "@/components/creator/DeleteInstagramData";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function CreatorSettingsPage() {
+  await requirePageRole("creator");
   const wa = whatsappConnectState();
   const session = await getSession();
   const db = await readDb();

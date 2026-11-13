@@ -1,9 +1,11 @@
 import { BountyBuilder } from "@/components/brand/BountyBuilder";
 import { BrandPendingScreen, getBrandAccess } from "@/components/brand/BrandGate";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewBountyPage() {
+  await requirePageRole("brand");
   const { brand, approved } = await getBrandAccess();
   if (!approved) return <BrandPendingScreen brand={brand} />;
   return (

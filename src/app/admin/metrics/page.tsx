@@ -2,10 +2,12 @@ import { readDb } from "@/server/db/store";
 import { ManualViewsForm } from "@/components/admin/AdminActions";
 import { ConnectBanner } from "@/components/ui/ConnectBanner";
 import { instagramConnectState } from "@/server/integrations/instagram";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function MetricsPage() {
+  await requirePageRole("admin");
   const db = await readDb();
   const ig = instagramConnectState();
   const reels = new Map(db.reels.map((r) => [r.applicationId, r]));

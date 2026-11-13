@@ -2,10 +2,12 @@ import { CreatorOnboardingForm } from "@/components/creator/OnboardingForm";
 import { instagramConnectState } from "@/server/integrations/instagram";
 import { getSession } from "@/server/auth/session";
 import { readDb } from "@/server/db/store";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function CreatorOnboardingPage() {
+  await requirePageRole("creator");
   const ig = instagramConnectState();
   const session = await getSession();
   const db = await readDb();

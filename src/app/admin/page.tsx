@@ -5,6 +5,7 @@ import { StatBars } from "@/components/ui/StatBars";
 import { DailyBars } from "@/components/admin/Charts";
 import { countBy, dailySeries, pendingCounts } from "@/server/admin-data";
 import { campaignApproval } from "@/server/access";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ function rate(approved: number, rejected: number) {
 }
 
 export default async function AdminHome() {
+  await requirePageRole("admin");
   const db = await readDb();
   const sum = (type: string) => db.ledger.filter((l) => l.type === type).reduce((a, l) => a + l.amountPaise, 0);
   const counts = pendingCounts(db);

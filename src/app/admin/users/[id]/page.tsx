@@ -6,10 +6,12 @@ import { formatIST, labelize } from "@/lib/format";
 import { BrandReview, ReviewChip, UserToggle } from "@/components/admin/AdminActions";
 import { campaignApproval } from "@/server/access";
 import { getSession } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminUserPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePageRole("admin");
   const { id } = await params;
   const [db, session] = await Promise.all([readDb(), getSession()]);
   const user = db.users.find((u) => u.id === id);

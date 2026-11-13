@@ -5,10 +5,12 @@ import { brandCampaignLabel } from "@/server/access";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatBars } from "@/components/ui/StatBars";
 import { BountyCard } from "@/components/bounty/BountyCard";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function BrandDashboard() {
+  await requirePageRole("brand");
   const { db, brand, approved } = await getBrandAccess();
   if (!approved) return <BrandPendingScreen brand={brand} />;
   const campaigns = db.campaigns.filter((c) => c.brandId === brand?.id);

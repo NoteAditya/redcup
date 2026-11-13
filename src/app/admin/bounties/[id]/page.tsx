@@ -13,10 +13,12 @@ import {
 import { appRows, targetInfo, userName } from "@/server/admin-data";
 import { campaignApproval } from "@/server/access";
 import { CRITERIA_PRESETS } from "@/server/eligibility/presets";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminBountyPage({ params }: { params: Promise<{ id: string }> }) {
+  await requirePageRole("admin");
   const { id } = await params;
   const db = await readDb();
   const campaign = db.campaigns.find((c) => c.id === id);

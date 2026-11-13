@@ -2,10 +2,12 @@ import Link from "next/link";
 import { readDb } from "@/server/db/store";
 import { formatIST, labelize } from "@/lib/format";
 import { BrandReview } from "@/components/admin/AdminActions";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function BrandApprovalsPage({ searchParams }: { searchParams: Promise<{ show?: string }> }) {
+  await requirePageRole("admin");
   const { show = "submitted" } = await searchParams;
   const db = await readDb();
   const tabs = [

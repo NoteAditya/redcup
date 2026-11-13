@@ -2,6 +2,7 @@ import Link from "next/link";
 import { readDb } from "@/server/db/store";
 import { formatIST, labelize } from "@/lib/format";
 import { targetInfo, userName } from "@/server/admin-data";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,7 @@ export default async function ActivityPage({
 }: {
   searchParams: Promise<{ q?: string; action?: string; page?: string }>;
 }) {
+  await requirePageRole("admin");
   const { q = "", action = "", page = "1" } = await searchParams;
   const db = await readDb();
   const needle = q.trim().toLowerCase();

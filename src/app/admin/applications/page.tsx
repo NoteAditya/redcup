@@ -2,12 +2,14 @@ import Link from "next/link";
 import { readDb } from "@/server/db/store";
 import { ApplicationReviewTable } from "@/components/admin/AdminActions";
 import { appRows } from "@/server/admin-data";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 type SP = Promise<{ campaign?: string; review?: string; q?: string }>;
 
 export default async function ApplicationsQueuePage({ searchParams }: { searchParams: SP }) {
+  await requirePageRole("admin");
   const { campaign = "", review = "pending", q = "" } = await searchParams;
   const db = await readDb();
   const needle = q.trim().toLowerCase();

@@ -6,10 +6,12 @@ import { campaignApproval } from "@/server/access";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ApplyButton } from "@/components/creator/ApplyButton";
 import { CreatorAvatar } from "@/components/creator/CreatorAvatar";
+import { requirePageRole } from "@/server/auth/guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function CreatorDashboard() {
+  await requirePageRole("creator");
   const session = await getSession();
   const db = await readDb();
   const creator = db.creators.find((c) => c.userId === session.userId);
