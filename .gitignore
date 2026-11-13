@@ -54,3 +54,6 @@ test-results/
 # Agent skills
 .agents/
 .skills/
+
+# Local Netlify folder
+.netlify
