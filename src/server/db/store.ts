@@ -56,6 +56,49 @@ export type Creator = {
   panMasked: string | null;
   upiMasked: string | null;
   createdAt: string;
+  /** Present once the creator has logged in with Instagram. */
+  instagram?: InstagramLink | null;
+};
+
+/** Login flow that issued the token. "unified" = Facebook Login for Business config (graph.facebook.com). */
+export type InstagramFlow = "unified" | "instagram";
+
+export type InstagramLink = {
+  /** Instagram account id for this app (the identity we log creators in by). */
+  igUserId: string;
+  flow: InstagramFlow;
+  username: string;
+  name: string | null;
+  /** BUSINESS / CREATOR from Instagram Login; PROFESSIONAL when Meta only tells us it is professional. */
+  accountType: "BUSINESS" | "CREATOR" | "PROFESSIONAL" | "PERSONAL" | null;
+  biography: string | null;
+  website: string | null;
+  followers: number | null;
+  follows: number | null;
+  mediaCount: number | null;
+  /** Meta CDN URL. It expires, so it is refreshed on login and by the avatar route. */
+  profilePictureUrl: string | null;
+  pictureFetchedAt: string | null;
+  /** AES-256-GCM sealed access token (src/server/crypto/secretbox.ts). Never sent to the browser. */
+  tokenSealed: string | null;
+  tokenExpiresAt: string | null;
+  tokenRefreshedAt: string | null;
+  tokenValid: boolean;
+  /** Business portfolio id (Unified Login only). */
+  clientBusinessId?: string | null;
+  connectedAt: string;
+  profileRefreshedAt: string;
+  /** How an older email/Google creator record got linked, for admins. */
+  linkNote?: string | null;
+};
+
+export type DataDeletionRequest = {
+  code: string;
+  igUserId: string | null;
+  creatorId: string | null;
+  source: "meta_callback" | "creator";
+  requestedAt: string;
+  status: "completed" | "no_data";
 };
 
 export type Campaign = {
@@ -190,6 +233,7 @@ export type Db = {
     createdAt: string;
   }[];
   otps: { contact: string; code: string; expiresAt: string }[];
+  dataDeletionRequests: DataDeletionRequest[];
 };
 
 export const empty = (): Db => ({
@@ -207,6 +251,7 @@ export const empty = (): Db => ({
   shortlistOverrides: [],
   adminActions: [],
   otps: [],
+  dataDeletionRequests: [],
 });
 
 /**

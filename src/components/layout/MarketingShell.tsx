@@ -89,6 +89,9 @@ export function MarketingShell({
                   <Link href="/privacy">Privacy Policy</Link>
                 </li>
                 <li>
+                  <Link href="/data-deletion">Data Deletion</Link>
+                </li>
+                <li>
                   <Link href="/refunds">Escrow &amp; Refund SLA</Link>
                 </li>
                 <li>

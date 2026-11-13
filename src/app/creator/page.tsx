@@ -5,6 +5,7 @@ import { readDb } from "@/server/db/store";
 import { campaignApproval } from "@/server/access";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ApplyButton } from "@/components/creator/ApplyButton";
+import { CreatorAvatar } from "@/components/creator/CreatorAvatar";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export default async function CreatorDashboard() {
   const db = await readDb();
   const creator = db.creators.find((c) => c.userId === session.userId);
   const metrics = db.creatorMetrics.find((m) => m.creatorId === creator?.id);
+  const ig = creator?.instagram ?? null;
   const live = db.campaigns.filter((c) => c.status === "live" && campaignApproval(c) === "approved");
   const brands = new Map(db.brands.map((b) => [b.id, b]));
   const applied = new Set(
@@ -31,18 +33,37 @@ export default async function CreatorDashboard() {
           alignItems: "end",
         }}
       >
-        <div>
-          <h1>Creator dashboard</h1>
-          <p className="muted" style={{ marginTop: "0.35rem" }}>
-            {creator?.displayName || "Creator"} @{creator?.handle || "—"} · {creator?.level || "new"}
-          </p>
+        <div style={{ display: "flex", gap: "0.9rem", alignItems: "center" }}>
+          {creator ? (
+            <CreatorAvatar creatorId={creator.id} name={creator.displayName} hasInstagram={Boolean(ig?.profilePictureUrl)} size={56} />
+          ) : null}
+          <div>
+            <h1>Creator dashboard</h1>
+            <p className="muted" style={{ marginTop: "0.35rem" }}>
+              {creator?.displayName || "Creator"} @{creator?.handle || "—"} · {creator?.level || "new"}
+              {ig ? ` · Instagram ${ig.accountType === "PROFESSIONAL" ? "professional" : (ig.accountType || "").toLowerCase()} account` : ""}
+            </p>
+          </div>
         </div>
         <Link href="/creator/onboarding" className="btn btn-ghost" prefetch>
           Edit profile
         </Link>
       </div>
 
-      {!creator?.handle && (
+      {ig && !ig.tokenValid && (
+        <div className="card" role="status" style={{ marginTop: "1rem" }}>
+          Your Instagram connection expired. <a href="/api/auth/instagram/start">Log in with Instagram again</a> so we can
+          keep your numbers and reel views up to date.
+        </div>
+      )}
+
+      {ig?.biography ? (
+        <p className="muted" style={{ marginTop: "0.75rem", maxWidth: "60ch", whiteSpace: "pre-line" }}>
+          {ig.biography}
+        </p>
+      ) : null}
+
+      {(!creator?.handle || !creator?.city) && (
         <div className="card" style={{ marginTop: "1rem" }}>
           Complete onboarding to check your eligibility and apply for campaigns.{" "}
           <Link href="/creator/onboarding">Continue setup</Link>
@@ -53,6 +74,10 @@ export default async function CreatorDashboard() {
         <div>
           <dt>Followers</dt>
           <dd>{metrics?.followers?.toLocaleString("en-IN") || "—"}</dd>
+        </div>
+        <div>
+          <dt>Posts</dt>
+          <dd>{ig?.mediaCount != null ? ig.mediaCount.toLocaleString("en-IN") : metrics?.mediaCount?.toLocaleString("en-IN") || "—"}</dd>
         </div>
         <div>
           <dt>Applications</dt>

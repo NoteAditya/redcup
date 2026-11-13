@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import fs from "fs";
 import path from "path";
+import { execFileSync } from "child_process";
 
 /**
  * Admin gate verification: brand approval → campaign approval → application review.
@@ -29,6 +30,30 @@ async function signInOk(page: Page, contact: string, pw: string, expectPath: Reg
   await signIn(page, contact, pw);
   await page.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 30_000 });
   await expect(page).toHaveURL(expectPath, { timeout: 15_000 });
+}
+
+/** Creators log in with Instagram only; QA gets an equivalent session from scripts/qa-creator-session.mjs. */
+let creatorCookie = "";
+async function signInCreator(page: Page, expectDashboard = true) {
+  if (!creatorCookie) {
+    creatorCookie = execFileSync("node", ["scripts/qa-creator-session.mjs", id], { encoding: "utf8" }).trim();
+  }
+  await page.context().clearCookies();
+  await page.goto("/privacy");
+  const base = new URL(page.url());
+  await page.context().addCookies([
+    {
+      name: "redcup_session",
+      value: creatorCookie,
+      domain: base.hostname,
+      path: "/",
+      httpOnly: true,
+      secure: base.protocol === "https:",
+      sameSite: "Lax",
+    },
+  ]);
+  await page.goto("/creator");
+  if (expectDashboard) await expect(page).toHaveURL(/\/creator/, { timeout: 30_000 });
 }
 
 const shot = (page: Page, name: string) => page.screenshot({ path: path.join(ART, `${name}.png`), fullPage: true });
@@ -65,14 +90,18 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /waiting for RedCup approval/i })).toBeVisible();
   await expect(page.getByLabel("Title")).toHaveCount(0);
 
-  // 2. Creator signs up immediately (no approval) and onboards.
+  // 2. Creator signup offers Instagram only (no Google, no email/password).
   await page.context().clearCookies();
   await page.goto("/signup?role=creator");
-  await page.getByLabel(/Display name/i).fill(creatorName);
-  await page.getByLabel("Email", { exact: true }).fill(creatorEmail);
-  await page.locator("#password").fill(password);
-  await page.getByRole("button", { name: /Create account/i }).click();
-  await expect(page).toHaveURL(/\/creator\/onboarding/, { timeout: 30_000 });
+  await expect(page.getByTestId("instagram-login")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Continue with Google/i })).toHaveCount(0);
+  await expect(page.getByLabel("Email", { exact: true })).toHaveCount(0);
+  await expect(page.locator("#password")).toHaveCount(0);
+  await shot(page, "01b-creator-signup-instagram-only");
+
+  // Creator (session as if from Instagram login) onboards immediately, no approval.
+  await signInCreator(page);
+  await page.goto("/creator/onboarding");
   await page.getByLabel("Display name").fill(creatorName);
   await page.getByRole("button", { name: /^Continue$/i }).click();
   await page.getByLabel("Instagram handle").fill(`qacreator${id}`);
@@ -122,7 +151,7 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await page.context().clearCookies();
   await page.goto("/bounties");
   await expect(page.getByText(title)).toHaveCount(0);
-  await signInOk(page, creatorEmail, password, /\/creator/);
+  await signInCreator(page);
   await expect(page.locator(".card", { hasText: title })).toHaveCount(0);
 
   // 5. Admin approves the campaign.
@@ -134,7 +163,7 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await expect(page.locator(".adm-panel", { hasText: title })).toHaveCount(0, { timeout: 30_000 });
 
   // 6. Creator now sees it and applies → pending review.
-  await signInOk(page, creatorEmail, password, /\/creator/);
+  await signInCreator(page);
   const card = page.locator(".card", { hasText: title });
   await expect(card.first()).toBeVisible({ timeout: 45_000 });
   await card.first().getByRole("button", { name: /^Apply$/i }).click();
@@ -207,7 +236,7 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await page.getByRole("button", { name: /Turn account off/ }).click();
   await expect(page.getByRole("button", { name: /Turn account back on/ })).toBeVisible({ timeout: 20_000 });
   await shot(page, "11-admin-user-off");
-  await signIn(page, creatorEmail, password);
+  await signInCreator(page, false);
   await expect(page.getByText(/account has been turned off/i)).toBeVisible({ timeout: 20_000 });
   await expect(page).toHaveURL(/\/login/);
 });

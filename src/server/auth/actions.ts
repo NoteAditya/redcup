@@ -18,6 +18,9 @@ export async function demoSignUp(input: {
   phone?: string;
   password: string;
 }) {
+  if (input.role !== "brand") {
+    return { ok: false as const, error: "Creators sign up with Instagram. Use \"Continue with Instagram\"." };
+  }
   const contact = input.email || input.phone;
   if (!contact || input.password.length < 6) {
     return { ok: false as const, error: "Email or phone and a password of 6+ characters are required." };
@@ -91,6 +94,7 @@ export async function demoSignUp(input: {
   session.role = input.role;
   session.name = input.name.trim();
   session.isLoggedIn = true;
+  session.via = "password";
   await session.save();
 
   if (input.email) {
@@ -113,6 +117,9 @@ export async function demoSignIn(input: { contact: string; password: string }) {
   if (!user?.passwordHash) {
     return { ok: false as const, error: "No account found for that contact." };
   }
+  if (user.role === "creator") {
+    return { ok: false as const, error: "Creators log in with Instagram now. Use \"Continue with Instagram\" above." };
+  }
   const ok = await bcrypt.compare(input.password, user.passwordHash);
   if (!ok) return { ok: false as const, error: "Wrong password." };
   if (user.status === "inactive") {
@@ -124,10 +131,10 @@ export async function demoSignIn(input: { contact: string; password: string }) {
   session.role = user.role;
   session.name = user.name;
   session.isLoggedIn = true;
+  session.via = "password";
   await session.save();
 
   if (user.role === "brand") redirect("/brand");
-  if (user.role === "creator") redirect("/creator");
   redirect("/admin");
 }
 
@@ -169,6 +176,7 @@ export async function requestOtp(contact: string) {
 
 /** Persist brand/creator choice for the next Google SSO completion. */
 export async function setPendingRole(role: "brand" | "creator") {
+  if (role !== "brand") return { ok: false as const };
   const { cookies } = await import("next/headers");
   const jar = await cookies();
   jar.set(ROLE_COOKIE, role, {
@@ -183,6 +191,9 @@ export async function setPendingRole(role: "brand" | "creator") {
 
 /** Claim a role for a Clerk user who signed in without a pending role. */
 export async function claimClerkRole(role: "brand" | "creator") {
+  if (role !== "brand") {
+    return { ok: false as const, error: "Creators sign up with Instagram, not Google." };
+  }
   await setPendingRole(role);
   const { syncClerkToLocalUser } = await import("./clerk-sync");
   const synced = await syncClerkToLocalUser();

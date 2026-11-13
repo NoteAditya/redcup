@@ -22,7 +22,7 @@ type Draft = {
   step: number;
 };
 
-const STEPS = [
+const ALL_STEPS = [
   { key: "displayName" as const, label: "Display name", question: "What name should brands see?", hint: "Your creator face on RedCup.", placeholder: "Ananya", required: true },
   { key: "handle" as const, label: "Instagram handle", question: "Your Instagram handle?", hint: "Without the @.", placeholder: "ananya.creates", required: true },
   { key: "city" as const, label: "City", question: "Which city are you based in?", hint: "Helps city-weighted eligibility.", placeholder: "Mumbai", required: true },
@@ -34,7 +34,26 @@ const STEPS = [
   { key: "followers" as const, label: "Followers (self-reported until Instagram connects)", question: "About how many followers?", hint: "Self-reported until Meta connect is live.", placeholder: "15000", required: false, type: "number" },
 ];
 
-export function CreatorOnboardingForm({ igMessage }: { igMessage?: string | null }) {
+export type OnboardingInstagram = {
+  username: string;
+  name: string | null;
+  followers: number | null;
+  avatarSrc: string | null;
+};
+
+export function CreatorOnboardingForm({
+  igMessage,
+  instagram,
+}: {
+  igMessage?: string | null;
+  /** Set when the creator logged in with Instagram: handle and followers come from there. */
+  instagram?: OnboardingInstagram | null;
+}) {
+  const STEPS = useMemo(
+    () => (instagram ? ALL_STEPS.filter((s) => s.key !== "handle" && s.key !== "followers") : ALL_STEPS),
+    [instagram],
+  );
+  const [avatarOk, setAvatarOk] = useState(true);
   const router = useRouter();
   const reduce = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -42,8 +61,8 @@ export function CreatorOnboardingForm({ igMessage }: { igMessage?: string | null
   const [pending, start] = useTransition();
   const [celebrate, setCelebrate] = useState(false);
   const { data, save, clear, hydrated } = useDraft<Draft>("redcup.creator.onboarding", {
-    displayName: "",
-    handle: "",
+    displayName: instagram?.name || instagram?.username || "",
+    handle: instagram?.username || "",
     city: "",
     languages: "",
     categories: "",
@@ -87,14 +106,14 @@ export function CreatorOnboardingForm({ igMessage }: { igMessage?: string | null
         const cats = data.categories.split(",").map((s) => s.trim()).filter(Boolean);
         await saveCreatorOnboarding({
           displayName: data.displayName,
-          handle: data.handle,
+          handle: instagram?.username || data.handle,
           city: data.city,
           languages: langs,
           categories: cats,
           whatsapp: data.whatsapp,
           pan: data.pan,
           upi: data.upi,
-          followers: Number(data.followers || 0) || undefined,
+          followers: instagram ? undefined : Number(data.followers || 0) || undefined,
         });
         clear();
         setCelebrate(true);
@@ -197,13 +216,25 @@ export function CreatorOnboardingForm({ igMessage }: { igMessage?: string | null
         <aside className="onboard-preview" aria-live="polite">
           <h3 style={{ fontSize: "1rem", marginBottom: "0.65rem" }}>Live profile card</h3>
           <div className={`creator-preview-card card ${previewReady ? "is-alive" : "is-ghost"}`}>
-            <div className="creator-preview-avatar" aria-hidden>
-              {(data.displayName || "?").slice(0, 1).toUpperCase()}
+            <div className="creator-preview-avatar" aria-hidden style={{ overflow: "hidden" }}>
+              {instagram?.avatarSrc && avatarOk ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={instagram.avatarSrc}
+                  alt=""
+                  width={48}
+                  height={48}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  onError={() => setAvatarOk(false)}
+                />
+              ) : (
+                (data.displayName || "?").slice(0, 1).toUpperCase()
+              )}
             </div>
             <div>
               <strong>{data.displayName || "Your name"}</strong>
               <div className="muted" style={{ fontSize: "0.85rem" }}>
-                @{data.handle || "handle"} · {data.city || "City"}
+                @{instagram?.username || data.handle || "handle"} · {data.city || "City"}
               </div>
               <div style={{ marginTop: "0.55rem", display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
                 {(data.categories || "Niche")
@@ -218,7 +249,12 @@ export function CreatorOnboardingForm({ igMessage }: { igMessage?: string | null
                   ))}
               </div>
               <div className="muted" style={{ marginTop: "0.65rem", fontSize: "0.82rem" }}>
-                {data.followers ? `${Number(data.followers).toLocaleString("en-IN")} followers` : "Followers pending"} ·{" "}
+                {instagram?.followers != null
+                  ? `${instagram.followers.toLocaleString("en-IN")} followers`
+                  : data.followers
+                    ? `${Number(data.followers).toLocaleString("en-IN")} followers`
+                    : "Followers pending"}{" "}
+                ·{" "}
                 {data.languages || "Languages"}
               </div>
             </div>

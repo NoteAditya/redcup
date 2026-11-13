@@ -12,6 +12,7 @@ const nav = [
 export default async function CreatorLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (session.deactivated) redirect("/login?deactivated=1");
+  if (session.creatorUseInstagram) redirect("/login?creator=instagram");
   if (session.needsRole) redirect("/signup?claim=1");
   if (!session.isLoggedIn) redirect("/login");
   if (session.role !== "creator") redirect("/");

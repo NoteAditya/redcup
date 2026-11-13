@@ -33,19 +33,11 @@ test.describe("Form validation UX", () => {
     await expect(page.getByLabel("Business name")).toHaveValue(`Form Brand ${id}`);
   });
 
-  test("creator onboarding rejects bad handle with inline error", async ({ page }) => {
-    const id = Date.now().toString(36);
+  test("creator signup offers Instagram only", async ({ page }) => {
     await page.goto("/signup?role=creator");
-    await page.getByLabel(/Display name/i).fill(`Form Creator ${id}`);
-    await page.getByLabel("Email", { exact: true }).fill(`form.creator.${id}@redcup.test`);
-    await page.locator("#password").fill("RedCupTest9!");
-    await page.getByRole("button", { name: /Create account/i }).click();
-    await expect(page).toHaveURL(/\/creator\/onboarding/, { timeout: 30_000 });
-    await page.getByLabel("Display name").fill(`Form Creator ${id}`);
-    await page.getByRole("button", { name: /^Continue$/i }).click();
-    await page.getByLabel("Instagram handle").fill("bad handle!!");
-    await page.getByRole("button", { name: /^Continue$/i }).click();
-    await expect(page.locator(".field-helper[role=\"alert\"]")).toBeVisible();
-    await expect(page.getByLabel("Instagram handle")).toHaveValue("bad handle!!");
+    await expect(page.getByTestId("instagram-login")).toHaveAttribute("href", "/api/auth/instagram/start");
+    await expect(page.getByRole("button", { name: /Continue with Google/i })).toHaveCount(0);
+    await expect(page.getByLabel("Email", { exact: true })).toHaveCount(0);
+    await expect(page.locator("#password")).toHaveCount(0);
   });
 });

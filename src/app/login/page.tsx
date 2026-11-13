@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { MarketingShell } from "@/components/layout/MarketingShell";
 import { SignInForm } from "@/components/auth/AuthForms";
+import { IG_ERRORS, InstagramButton, ProfessionalAccountHelp } from "@/components/auth/InstagramButton";
 
 export const metadata = { title: "Sign In — RedCup" };
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ deactivated?: string }>;
+  searchParams: Promise<{ deactivated?: string; ig_error?: string; creator?: string }>;
 }) {
-  const { deactivated } = await searchParams;
+  const { deactivated, ig_error, creator } = await searchParams;
+  const igError = ig_error ? IG_ERRORS[ig_error] ?? IG_ERRORS.failed : null;
   return (
     <MarketingShell>
       <div
@@ -41,9 +43,36 @@ export default async function LoginPage({
             This account has been turned off by RedCup. Contact support if you think this is a mistake.
           </p>
         ) : null}
-        <div>
+        <section aria-labelledby="creator-login" style={{ marginBottom: "1.75rem" }}>
+          <h2 id="creator-login" style={{ fontSize: "1rem", marginBottom: "0.35rem" }}>
+            Creators
+          </h2>
+          <p className="muted" style={{ fontSize: "0.85rem", marginBottom: "0.85rem" }}>
+            Creators log in with their Instagram professional account. Your profile, followers and picture come from
+            Instagram.
+          </p>
+          {creator === "instagram" && !igError ? (
+            <p className="err" role="alert" style={{ marginBottom: "0.85rem" }}>
+              Creator accounts now log in with Instagram only. Use the button below. Your existing RedCup profile is
+              kept and links automatically when your Instagram username matches the handle on it.
+            </p>
+          ) : null}
+          {igError ? (
+            <div role="alert" style={{ marginBottom: "0.85rem" }}>
+              <p className="err" style={{ marginBottom: "0.5rem" }}>
+                {igError}
+              </p>
+              {ig_error === "personal" || ig_error === "no_accounts" ? <ProfessionalAccountHelp /> : null}
+            </div>
+          ) : null}
+          <InstagramButton />
+        </section>
+        <section aria-labelledby="brand-login" style={{ paddingTop: "1.25rem", borderTop: "1px solid var(--line)" }}>
+          <h2 id="brand-login" style={{ fontSize: "1rem", marginBottom: "0.85rem" }}>
+            Brands and RedCup team
+          </h2>
           <SignInForm />
-        </div>
+        </section>
       </div>
     </MarketingShell>
   );

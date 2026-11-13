@@ -60,6 +60,7 @@ export function countBy<T>(items: T[], key: (t: T) => string) {
 }
 
 export function userName(db: Db, userId: string) {
+  if (userId.startsWith("system")) return "RedCup (automatic)";
   return db.users.find((u) => u.id === userId)?.name ?? userId;
 }
 
@@ -81,6 +82,10 @@ export function targetInfo(db: Db, type: string, targetId: string): { label: str
       label: a ? `${cr?.displayName ?? "Creator"} → ${c?.title ?? "campaign"}` : targetId,
       href: c ? "/admin/bounties/" + c.id : null,
     };
+  }
+  if (type === "creator") {
+    const cr = db.creators.find((x) => x.id === targetId);
+    return { label: cr ? `${cr.displayName} (@${cr.handle})` : targetId, href: cr ? "/admin/creators/" + cr.id : null };
   }
   if (type === "user") {
     const u = db.users.find((x) => x.id === targetId);

@@ -30,21 +30,15 @@ export function ClaimRoleForm() {
       </span>
       <h1 style={{ fontSize: "1.5rem", marginBottom: "0.35rem" }}>How will you use RedCup?</h1>
       <p className="muted" style={{ fontSize: "0.875rem", marginBottom: "1.25rem" }}>
-        Your Google account is connected. Pick a role to finish setup.
+        Your Google account is connected. Google sign-in is for brands; creators join with Instagram.
       </p>
       <div style={{ display: "grid", gap: "0.75rem" }}>
         <button type="button" className="btn btn-primary" disabled={pending} onClick={() => pick("brand")}>
           Continue as Brand
         </button>
-        <button
-          type="button"
-          className="btn btn-ghost"
-          disabled={pending}
-          onClick={() => pick("creator")}
-          style={{ border: "1px solid var(--line)" }}
-        >
-          Continue as Creator
-        </button>
+        <a href="/api/auth/instagram/start" className="btn btn-ghost" style={{ border: "1px solid var(--line)", textAlign: "center" }}>
+          I&apos;m a creator: continue with Instagram
+        </a>
       </div>
       {error && (
         <p className="err" role="alert" style={{ marginTop: "0.85rem" }}>

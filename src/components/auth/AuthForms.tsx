@@ -7,8 +7,9 @@ import { AuthDivider, GoogleButton } from "@/components/auth/GoogleButton";
 import { TextField } from "@/components/forms/Field";
 import { emailOk, passwordOk, requiredText } from "@/lib/validate";
 
-export function SignUpForm({ defaultRole = "brand" }: { defaultRole?: "brand" | "creator" }) {
-  const [role, setRole] = useState<"brand" | "creator">(defaultRole);
+/** Brand sign-up. Creators sign up with Instagram (see InstagramButton). */
+export function SignUpForm() {
+  const role = "brand" as const;
   const [error, setError] = useState<string | null>(null);
   const [fieldErr, setFieldErr] = useState<Record<string, string | null>>({});
   const [values, setValues] = useState({ name: "", email: "", phone: "", password: "" });
@@ -21,7 +22,7 @@ export function SignUpForm({ defaultRole = "brand" }: { defaultRole?: "brand" | 
 
   const validate = () => {
     const next: Record<string, string | null> = {
-      name: requiredText(values.name, role === "brand" ? "Business name" : "Display name"),
+      name: requiredText(values.name, "Business name"),
       email: values.email.trim() || values.phone.trim() ? (values.email.trim() ? emailOk(values.email) : null) : "Add an email or phone so we can reach you.",
       password: passwordOk(values.password),
     };
@@ -49,18 +50,10 @@ export function SignUpForm({ defaultRole = "brand" }: { defaultRole?: "brand" | 
         });
       }}
     >
-      <div className="role-toggle" role="group" aria-label="Account type">
-        <button type="button" className={`btn ${role === "brand" ? "btn-primary" : "btn-ghost"}`} onClick={() => setRole("brand")}>
-          Brand
-        </button>
-        <button type="button" className={`btn ${role === "creator" ? "btn-primary" : "btn-ghost"}`} onClick={() => setRole("creator")}>
-          Creator
-        </button>
-      </div>
       <GoogleButton mode="sign-up" role={role} />
       <AuthDivider />
       <TextField
-        label={role === "brand" ? "Business name" : "Display name"}
+        label="Business name"
         name="name"
         autoComplete="organization"
         required

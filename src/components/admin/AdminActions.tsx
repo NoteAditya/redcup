@@ -16,6 +16,7 @@ import {
   type CampaignStatusAction,
 } from "@/server/services/admin";
 import type { CampaignCriteria, RuleMode } from "@/lib/types";
+import { fetchViewsFromInstagram } from "@/server/services/instagram";
 import { fromISTInput, toISTInput } from "@/lib/format";
 
 type R = { ok: boolean; error?: string };
@@ -543,25 +544,60 @@ export function UserToggle({ userId, active }: { userId: string; active: boolean
 
 /* ------------------------------------------------------- Existing tools */
 
-export function ManualViewsForm({ applicationId }: { applicationId: string }) {
+export function ManualViewsForm({ applicationId, canFetch = false }: { applicationId: string; canFetch?: boolean }) {
   const { pending, err, done, run } = useAction();
+  const [views, setViews] = useState("");
+  const [fetching, startFetch] = useTransition();
+  const [igMsg, setIgMsg] = useState<{ ok: boolean; text: string } | null>(null);
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        run(() => enterManualViews(applicationId, Number(fd.get("views") || 0)), "Saved.");
+        run(() => enterManualViews(applicationId, Number(views || 0)), "Saved.");
       }}
       style={{ display: "flex", gap: 8, alignItems: "end", flexWrap: "wrap" }}
     >
       <label className="field" style={{ marginBottom: 0 }}>
         <span>Verified views</span>
-        <input className="input" id={"views-" + applicationId} name="views" type="number" min={0} required />
+        <input
+          className="input"
+          id={"views-" + applicationId}
+          name="views"
+          type="number"
+          min={0}
+          required
+          value={views}
+          onChange={(e) => setViews(e.target.value)}
+        />
       </label>
+      {canFetch && (
+        <button
+          type="button"
+          className="btn btn-ghost"
+          disabled={fetching || pending}
+          onClick={() => {
+            setIgMsg(null);
+            startFetch(async () => {
+              const res = await fetchViewsFromInstagram(applicationId);
+              if (res.ok) {
+                setViews(String(res.views));
+                setIgMsg({ ok: true, text: "Filled from Instagram insights. Check it, then Save." });
+              } else setIgMsg({ ok: false, text: res.error });
+            });
+          }}
+        >
+          {fetching ? "Asking Instagram…" : "Fetch from Instagram"}
+        </button>
+      )}
       <button className="btn btn-primary" type="submit" disabled={pending}>
         Save
       </button>
       <Feedback err={err} done={done} />
+      {igMsg && (
+        <p className={igMsg.ok ? "muted" : "err"} role="status" style={{ margin: "0.5rem 0 0", fontSize: "0.8125rem", flexBasis: "100%" }}>
+          {igMsg.text}
+        </p>
+      )}
     </form>
   );
 }

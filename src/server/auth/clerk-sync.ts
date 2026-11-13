@@ -48,7 +48,7 @@ export async function clearPendingRoleCookie() {
  */
 export async function syncClerkToLocalUser(): Promise<
   | { ok: true; user: User }
-  | { ok: false; reason: "no_clerk" | "needs_role" }
+  | { ok: false; reason: "no_clerk" | "needs_role" | "creator_instagram_only" }
 > {
   let userId: string | null = null;
   try {
@@ -78,11 +78,17 @@ export async function syncClerkToLocalUser(): Promise<
   const byClerk = existing.users.find((u) => u.clerkId === clerkId);
   if (byClerk) {
     if (pendingRole) await clearPendingRoleCookie();
+    // Creators log in with Instagram only; a Google session never signs a creator in.
+    if (byClerk.role === "creator") return { ok: false, reason: "creator_instagram_only" };
     return { ok: true, user: byClerk };
   }
 
   if (email) {
     const byEmail = existing.users.find((u) => u.email && u.email === email);
+    if (byEmail && byEmail.role === "creator") {
+      if (pendingRole) await clearPendingRoleCookie();
+      return { ok: false, reason: "creator_instagram_only" };
+    }
     if (byEmail) {
       const linked = await updateDb((db) => {
         const u = db.users.find((x) => x.id === byEmail.id);
@@ -98,6 +104,10 @@ export async function syncClerkToLocalUser(): Promise<
 
   if (!pendingRole) {
     return { ok: false, reason: "needs_role" };
+  }
+  if (pendingRole === "creator") {
+    await clearPendingRoleCookie();
+    return { ok: false, reason: "creator_instagram_only" };
   }
 
   const role: Role = pendingRole;

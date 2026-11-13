@@ -2,7 +2,7 @@
 
 import { requireUser } from "@/server/auth/session";
 import { id, nowIso, updateDb } from "@/server/db/store";
-import { instagramConnectState } from "@/server/integrations/instagram";
+import { instagramConnectState, isProfessional } from "@/server/integrations/instagram";
 
 export async function saveCreatorOnboarding(input: {
   displayName: string;
@@ -17,13 +17,15 @@ export async function saveCreatorOnboarding(input: {
   followers?: number;
 }) {
   const session = await requireUser(["creator"]);
-  const ig = instagramConnectState();
+  const igState = instagramConnectState();
 
   await updateDb((db) => {
     const creator = db.creators.find((c) => c.userId === session.userId);
     if (!creator) throw new Error("NO_CREATOR");
+    const ig = creator.instagram;
     creator.displayName = input.displayName.trim();
-    creator.handle = input.handle.replace(/^@/, "").trim().toLowerCase();
+    // Instagram-linked creators keep the handle Instagram gave us.
+    if (!ig) creator.handle = input.handle.replace(/^@/, "").trim().toLowerCase();
     creator.city = input.city.trim();
     creator.languages = input.languages;
     creator.categories = input.categories;
@@ -31,17 +33,18 @@ export async function saveCreatorOnboarding(input: {
     creator.upiMasked = input.upi ? `****${input.upi.slice(-4)}` : null;
 
     const existing = db.creatorMetrics.find((m) => m.creatorId === creator.id);
+    const fromIg = Boolean(ig);
     const metrics = {
       creatorId: creator.id,
-      followers: input.followers ?? existing?.followers ?? 0,
-      accountType: (ig.ready ? existing?.accountType : "CREATOR") as "CREATOR",
+      followers: fromIg ? (ig?.followers ?? existing?.followers ?? 0) : (input.followers ?? existing?.followers ?? 0),
+      accountType: fromIg ? (ig?.accountType ?? null) : ((igState.ready ? existing?.accountType : "CREATOR") as "CREATOR"),
       accountAgeDays: existing?.accountAgeDays ?? 180,
-      mediaCount: existing?.mediaCount ?? 24,
-      avgReelViews10: existing?.avgReelViews10 ?? Math.round((input.followers ?? 12000) * 0.4),
-      engagementRate10: existing?.engagementRate10 ?? 0.035,
-      audienceCountryPct: existing?.audienceCountryPct ?? { IN: 78 },
-      audienceCityPct: existing?.audienceCityPct ?? { [input.city || "Delhi"]: 22 },
-      audienceGenderAge: existing?.audienceGenderAge ?? { female: 58, male: 42 },
+      mediaCount: fromIg ? (ig?.mediaCount ?? existing?.mediaCount ?? 0) : (existing?.mediaCount ?? 24),
+      avgReelViews10: existing?.avgReelViews10 ?? (fromIg ? null : Math.round((input.followers ?? 12000) * 0.4)),
+      engagementRate10: existing?.engagementRate10 ?? (fromIg ? null : 0.035),
+      audienceCountryPct: existing?.audienceCountryPct ?? (fromIg ? null : { IN: 78 }),
+      audienceCityPct: existing?.audienceCityPct ?? (fromIg ? null : { [input.city || "Delhi"]: 22 }),
+      audienceGenderAge: existing?.audienceGenderAge ?? (fromIg ? null : { female: 58, male: 42 }),
       niches: input.categories,
       nicheVerified: [],
       languages: input.languages,
@@ -56,8 +59,8 @@ export async function saveCreatorOnboarding(input: {
       fraudFlagsUpheld: 0,
       competitorHistory: existing?.competitorHistory ?? [],
       // Self-reported connect until Meta keys exist — marked clearly in UI
-      igConnected: ig.ready ? Boolean(existing?.igConnected) : true,
-      tokenValid: ig.ready ? Boolean(existing?.tokenValid) : true,
+      igConnected: fromIg ? isProfessional(ig?.accountType ?? null) : igState.ready ? Boolean(existing?.igConnected) : true,
+      tokenValid: fromIg ? Boolean(ig?.tokenValid) : igState.ready ? Boolean(existing?.tokenValid) : true,
       refreshedAt: nowIso(),
     };
     if (existing) Object.assign(existing, metrics);
@@ -68,7 +71,7 @@ export async function saveCreatorOnboarding(input: {
     }
   });
 
-  return { ok: true as const, instagram: ig };
+  return { ok: true as const, instagram: igState };
 }
 
 export async function uploadDraft(applicationId: string, caption: string, videoPath: string) {

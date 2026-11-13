@@ -83,7 +83,7 @@ export type EligibilityResult = {
 export type CreatorMetrics = {
   creatorId: string;
   followers: number;
-  accountType: "CREATOR" | "BUSINESS" | "PERSONAL" | null;
+  accountType: "CREATOR" | "BUSINESS" | "PROFESSIONAL" | "PERSONAL" | null;
   accountAgeDays: number | null;
   mediaCount: number;
   avgReelViews10: number | null;

@@ -4,6 +4,7 @@ import { readDb } from "@/server/db/store";
 import { formatINR } from "@/lib/money";
 import { formatIST, labelize } from "@/lib/format";
 import { ReviewChip } from "@/components/admin/AdminActions";
+import { CreatorAvatar } from "@/components/creator/CreatorAvatar";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export default async function AdminCreatorPage({ params }: { params: Promise<{ i
   if (!creator) notFound();
   const user = db.users.find((u) => u.id === creator.userId);
   const m = db.creatorMetrics.find((x) => x.creatorId === creator.id);
+  const ig = creator.instagram ?? null;
   const apps = db.applications
     .filter((a) => a.creatorId === creator.id)
     .sort((a, b) => b.appliedAt.localeCompare(a.appliedAt));
@@ -29,7 +31,9 @@ export default async function AdminCreatorPage({ params }: { params: Promise<{ i
     <div>
       <Link href="/admin/applications?review=all" className="muted" style={{ fontSize: "0.85rem" }}>← Applications</Link>
       <div className="adm-head" style={{ marginTop: 8 }}>
-        <div>
+        <div style={{ display: "flex", gap: "0.9rem", alignItems: "center" }}>
+          <CreatorAvatar creatorId={creator.id} name={creator.displayName} hasInstagram={Boolean(ig?.profilePictureUrl)} size={64} />
+          <div>
           <h1>{creator.displayName}</h1>
           <p className="adm-sub">
             @{creator.handle} · {creator.level} · {creator.city || "city not set"}
@@ -40,6 +44,7 @@ export default async function AdminCreatorPage({ params }: { params: Promise<{ i
               </>
             ) : null}
           </p>
+          </div>
         </div>
         {user && (
           <span className={user.status === "inactive" ? "chip chip-bad" : "chip chip-ok"}>
@@ -67,11 +72,55 @@ export default async function AdminCreatorPage({ params }: { params: Promise<{ i
           <dt>Engagement</dt>
           <dd>{m?.engagementRate10 != null ? (m.engagementRate10 * 100).toFixed(1) + "%" : "—"}</dd>
           <dt>Instagram</dt>
-          <dd>{m?.igConnected ? "connected (self-reported until Meta login exists)" : "not connected"}</dd>
+          <dd>
+            {ig
+              ? `logged in with Instagram · ${ig.tokenValid ? "connection active" : "connection expired"}`
+              : m?.igConnected
+                ? "self-reported (signed up before Instagram login; links on their first Instagram login)"
+                : "not connected"}
+          </dd>
           <dt>Payout details</dt>
           <dd>{creator.upiMasked ? "UPI on file" : "no UPI"} · {creator.panMasked ? "PAN on file" : "no PAN"}</dd>
         </dl>
       </div>
+
+      {ig && (
+        <div className="adm-panel">
+          <h3>Instagram profile</h3>
+          {ig.linkNote && (
+            <p className="muted" role="note" style={{ fontSize: "0.85rem", margin: "0 0 0.75rem" }}>
+              {ig.linkNote}
+            </p>
+          )}
+          <dl className="adm-dl">
+            <dt>Username</dt>
+            <dd>
+              <a href={`https://www.instagram.com/${ig.username}/`} target="_blank" rel="noreferrer">
+                @{ig.username}
+              </a>
+            </dd>
+            <dt>Name</dt>
+            <dd>{ig.name || "—"}</dd>
+            <dt>Account type</dt>
+            <dd>{ig.accountType ? ig.accountType.toLowerCase() : "—"}</dd>
+            <dt>Bio</dt>
+            <dd style={{ whiteSpace: "pre-line" }}>{ig.biography || "—"}</dd>
+            <dt>Website</dt>
+            <dd>{ig.website || "—"}</dd>
+            <dt>Followers · following · posts</dt>
+            <dd>
+              {[ig.followers, ig.follows, ig.mediaCount].map((n) => (n != null ? n.toLocaleString("en-IN") : "—")).join(" · ")}
+            </dd>
+            <dt>Instagram id</dt>
+            <dd className="muted">{ig.igUserId}</dd>
+            <dt>Connected</dt>
+            <dd>
+              {formatIST(ig.connectedAt)} · profile updated {formatIST(ig.profileRefreshedAt)}
+              {ig.tokenExpiresAt ? ` · token until ${formatIST(ig.tokenExpiresAt)}` : ""}
+            </dd>
+          </dl>
+        </div>
+      )}
 
       <h2 style={{ marginTop: "1.75rem" }}>Applications and results</h2>
       <div className="adm-table-wrap" style={{ marginTop: "0.75rem" }}>

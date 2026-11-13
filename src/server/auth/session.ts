@@ -13,6 +13,10 @@ export type SessionData = {
   needsRole?: boolean;
   /** Set when the account exists but an admin turned it off. */
   deactivated?: boolean;
+  /** How this cookie was issued. Creators are only accepted when it is "instagram". */
+  via?: "instagram" | "password";
+  /** A creator tried to use Google or a password; creators must log in with Instagram. */
+  creatorUseInstagram?: boolean;
 };
 
 const DEV_ONLY_SECRET = "dev-only-session-secret-change-me-32chars!!";
@@ -72,6 +76,13 @@ export async function getSession(): Promise<SessionData & { save?: () => Promise
       if (synced.reason === "needs_role") {
         return { isLoggedIn: false, needsRole: true };
       }
+      if (synced.reason === "creator_instagram_only") {
+        // Let a valid Instagram cookie win; otherwise tell them to use Instagram.
+        const iron = await getIron();
+        if (!(iron.isLoggedIn && iron.role === "creator" && iron.via === "instagram")) {
+          return { isLoggedIn: false, creatorUseInstagram: true };
+        }
+      }
     } catch {
       // Fall through to iron-session when Clerk is misconfigured.
     }
@@ -83,6 +94,10 @@ export async function getSession(): Promise<SessionData & { save?: () => Promise
     const user = db.users.find((u) => u.id === iron.userId);
     if (!user || user.status === "inactive") {
       return { isLoggedIn: false, deactivated: Boolean(user) };
+    }
+    // Creators sign in only with Instagram. Older password/Google cookies stop working.
+    if (user.role === "creator" && iron.via !== "instagram") {
+      return { isLoggedIn: false, creatorUseInstagram: true };
     }
     if (user.role !== iron.role) iron.role = user.role;
   }

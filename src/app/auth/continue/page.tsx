@@ -6,6 +6,7 @@ export const metadata = { title: "Continuing — RedCup" };
 export default async function AuthContinuePage() {
   const session = await getSession();
   if (session.deactivated) redirect("/login?deactivated=1");
+  if (session.creatorUseInstagram) redirect("/login?creator=instagram");
   if (session.needsRole) redirect("/signup?claim=1");
   if (!session.isLoggedIn || !session.role) redirect("/login");
   if (session.role === "brand") redirect("/brand");
