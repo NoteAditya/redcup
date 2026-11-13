@@ -211,6 +211,11 @@ function getSql(): NeonQueryFunction<false, false> | null {
   if (sqlClient !== undefined) return sqlClient;
   const url = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
   if (!url) {
+    if (process.env.VERCEL || process.env.NETLIFY) {
+      // Serverless file storage lives in /tmp and is wiped between instances,
+      // which silently loses users and sessions. Refuse instead.
+      throw new Error("DATABASE_URL is not set. Serverless deploys need Neon; file storage would lose data.");
+    }
     sqlClient = null;
     return null;
   }

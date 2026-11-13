@@ -12,8 +12,29 @@ export type SessionData = {
   needsRole?: boolean;
 };
 
+const DEV_ONLY_SECRET = "dev-only-session-secret-change-me-32chars!!";
+
+/**
+ * In production a real SESSION_SECRET (32+ chars) is mandatory. Falling back to
+ * a public default would let anyone forge a login cookie, so fail loudly.
+ */
+function resolveSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (secret && secret.length >= 32) return secret;
+  if (process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== "phase-production-build") {
+    throw new Error(
+      secret
+        ? "SESSION_SECRET must be at least 32 characters."
+        : "SESSION_SECRET is not set. Refusing to sign sessions with a default key.",
+    );
+  }
+  return secret && secret.length > 0 ? secret.padEnd(32, "!") : DEV_ONLY_SECRET;
+}
+
 export const sessionOptions: SessionOptions = {
-  password: process.env.SESSION_SECRET || "dev-only-session-secret-change-me-32chars!!",
+  get password() {
+    return resolveSessionSecret();
+  },
   cookieName: "redcup_session",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",

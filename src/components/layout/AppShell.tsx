@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SignedIn, UserButton } from "@clerk/nextjs";
-import { signOut as ironSignOut } from "@/server/auth/actions";
+import { Show, UserButton } from "@clerk/nextjs";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 
 type NavItem = { href: string; label: string };
 
@@ -36,21 +36,16 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: React.Re
           <div style={{ flex: 1 }} />
 
           <div style={{ padding: "0.65rem 0.5rem", borderTop: "1px solid var(--line)", display: "grid", gap: "0.65rem" }}>
-            <SignedIn>
+            <Show when="signed-in">
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <UserButton />
                 <span style={{ fontSize: "0.75rem", color: "var(--muted)" }}>Account</span>
               </div>
-            </SignedIn>
-            <form action={ironSignOut}>
-              <button
-                type="submit"
-                className="btn btn-ghost btn-compact"
-                style={{ width: "100%", justifyContent: "flex-start", color: "var(--muted)" }}
-              >
-                Sign out
-              </button>
-            </form>
+            </Show>
+            <SignOutButton
+              className="btn btn-ghost btn-compact"
+              style={{ width: "100%", justifyContent: "flex-start", color: "var(--muted)" }}
+            />
             <Link
               href="/"
               style={{
