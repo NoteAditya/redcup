@@ -1,6 +1,6 @@
 import { nowIso, readDb, updateDb, type Creator, type InstagramLink } from "@/server/db/store";
 import { applyProfileToMetrics } from "@/server/auth/instagram-login";
-import { InstagramError, refreshProfile, refreshTokenIfDue } from "@/server/integrations/instagram";
+import { InstagramError, fetchAudience, refreshProfile, refreshTokenIfDue, storedToken } from "@/server/integrations/instagram";
 
 /** Profile picture URLs from Meta expire after a while; refetch once they are this old. */
 export const PICTURE_MAX_AGE_MS = 12 * 60 * 60 * 1000;
@@ -26,6 +26,10 @@ export async function syncCreatorInstagram(creatorId: string, opts: { force?: bo
   } catch (e) {
     if (e instanceof InstagramError && e.code === "token") invalid = true;
   }
+  // Demographics change slowly; refresh them at most once a day alongside the profile.
+  const audienceDue = !link.profileRefreshedAt || Date.now() - Date.parse(link.profileRefreshedAt) > 86_400_000;
+  const token = profile && audienceDue ? storedToken(working) : null;
+  const audience = token ? await fetchAudience(token, working.flow, working.igUserId).catch(() => null) : null;
   if (!tokenPatch && !profile && !invalid) return link;
 
   return updateDb((d) => {
@@ -48,6 +52,7 @@ export async function syncCreatorInstagram(creatorId: string, opts: { force?: bo
         pictureFetchedAt: at,
         profileRefreshedAt: at,
       });
+      if (audience && (audience.countryPct || audience.cityPct || audience.genderPct)) c.instagram.audience = audience;
     }
     applyProfileToMetrics(d, c, c.instagram);
     return c.instagram;

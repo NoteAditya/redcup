@@ -47,6 +47,30 @@ for (let attempt = 0; attempt < 8 && !userId; attempt++) {
     panMasked: null,
     upiMasked: null,
     createdAt: now,
+    // QA stand-in for what /api/auth/instagram/callback stores. No token: nothing can call Meta with it.
+    instagram: {
+      igUserId: `qa-${qaId}`,
+      flow: "unified",
+      username: `qacreator${qaId}`.toLowerCase(),
+      name,
+      accountType: "PROFESSIONAL",
+      biography: null,
+      website: null,
+      followers: 15000,
+      follows: 0,
+      mediaCount: 30,
+      profilePictureUrl: null,
+      pictureFetchedAt: null,
+      audience: { countryPct: { IN: 100 }, cityPct: { Mumbai: 100 }, genderPct: null },
+      tokenSealed: null,
+      tokenExpiresAt: null,
+      tokenRefreshedAt: now,
+      tokenValid: true,
+      clientBusinessId: null,
+      connectedAt: now,
+      profileRefreshedAt: now,
+      linkNote: "QA account (e2e/admin-gate.spec.ts)",
+    },
   });
   const res = await sql`
     UPDATE redcup_store SET data = ${JSON.stringify(db)}::jsonb, updated_at = now()

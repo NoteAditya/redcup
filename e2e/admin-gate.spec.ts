@@ -104,8 +104,6 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await page.goto("/creator/onboarding");
   await page.getByLabel("Display name").fill(creatorName);
   await page.getByRole("button", { name: /^Continue$/i }).click();
-  await page.getByLabel("Instagram handle").fill(`qacreator${id}`);
-  await page.getByRole("button", { name: /^Continue$/i }).click();
   await page.getByLabel("City").fill("Mumbai");
   await page.getByRole("button", { name: /^Continue$/i }).click();
   await page.getByLabel(/Languages/i).fill("Hindi, English");
@@ -117,22 +115,20 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await page.getByLabel("PAN").fill("ABCDE1234F");
   await page.getByRole("button", { name: /^Continue$/i }).click();
   await page.getByLabel("UPI ID").fill(`qa${id}@upi`);
-  await page.getByRole("button", { name: /^Continue$/i }).click();
-  await page.getByLabel(/Followers/i).fill("15000");
   await page.getByRole("button", { name: /Save and continue/i }).click();
   await expect(page).toHaveURL(/\/creator/, { timeout: 30_000 });
 
   // 3. Admin approves the brand from Brand approvals.
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto("/admin/verification");
-  const brandPanel = page.locator(".adm-panel", { hasText: brandName });
+  const brandPanel = page.locator(".adm-panel:visible", { hasText: brandName });
   await expect(brandPanel).toBeVisible({ timeout: 30_000 });
   // Reject without a reason must fail
   await brandPanel.getByRole("button", { name: /^Reject$/ }).click();
   await expect(brandPanel.getByText(/Type a reason/i)).toBeVisible();
   await brandPanel.getByLabel(/Reason/).fill("QA: GSTIN checked");
   await brandPanel.getByRole("button", { name: /Approve brand/i }).click();
-  await expect(page.locator(".adm-panel", { hasText: brandName })).toHaveCount(0, { timeout: 30_000 });
+  await expect(page.locator(".adm-panel:visible", { hasText: brandName })).toHaveCount(0, { timeout: 30_000 });
   await shot(page, "02-admin-brand-approved");
 
   // 4. Brand creates + funds a bounty → pending approval, not visible to creators.
@@ -152,19 +148,19 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   await page.goto("/bounties");
   await expect(page.getByText(title)).toHaveCount(0);
   await signInCreator(page);
-  await expect(page.locator(".card", { hasText: title })).toHaveCount(0);
+  await expect(page.locator(".card:visible", { hasText: title })).toHaveCount(0);
 
   // 5. Admin approves the campaign.
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto("/admin/campaign-approvals");
-  const campPanel = page.locator(".adm-panel", { hasText: title });
+  const campPanel = page.locator(".adm-panel:visible", { hasText: title });
   await expect(campPanel).toBeVisible({ timeout: 30_000 });
   await campPanel.getByRole("button", { name: /^Approve$/ }).click();
-  await expect(page.locator(".adm-panel", { hasText: title })).toHaveCount(0, { timeout: 30_000 });
+  await expect(page.locator(".adm-panel:visible", { hasText: title })).toHaveCount(0, { timeout: 30_000 });
 
   // 6. Creator now sees it and applies → pending review.
   await signInCreator(page);
-  const card = page.locator(".card", { hasText: title });
+  const card = page.locator(".card:visible", { hasText: title });
   await expect(card.first()).toBeVisible({ timeout: 45_000 });
   await card.first().getByRole("button", { name: /^Apply$/i }).click();
   await expect(card.first().getByText(/Applied/i)).toBeVisible({ timeout: 20_000 });
@@ -184,12 +180,12 @@ test("admin gates brands, campaigns and applications", async ({ page }) => {
   // 8. Admin approves the application from the queue (bulk path with filter).
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto(`/admin/applications?campaign=${campaignId}`);
-  const row = page.locator("tr", { hasText: creatorName });
+  const row = page.locator("tr:visible", { hasText: creatorName });
   await expect(row).toBeVisible({ timeout: 30_000 });
   await row.getByRole("checkbox").check();
   await page.getByPlaceholder(/Optional note/).fill("QA: good fit");
   await page.getByRole("button", { name: /Approve selected \(1\)/ }).click();
-  await expect(page.locator("tr", { hasText: creatorName })).toHaveCount(0, { timeout: 30_000 });
+  await expect(page.locator("tr:visible", { hasText: creatorName })).toHaveCount(0, { timeout: 30_000 });
   await shot(page, "06-admin-app-approved");
 
   // 9. Brand now sees the creator.
@@ -290,12 +286,12 @@ test("admin edits, status changes, create-for-brand, send back and reject", asyn
 
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto("/admin/campaign-approvals");
-  let panel = page.locator(".adm-panel", { hasText: backTitle });
+  let panel = page.locator(".adm-panel:visible", { hasText: backTitle });
   await panel.getByRole("button", { name: /Send back/ }).click();
   await expect(panel.getByText(/Type a note/)).toBeVisible();
   await panel.getByLabel(/Note to the brand/).fill("QA: please add a CTA");
   await panel.getByRole("button", { name: /Send back/ }).click();
-  await expect(page.locator(".adm-panel", { hasText: backTitle })).toHaveCount(0, { timeout: 20_000 });
+  await expect(page.locator(".adm-panel:visible", { hasText: backTitle })).toHaveCount(0, { timeout: 20_000 });
 
   await signInOk(page, brandEmail, password, /\/brand/);
   await page.goto(backUrl);
@@ -308,11 +304,11 @@ test("admin edits, status changes, create-for-brand, send back and reject", asyn
 
   await signInOk(page, adminEmail, adminPassword, /\/admin/);
   await page.goto("/admin/campaign-approvals");
-  panel = page.locator(".adm-panel", { hasText: backTitle });
+  panel = page.locator(".adm-panel:visible", { hasText: backTitle });
   await expect(panel).toBeVisible();
   await panel.getByLabel(/Note to the brand/).fill("QA: rejecting for test");
   await panel.getByRole("button", { name: /^Reject$/ }).click();
-  await expect(page.locator(".adm-panel", { hasText: backTitle })).toHaveCount(0, { timeout: 20_000 });
+  await expect(page.locator(".adm-panel:visible", { hasText: backTitle })).toHaveCount(0, { timeout: 20_000 });
 
   await page.goto(`/admin/activity?q=${encodeURIComponent(id)}`);
   for (const a of ["campaign create", "campaign edit", "campaign status", "campaign send back", "campaign reject", "user deactivate"]) {

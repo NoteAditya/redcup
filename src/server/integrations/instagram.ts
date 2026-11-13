@@ -353,6 +353,63 @@ export async function refreshProfile(link: InstagramLink, cfg = instagramConfig(
   return fetchProfile(token, link.flow, link.igUserId, cfg);
 }
 
+/* ------------------------------------------------------ Audience insights */
+
+export type InstagramAudience = {
+  countryPct: Record<string, number> | null;
+  cityPct: Record<string, number> | null;
+  genderPct: Record<string, number> | null;
+};
+
+type Breakdown = { results?: { dimension_values?: string[]; value?: number }[] }[];
+
+function toPct(rows: { key: string; value: number }[]): Record<string, number> | null {
+  const total = rows.reduce((a, r) => a + r.value, 0);
+  if (!total) return null;
+  const out: Record<string, number> = {};
+  for (const r of rows) out[r.key] = Math.round((r.value / total) * 1000) / 10;
+  return out;
+}
+
+/**
+ * Follower demographics (country, city, gender) from Instagram insights, as percentages.
+ * Instagram only shares these for accounts with 100+ followers and with the insights permission;
+ * anything it doesn't share comes back null.
+ */
+export async function fetchAudience(token: string, flow: InstagramFlow, igUserId: string, cfg = instagramConfig()): Promise<InstagramAudience> {
+  if (!cfg) return { countryPct: null, cityPct: null, genderPct: null };
+  const path = `${flow === "unified" ? igUserId : "me"}/insights`;
+  const one = async (breakdown: "country" | "city" | "gender") => {
+    try {
+      const res = await graphGet<{ data?: { total_value?: { breakdowns?: Breakdown } }[] }>(cfg, flow, token, path, {
+        metric: "follower_demographics",
+        period: "lifetime",
+        metric_type: "total_value",
+        breakdown,
+      });
+      const results = res.data?.[0]?.total_value?.breakdowns?.[0]?.results ?? [];
+      return results
+        .map((r) => ({ key: String(r.dimension_values?.[0] ?? ""), value: typeof r.value === "number" ? r.value : 0 }))
+        .filter((r) => r.key);
+    } catch {
+      return [];
+    }
+  };
+  const [country, city, gender] = await Promise.all([one("country"), one("city"), one("gender")]);
+  // "Mumbai, Maharashtra" → "Mumbai", the form campaign criteria use.
+  const cityRows = new Map<string, number>();
+  for (const r of city) {
+    const name = r.key.split(",")[0].trim();
+    cityRows.set(name, (cityRows.get(name) ?? 0) + r.value);
+  }
+  const genderNames: Record<string, string> = { F: "female", M: "male", U: "unknown" };
+  return {
+    countryPct: toPct(country),
+    cityPct: city.length ? toPct([...cityRows].map(([key, value]) => ({ key, value }))) : null,
+    genderPct: toPct(gender.map((g) => ({ key: genderNames[g.key] ?? g.key.toLowerCase(), value: g.value }))),
+  };
+}
+
 /* --------------------------------------------------------- Reel insights */
 
 /** Instagram shortcode from a post/reel URL, for matching permalinks. */

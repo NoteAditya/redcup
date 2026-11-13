@@ -6,6 +6,7 @@ import { completeInstagramLogin, knownInstagramIds } from "@/server/auth/instagr
 import {
   InstagramError,
   exchangeCode,
+  fetchAudience,
   fetchProfile,
   instagramConfig,
   instagramRedirectUri,
@@ -46,7 +47,8 @@ export async function GET(req: NextRequest) {
     const profile = await fetchProfile(tok.token, tok.flow, account.igUserId, cfg);
     if (!isProfessional(profile.accountType)) return back(req, "/login?ig_error=personal");
 
-    const result = await completeInstagramLogin(profile, tok, account.clientBusinessId);
+    const audience = await fetchAudience(tok.token, tok.flow, account.igUserId, cfg).catch(() => null);
+    const result = await completeInstagramLogin(profile, tok, account.clientBusinessId, audience);
     if (!result.ok) {
       return back(req, result.reason === "deactivated" ? "/login?deactivated=1" : "/login?ig_error=not_creator");
     }

@@ -70,3 +70,27 @@ test("reel permalinks match by shortcode", () => {
   expect(shortcodeFromPermalink("https://www.instagram.com/someone/reel/C9abc_12-x/")).toBe("C9abc_12-x");
   expect(shortcodeFromPermalink("https://example.com/x")).toBeNull();
 });
+
+test("follower demographics become percentages keyed the way criteria expect", async () => {
+  vi.stubEnv("INSTAGRAM_APP_ID", "111");
+  vi.stubEnv("INSTAGRAM_APP_SECRET", "s");
+  vi.stubEnv("INSTAGRAM_CONFIG_ID", "222");
+  const { fetchAudience } = await import("@/server/integrations/instagram");
+  const replies: Record<string, unknown> = {
+    country: [{ dimension_values: ["IN"], value: 75 }, { dimension_values: ["US"], value: 25 }],
+    city: [{ dimension_values: ["Mumbai, Maharashtra"], value: 30 }, { dimension_values: ["Delhi, Delhi"], value: 10 }],
+    gender: [{ dimension_values: ["F"], value: 60 }, { dimension_values: ["M"], value: 40 }],
+  };
+  const fetchMock = vi.fn(async (url: URL) => {
+    const b = url.searchParams.get("breakdown")!;
+    expect(url.hostname).toBe("graph.facebook.com");
+    expect(url.searchParams.get("appsecret_proof")).toBeTruthy();
+    return new Response(JSON.stringify({ data: [{ total_value: { breakdowns: [{ results: replies[b] }] } }] }), { status: 200 });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  const a = await fetchAudience("tok", "unified", "1784");
+  expect(a.countryPct).toEqual({ IN: 75, US: 25 });
+  expect(a.cityPct).toEqual({ Mumbai: 75, Delhi: 25 });
+  expect(a.genderPct).toEqual({ female: 60, male: 40 });
+  vi.unstubAllGlobals();
+});

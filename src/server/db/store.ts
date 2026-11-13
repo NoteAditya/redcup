@@ -79,6 +79,8 @@ export type InstagramLink = {
   /** Meta CDN URL. It expires, so it is refreshed on login and by the avatar route. */
   profilePictureUrl: string | null;
   pictureFetchedAt: string | null;
+  /** Follower demographics from insights (percent), when Instagram shares them. */
+  audience?: { countryPct: Record<string, number> | null; cityPct: Record<string, number> | null; genderPct: Record<string, number> | null } | null;
   /** AES-256-GCM sealed access token (src/server/crypto/secretbox.ts). Never sent to the browser. */
   tokenSealed: string | null;
   tokenExpiresAt: string | null;

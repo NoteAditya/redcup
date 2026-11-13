@@ -1,7 +1,7 @@
 import type { CreatorMetrics } from "@/lib/types";
 import { id, nowIso, readDb, updateDb, type Creator, type Db, type InstagramLink, type User } from "@/server/db/store";
 import { logAdmin } from "@/server/access";
-import type { ExchangedToken, InstagramProfile } from "@/server/integrations/instagram";
+import type { ExchangedToken, InstagramAudience, InstagramProfile } from "@/server/integrations/instagram";
 import { isProfessional, sealToken } from "@/server/integrations/instagram";
 
 export type InstagramLoginResult =
@@ -16,7 +16,13 @@ export async function knownInstagramIds(): Promise<Set<string>> {
   return new Set(db.creators.map((c) => c.instagram?.igUserId).filter((x): x is string => Boolean(x)));
 }
 
-function linkFrom(profile: InstagramProfile, tok: ExchangedToken, clientBusinessId: string | null, prev?: InstagramLink | null): InstagramLink {
+function linkFrom(
+  profile: InstagramProfile,
+  tok: ExchangedToken,
+  clientBusinessId: string | null,
+  prev?: InstagramLink | null,
+  audience?: InstagramAudience | null,
+): InstagramLink {
   const at = nowIso();
   return {
     igUserId: profile.igUserId,
@@ -31,6 +37,7 @@ function linkFrom(profile: InstagramProfile, tok: ExchangedToken, clientBusiness
     mediaCount: profile.mediaCount,
     profilePictureUrl: profile.profilePictureUrl,
     pictureFetchedAt: profile.profilePictureUrl ? at : null,
+    audience: audience ?? prev?.audience ?? null,
     tokenSealed: sealToken(tok.token),
     tokenExpiresAt: tok.expiresAt,
     tokenRefreshedAt: at,
@@ -79,6 +86,9 @@ export function applyProfileToMetrics(db: Db, creator: Creator, link: InstagramL
   if (link.followers != null) m.followers = link.followers;
   if (link.mediaCount != null) m.mediaCount = link.mediaCount;
   m.accountType = link.accountType;
+  if (link.audience?.countryPct) m.audienceCountryPct = link.audience.countryPct;
+  if (link.audience?.cityPct) m.audienceCityPct = link.audience.cityPct;
+  if (link.audience?.genderPct) m.audienceGenderAge = { ...(m.audienceGenderAge ?? {}), ...link.audience.genderPct };
   m.igConnected = isProfessional(link.accountType);
   m.tokenValid = link.tokenValid;
   m.refreshedAt = nowIso();
@@ -95,6 +105,7 @@ export async function completeInstagramLogin(
   profile: InstagramProfile,
   tok: ExchangedToken,
   clientBusinessId: string | null,
+  audience: InstagramAudience | null = null,
 ): Promise<InstagramLoginResult> {
   return updateDb((db): InstagramLoginResult => {
     let creator = db.creators.find((c) => c.instagram?.igUserId === profile.igUserId) ?? null;
@@ -114,7 +125,7 @@ export async function completeInstagramLogin(
       if (!user) return { ok: false, reason: "not_creator" };
       if (user.role !== "creator") return { ok: false, reason: "not_creator" };
       if (user.status === "inactive") return { ok: false, reason: "deactivated" };
-      const link = linkFrom(profile, tok, clientBusinessId, creator.instagram);
+      const link = linkFrom(profile, tok, clientBusinessId, creator.instagram, audience);
       if (linkedExisting) {
         const how = user.clerkId ? "Google" : user.email ? "email" : "phone";
         link.linkNote = `Linked on first Instagram login: @${profile.username} matched the handle on this ${how} account created ${user.createdAt.slice(0, 10)}.`;
@@ -158,7 +169,7 @@ export async function completeInstagramLogin(
       panMasked: null,
       upiMasked: null,
       createdAt: nowIso(),
-      instagram: linkFrom(profile, tok, clientBusinessId),
+      instagram: linkFrom(profile, tok, clientBusinessId, null, audience),
     };
     db.creators.push(creator);
     applyProfileToMetrics(db, creator, creator.instagram!);

@@ -113,6 +113,21 @@ export default async function AdminCreatorPage({ params }: { params: Promise<{ i
             <dd>
               {[ig.followers, ig.follows, ig.mediaCount].map((n) => (n != null ? n.toLocaleString("en-IN") : "—")).join(" · ")}
             </dd>
+            <dt>Audience</dt>
+            <dd>
+              {ig.audience?.countryPct || ig.audience?.cityPct
+                ? [ig.audience?.countryPct, ig.audience?.cityPct]
+                    .filter(Boolean)
+                    .map((m) =>
+                      Object.entries(m!)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 3)
+                        .map(([k, v]) => `${k} ${v}%`)
+                        .join(", "),
+                    )
+                    .join(" · ")
+                : "Instagram hasn't shared demographics (needs 100+ followers and insights access)"}
+            </dd>
             <dt>Instagram id</dt>
             <dd className="muted">{ig.igUserId}</dd>
             <dt>Connected</dt>
