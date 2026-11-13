@@ -6,7 +6,8 @@ import type { TopReel, TopReelsStatus } from "@/server/db/store";
 const fmt = (n: number | null) =>
   n == null ? null : n >= 100000 ? `${(n / 100000).toFixed(n >= 1000000 ? 0 : 1)}L` : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
 
-const EMPTY: Record<TopReelsStatus | "none", string> = {
+const EMPTY: Record<TopReelsStatus | "none" | "pending", string> = {
+  pending: "Fetching top reels from Instagram. Refresh in a minute.",
   ok: "No reels to show yet.",
   no_reels: "No reels on this Instagram account yet.",
   no_token: "Reels show up after logging in with Instagram. The Instagram connection is missing or expired.",
@@ -43,7 +44,8 @@ export function TopReels({
 }: {
   creatorId: string;
   reels: TopReel[] | null | undefined;
-  status: TopReelsStatus | null | undefined;
+  /** "pending" = connected to Instagram but reels not fetched yet. */
+  status: TopReelsStatus | "pending" | null | undefined;
   compact?: boolean;
   limit?: number;
 }) {

@@ -84,7 +84,7 @@ export function CreatorBento({
             {ig?.topReelsFetchedAt ? "From Instagram" : ""}
           </span>
         </div>
-        <TopReels creatorId={creator.id} reels={ig?.topReels} status={ig ? (ig.topReelsStatus ?? null) : null} />
+        <TopReels creatorId={creator.id} reels={ig?.topReels} status={ig ? (ig.topReelsStatus ?? (ig.tokenSealed ? "pending" : "no_token")) : null} />
       </div>
     </section>
   );

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { after } from "next/server";
+import { syncTopReels, topReelsStale } from "@/server/instagram-sync";
 import { requirePageRole } from "@/server/auth/guard";
 import { BrandPendingScreen, getBrandAccess } from "@/components/brand/BrandGate";
 import { CATEGORIES } from "@/lib/categories";
@@ -29,6 +31,11 @@ export default async function BrandExplorePage({
   const niche = sp.niche && (CATEGORIES as readonly string[]).includes(sp.niche) ? sp.niche : null;
   const sort: ExploreSort = SORTS.some((s) => s.key === sp.sort) ? (sp.sort as ExploreSort) : "followers";
   const rows = exploreCreators(db, { niche, sort });
+  // Keep the reels cache warm for the first few cards (a few at a time to respect Instagram's limits).
+  const stale = rows.slice(0, 12).filter((r) => topReelsStale(r.creator.instagram)).slice(0, 3).map((r) => r.creator.id);
+  if (stale.length) after(async () => {
+    for (const cid of stale) await syncTopReels(cid).catch(() => null);
+  });
   const href = (p: { niche?: string | null; sort?: string }) => {
     const q = new URLSearchParams();
     const nn = p.niche === undefined ? niche : p.niche;
@@ -131,7 +138,7 @@ export default async function BrandExplorePage({
                     <dd>{c.city || "—"}</dd>
                   </div>
                 </dl>
-                <TopReels creatorId={c.id} reels={ig.topReels} status={ig.topReelsStatus ?? null} compact limit={3} />
+                <TopReels creatorId={c.id} reels={ig.topReels} status={ig.topReelsStatus ?? (ig.tokenSealed ? "pending" : "no_token")} compact limit={3} />
               </li>
             );
           })}

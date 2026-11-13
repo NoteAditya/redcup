@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
+import { syncTopReels, topReelsStale } from "@/server/instagram-sync";
 import { readDb } from "@/server/db/store";
 import { formatINR } from "@/lib/money";
 import { formatIST, labelize } from "@/lib/format";
@@ -19,6 +21,7 @@ export default async function AdminCreatorPage({ params }: { params: Promise<{ i
   const user = db.users.find((u) => u.id === creator.userId);
   const m = db.creatorMetrics.find((x) => x.creatorId === creator.id);
   const ig = creator.instagram ?? null;
+  if (ig && topReelsStale(ig)) after(() => syncTopReels(id).catch(() => null));
   const apps = db.applications
     .filter((a) => a.creatorId === creator.id)
     .sort((a, b) => b.appliedAt.localeCompare(a.appliedAt));
@@ -93,7 +96,7 @@ export default async function AdminCreatorPage({ params }: { params: Promise<{ i
           <p className="muted" style={{ fontSize: "0.8rem", margin: "0 0 0.75rem" }}>
             {ig.topReelsFetchedAt ? `From Instagram, updated ${formatIST(ig.topReelsFetchedAt)}` : "Not fetched yet"}
           </p>
-          <TopReels creatorId={creator.id} reels={ig.topReels} status={ig.topReelsStatus ?? null} />
+          <TopReels creatorId={creator.id} reels={ig.topReels} status={ig.topReelsStatus ?? (ig.tokenSealed ? "pending" : "no_token")} />
         </div>
       )}
 
