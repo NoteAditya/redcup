@@ -21,13 +21,15 @@ export function CupFill({
   const [budget, setBudget] = useState(defaultBudget);
   const budgetPaise = budget * 100;
   const feePaise = Math.round(budgetPaise * feePct);
-  const totalPaise = budgetPaise + feePaise;
+  // GST at 18% applies to the platform fee.
+  const gstPaise = Math.round(feePaise * 0.18);
+  const totalPaise = budgetPaise + feePaise + gstPaise;
 
   const estimatedReach = useMemo(() => {
-    if (budget < 25000) return { slots: 2, estViews: "25,000+" };
-    if (budget < 100000) return { slots: 5, estViews: "120,000+" };
-    if (budget < 250000) return { slots: 10, estViews: "350,000+" };
-    return { slots: 18, estViews: "800,000+" };
+    if (budget < 25000) return { slots: 2, estViews: "25,000" };
+    if (budget < 100000) return { slots: 5, estViews: "1.2 lakh" };
+    if (budget < 250000) return { slots: 10, estViews: "3.5 lakh" };
+    return { slots: 18, estViews: "8 lakh" };
   }, [budget]);
 
   return (
@@ -37,7 +39,7 @@ export function CupFill({
         padding: "clamp(1.5rem, 3vw, 2.25rem)",
       }}
     >
-      {/* Header with Title and Escrow Calculation */}
+      {/* Header with Title and total cost */}
       <div
         style={{
           display: "flex",
@@ -49,26 +51,13 @@ export function CupFill({
         }}
       >
         <div>
-          <span
-            className="pill-card"
-            style={{
-              fontSize: "0.75rem",
-              padding: "0.25rem 0.75rem",
-              background: "var(--blush)",
-              color: "var(--wine)",
-              border: "1px solid var(--blush-deep)",
-              fontWeight: 600,
-            }}
-          >
-            Escrow Calculator
-          </span>
           <h3 style={{ marginTop: "0.55rem", fontSize: "1.2rem", color: "var(--ink)", letterSpacing: "-0.02em" }}>
-            Campaign Budget Simulator
+            Campaign cost calculator
           </h3>
         </div>
         <div style={{ textAlign: "right" }}>
           <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>
-            Total Escrow Deposit
+            You pay
           </span>
           <span
             className="serif-moment"
@@ -82,6 +71,9 @@ export function CupFill({
             }}
           >
             {formatINR(totalPaise)}
+          </span>
+          <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block", marginTop: "0.2rem" }}>
+            ({formatINR(budgetPaise)} creator budget + {formatINR(feePaise)} fee + {formatINR(gstPaise)} GST)
           </span>
         </div>
       </div>
@@ -175,7 +167,7 @@ export function CupFill({
         >
           <div style={{ padding: "0.75rem 1rem", borderRight: "1px solid var(--line)" }}>
             <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block" }}>
-              Creator Payout Pool
+              Creator budget
             </span>
             <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: "0.9375rem", color: "var(--ink)" }}>
               {formatINR(budgetPaise)}
@@ -201,19 +193,19 @@ export function CupFill({
         >
           <div style={{ padding: "0.75rem 1rem", borderRight: "1px solid var(--line)" }}>
             <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block" }}>
-              Allocated Slots
+              Creators
             </span>
             <span style={{ fontSize: "0.9375rem", fontWeight: 600, color: "var(--ink)" }}>
-              {estimatedReach.slots} Creators
+              up to {estimatedReach.slots}
             </span>
           </div>
 
           <div style={{ padding: "0.75rem 1rem" }}>
             <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block" }}>
-              Verified View Target
+              Estimated reach
             </span>
             <span style={{ fontSize: "0.9375rem", fontWeight: 600, color: "var(--cta)" }}>
-              {estimatedReach.estViews}
+              up to about {estimatedReach.estViews} views (not guaranteed)
             </span>
           </div>
         </div>
@@ -224,7 +216,7 @@ export function CupFill({
         className="btn btn-primary"
         style={{ width: "100%", justifyContent: "center" }}
       >
-        Lock Budget and Launch
+        Plan this campaign
       </Link>
     </div>
   );

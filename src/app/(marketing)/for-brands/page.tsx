@@ -1,38 +1,39 @@
 import Link from "next/link";
 import { MarketingShell } from "@/components/layout/MarketingShell";
+import { CupFill } from "@/components/marketing/CupFill";
 
-export const metadata = { title: "For Brands — Performance Creator Bounties" };
+export const metadata = { title: "For Brands — Performance Creator Campaigns" };
 
 const STEPS = [
   {
     step: "Step 1",
     tag: "Business Verification",
-    title: "Complete Fast Business Verification",
-    desc: "Verify your GSTIN and business profile. Admin verification protects the marketplace and guarantees campaign compliance.",
+    title: "Verify your business",
+    desc: "Add your GSTIN and details. We check every brand to keep the marketplace safe.",
   },
   {
     step: "Step 2",
     tag: "Audience Filters",
-    title: "Define Audience & Creator Criteria",
-    desc: "Use category presets or define custom requirements (niche, city, follower range). See real-time eligible creator counts as you configure.",
+    title: "Choose who you want",
+    desc: "Pick a preset or set niche, city and follower range, and see how many creators match.",
   },
   {
     step: "Step 3",
-    tag: "100% Escrow",
-    title: "Fund Campaign Escrow",
-    desc: "Lock the creator payout pool plus a 15% platform fee (+ GST). Your campaign immediately opens for applications.",
+    tag: "Pre-funded",
+    title: "Fund your campaign",
+    desc: "Creator budget + 15% fee + GST, held safely by Razorpay. It opens to creators once approved.",
   },
   {
     step: "Step 4",
     tag: "Fit Score Rank",
-    title: "Shortlist via Fit Score and Award",
-    desc: "RedCup ranks applicants by Fit Score (audience overlap, historical reel views, engagement). Review and award slots within 48 hours.",
+    title: "Pick your creators",
+    desc: "We rank applicants by fit and past results, and you choose within 48 hours.",
   },
   {
     step: "Step 5",
-    tag: "API Verification",
-    title: "Single Draft Review & View Tracking",
-    desc: "Review one draft with one revision. Once approved, the creator publishes with the paid partnership tag. We verify views directly via Instagram Graph API.",
+    tag: "Instagram data",
+    title: "Approve, post, track",
+    desc: "You approve each draft (one revision). The reel goes live with the Paid Partnership label, and we verify its views for 7 days.",
   },
 ];
 
@@ -42,27 +43,34 @@ export default function ForBrandsPage() {
       <div style={{ maxWidth: "720px", margin: "clamp(1.5rem, 4vw, 3rem) 0 clamp(2.5rem, 5vw, 4rem)" }}>
         <div className="kicker">
           <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--wine)" }} />
-          <span>Brand Performance Architecture</span>
+          <span>For brands</span>
         </div>
         <h1 style={{ marginBottom: "1.15rem", lineHeight: 1.08 }}>
-          Run creator campaigns that guarantee verified views.
+          Get reels from creators who fit your brand. Pay mostly for real views.
         </h1>
         <p className="lede">
-          Lock your budget in escrow before production begins. Creators apply with pre-checked eligibility, Fit Score surfaces the best matches, and you pay only after the approved reel hits real view milestones.
+          Set your brief and budget. Only creators who match can apply, you pick the best fit, and you approve every reel. Your budget is held by Razorpay: creators get a fixed base per approved reel, and the rest is paid only for verified results, and unused budget comes back to you.
         </p>
         <div style={{ display: "flex", gap: "0.85rem", marginTop: "2rem", flexWrap: "wrap" }}>
           <Link href="/signup?role=brand" className="btn btn-primary">
-            Create Brand Account
+            Launch your first campaign
           </Link>
-          <Link href="/bounties" className="btn btn-ghost">
-            View Live Bounties
+          <Link href="#calculator" className="btn btn-ghost">
+            See pricing
           </Link>
         </div>
       </div>
 
+      {/* Campaign cost calculator (moved from the homepage) */}
+      <section id="calculator" style={{ maxWidth: "560px", margin: "0 0 var(--section-gap)", scrollMarginTop: "6rem" }}>
+        <CupFill />
+      </section>
+
       {/* 5-Step Ruled Ledger */}
       <section
+        id="how-it-works"
         style={{
+          scrollMarginTop: "6rem",
           border: "1px solid var(--line)",
           borderRadius: "var(--radius-card)",
           overflow: "hidden",
@@ -72,8 +80,8 @@ export default function ForBrandsPage() {
         }}
       >
         <div style={{ padding: "1.75rem 2rem", borderBottom: "1px solid var(--line)", backgroundColor: "var(--paper-subtle)" }}>
-          <span className="chip chip-cup">Standard SLA</span>
-          <h2 style={{ fontSize: "1.35rem", marginTop: "0.5rem" }}>From GSTIN verification to verified views</h2>
+          <span className="chip chip-cup">How it works</span>
+          <h2 style={{ fontSize: "1.35rem", marginTop: "0.5rem" }}>From brief to verified results in about 3 weeks</h2>
         </div>
 
         <div>
@@ -116,18 +124,18 @@ export default function ForBrandsPage() {
         }}
       >
         <div className="card">
-          <span className="chip chip-ok" style={{ marginBottom: "0.85rem" }}>Transparent Escrow</span>
-          <h3 style={{ fontSize: "1.25rem" }}>No surprise retainers</h3>
+          <span className="chip chip-ok" style={{ marginBottom: "0.85rem" }}>Clear costs</span>
+          <h3 style={{ fontSize: "1.25rem" }}>No surprise fees</h3>
           <p style={{ marginTop: "0.5rem", color: "var(--ink-secondary)", fontSize: "0.9375rem", lineHeight: 1.65 }}>
-            Creator pool and platform fee are displayed and locked before your campaign launches. Never worry about scope creep or hidden talent markup fees.
+            You see the full cost, including GST, before you pay. Unused budget comes back to you.
           </p>
         </div>
 
         <div className="card">
-          <span className="chip chip-cup" style={{ marginBottom: "0.85rem" }}>Automated Shortlist</span>
-          <h3 style={{ fontSize: "1.25rem" }}>Fit Score ranking engine</h3>
+          <span className="chip chip-cup" style={{ marginBottom: "0.85rem" }}>Smart shortlist</span>
+          <h3 style={{ fontSize: "1.25rem" }}>Best-fit creators first</h3>
           <p style={{ marginTop: "0.5rem", color: "var(--ink-secondary)", fontSize: "0.9375rem", lineHeight: 1.65 }}>
-            Our matching algorithms evaluate audience match, engagement authenticity, and past performance. In case you miss the award window, top Fit Scores auto-award to keep production on track.
+            We rank creators by fit and past results. If you don&apos;t choose in 48 hours, we pick the top matches so your campaign isn&apos;t delayed.
           </p>
         </div>
       </section>

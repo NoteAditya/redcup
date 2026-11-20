@@ -27,7 +27,7 @@ export default async function BrandCreatorPage({ params }: { params: Promise<{ i
       </Link>
       <CreatorBento creator={row.creator} metrics={row.metrics} />
       <p className="muted" style={{ fontSize: "0.8rem", marginTop: "1rem" }}>
-        Want this creator on a campaign? Creators apply to your live bounties, and you see them once RedCup approves their
+        Want this creator on a campaign? Creators apply to your live campaigns, and you see them once RedCup approves their
         application.
       </p>
     </div>

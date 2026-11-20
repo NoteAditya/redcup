@@ -72,7 +72,7 @@ export function BrandProfileForm({
               setV((s) => ({ ...s, category: c }));
             }}
           />
-          <p className="field-helper" role={fe("category") ? "alert" : undefined}>{fe("category") || "Shown on your bounty cards."}</p>
+          <p className="field-helper" role={fe("category") ? "alert" : undefined}>{fe("category") || "Shown on your campaign cards."}</p>
         </div>
         <Text label="City" name="city" value={v.city} onChange={set("city")} error={fe("city")} required />
         <Text label="Website" name="website" value={v.website} onChange={set("website")} error={fe("website")} placeholder="https://" />

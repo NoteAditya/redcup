@@ -28,11 +28,11 @@ export const metadata: Metadata = {
     template: "%s · RedCup",
   },
   description:
-    "India's pay-for-results creator platform. Brands fund a reel bounty. Eligible creators apply. You pay for an approved live reel plus verified views.",
+    "India's pay-for-results creator platform. Brands fund a reel campaign. Eligible creators apply. You pay for an approved live reel plus verified views.",
   openGraph: {
     title: "RedCup — Pay for verified Instagram views",
     description:
-      "Fund a reel bounty. Award eligible creators. Pay for approved posts and verified views.",
+      "Fund a reel campaign. Award eligible creators. Pay for approved posts and verified views.",
     url: siteUrl,
     siteName: "RedCup",
     locale: "en_IN",

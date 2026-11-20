@@ -24,7 +24,7 @@ export default async function BrandProfilePage() {
       <div className="profile-page-head">
         <span className="chip">Brand profile</span>
         <h1>{brand.businessName}</h1>
-        <p className="muted">What creators see on your bounty cards.</p>
+        <p className="muted">What creators see on your campaign cards.</p>
       </div>
       <section className="bento" aria-label="Brand overview">
         <div className="bento-tile bento-hero">

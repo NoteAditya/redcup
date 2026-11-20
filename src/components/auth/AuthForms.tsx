@@ -62,7 +62,7 @@ export function SignUpForm() {
         onChange={(e) => set("name", e.target.value)}
         onBlur={() => setFieldErr((e) => ({ ...e, name: requiredText(values.name, "Name") }))}
         error={fieldErr.name}
-        hint="Shown on your profile and bounty cards."
+        hint="Shown on your profile and campaign cards."
       />
       <TextField
         label="Email"

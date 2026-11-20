@@ -95,7 +95,7 @@ export default async function CreatorDashboard() {
           <dd>{myApps.length}</dd>
         </div>
         <div>
-          <dt>Open bounties</dt>
+          <dt>Open campaigns</dt>
           <dd>{live.length}</dd>
         </div>
       </dl>
@@ -104,7 +104,7 @@ export default async function CreatorDashboard() {
       <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
         {live.length === 0 && (
           <EmptyState
-            title="No live bounties"
+            title="No live campaigns"
             body="When brands fund campaigns, matching ones show up here with eligibility chips."
             actionHref="/bounties"
             actionLabel="Browse public list"

@@ -16,7 +16,7 @@ export default async function BrandOnboardingPage() {
     <div>
       <h1>Brand onboarding</h1>
       <p className="muted" style={{ margin: "0.5rem 0 1.25rem", maxWidth: "48ch" }}>
-        One question at a time. Your first bounty card builds as you answer — draft resumes on this device.
+        One question at a time. Your first campaign card builds as you answer — draft resumes on this device.
       </p>
       <BrandOnboardingForm
         initial={{ businessName: brand?.businessName ?? "", city: brand?.city ?? "", website: brand?.website ?? "" }}

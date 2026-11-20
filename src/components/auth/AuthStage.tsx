@@ -32,13 +32,13 @@ export function AuthStage({
         </div>
         <div className="auth-fan-tile t2 is-ink">
           <span className="auth-fan-ico">▶</span>
-          <b>Top reels</b>
-          <small>Your best 5, ranked by real views</small>
+          <b>Your RedCup profile</b>
+          <small>Your best reels and verified stats in one link</small>
         </div>
         <div className="auth-fan-tile t3 is-red">
           <span className="auth-fan-ico">₹</span>
-          <b>Escrow-funded bounties</b>
-          <small>Paid for verified views</small>
+          <b>Brand-funded campaigns</b>
+          <small>A fixed base plus verified views</small>
         </div>
         <div className="auth-fan-tile t4">
           <span className="auth-fan-ico">✓</span>

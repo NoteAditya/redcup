@@ -20,10 +20,10 @@ export function RolePicker() {
   return (
     <div className="role-picker" style={{ maxWidth: "780px", margin: "1.5rem auto 3.5rem" }}>
       <div style={{ marginBottom: "2rem" }}>
-        <p className="kicker">Account Type</p>
-        <h1 style={{ marginBottom: "0.5rem" }}>Select your RedCup path</h1>
+        <p className="kicker">Join RedCup</p>
+        <h1 style={{ marginBottom: "0.5rem" }}>Are you a brand or a creator?</h1>
         <p className="lede" style={{ fontSize: "0.9375rem" }}>
-          Choose your operating role to begin guided onboarding.
+          Pick one to get started. It takes about 3 minutes.
         </p>
       </div>
 
@@ -55,7 +55,7 @@ export function RolePicker() {
               I am a Brand
             </strong>
             <p style={{ margin: "0.5rem 0 0", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
-              Lock a reel budget, set your audience criteria, shortlist top creators with Fit Score, and pay exclusively for verified views.
+              Set your brief and budget, choose from creators we shortlist for you, approve every reel, and pay creators a fixed base per reel, and the rest only for verified results.
             </p>
           </div>
           <div style={{ marginTop: "1.5rem", fontSize: "0.8125rem", fontWeight: 600, color: "var(--ink)" }}>
@@ -90,7 +90,7 @@ export function RolePicker() {
               I am a Creator
             </strong>
             <p style={{ margin: "0.5rem 0 0", color: "var(--ink-secondary)", fontSize: "0.875rem", lineHeight: 1.6 }}>
-              Connect your Instagram profile, view eligibility tags before applying, submit one draft revision, and receive guaranteed payouts.
+              Connect Instagram, see which campaigns you qualify for, make reels for brands, and get paid by UPI. Free to join.
             </p>
           </div>
           <div style={{ marginTop: "1.5rem", fontSize: "0.8125rem", fontWeight: 600, color: "var(--ink)" }}>

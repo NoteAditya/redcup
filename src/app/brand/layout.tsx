@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 const fullNav = [
   { href: "/brand", label: "Dashboard" },
-  { href: "/brand/bounties/new", label: "New bounty" },
+  { href: "/brand/bounties/new", label: "New campaign" },
   { href: "/brand/explore", label: "Explore creators" },
   { href: "/brand/profile", label: "Profile" },
   { href: "/brand/settings", label: "Settings" },

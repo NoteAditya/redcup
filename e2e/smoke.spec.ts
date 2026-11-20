@@ -56,7 +56,7 @@ test.describe("RedCup production flows", () => {
   test("marketing pages load without console errors", async ({ page }) => {
     const done = await noConsoleErrors(page);
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1, name: /Fund creator reels/i })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: /Brands get real content/i })).toBeVisible();
     await shot(page, "home");
     await page.goto("/for-brands");
     await expect(page.getByRole("heading").first()).toBeVisible();
@@ -65,7 +65,7 @@ test.describe("RedCup production flows", () => {
     await expect(page.getByRole("heading").first()).toBeVisible();
     await shot(page, "for-creators");
     await page.goto("/bounties");
-    await expect(page.getByRole("heading", { name: /Open Reel Bounties|Open bounties/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Open Reel Campaigns|Open campaigns/i })).toBeVisible();
     await shot(page, "bounties");
     await page.goto("/creators");
     await expect(page.getByRole("heading").first()).toBeVisible();

@@ -8,7 +8,7 @@ export default function ContactPage() {
       <div style={{ maxWidth: "600px", margin: "1.5rem auto 3.5rem" }}>
         <h1 style={{ marginBottom: "0.75rem" }}>Get in Touch</h1>
         <p className="lede" style={{ marginBottom: "1.75rem" }}>
-          Inquiries regarding campaign escrow, agency integration, or creator payments.
+          Inquiries regarding campaign payments, agency integration, or creator payments.
         </p>
 
         <div

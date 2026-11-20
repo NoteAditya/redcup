@@ -41,17 +41,17 @@ export default async function BrandDashboard() {
           </p>
         </div>
         <Link href="/brand/bounties/new" className="btn btn-primary" prefetch>
-          New bounty
+          New campaign
         </Link>
       </div>
 
       <p className="muted" style={{ marginTop: "0.75rem", fontSize: "0.875rem" }}>
-        New bounties are reviewed by RedCup before creators can see them.
+        New campaigns are reviewed by RedCup before creators can see them.
       </p>
 
       <dl className="app-kpi">
         <div>
-          <dt>Bounties</dt>
+          <dt>Campaigns</dt>
           <dd>{campaigns.length}</dd>
         </div>
         <div>
@@ -66,14 +66,14 @@ export default async function BrandDashboard() {
         </div>
       </dl>
 
-      <h2 style={{ marginTop: "0.5rem" }}>Your bounties</h2>
+      <h2 style={{ marginTop: "0.5rem" }}>Your campaigns</h2>
       <div className="bounty-grid" style={{ marginTop: "0.75rem" }}>
         {campaigns.length === 0 && (
           <EmptyState
-            title="No bounties yet"
-            body="Create and fund your first reel bounty. RedCup reviews it, then matching creators can apply."
+            title="No campaigns yet"
+            body="Create and fund your first reel campaign. RedCup reviews it, then matching creators can apply."
             actionHref="/brand/bounties/new"
-            actionLabel="Create bounty"
+            actionLabel="Create campaign"
           />
         )}
         {campaigns.map((c) => (

@@ -17,8 +17,8 @@ export default async function LoginPage({
     <MarketingShell>
       <AuthStage
         eyebrow="Sign in"
-        title="Your creator work,"
-        accent="verified."
+        title="Welcome to"
+        accent="RedCup"
         sub="Creators log in with Instagram. Brands log in with email or Google."
       >
         <div style={{ marginBottom: "1.25rem" }}>

@@ -156,7 +156,7 @@ export function CreatorOnboardingForm({
       <div className="onboard-celebrate card" role="status">
         <div className="onboard-celebrate-mark" aria-hidden />
         <h2>Creator path unlocked</h2>
-        <p className="muted">Your profile card is ready — finding open bounties.</p>
+        <p className="muted">Your profile card is ready — finding open campaigns.</p>
       </div>
     );
   }

@@ -24,7 +24,7 @@ const STEPS = [
     key: "businessName" as const,
     label: "Business name",
     question: "What should creators call your brand?",
-    hint: "This appears on bounty cards and shortlists.",
+    hint: "This appears on campaign cards and shortlists.",
     placeholder: "e.g. Glow Lab",
     required: true,
   },
@@ -32,7 +32,7 @@ const STEPS = [
     key: "category" as const,
     label: "Category",
     question: "Which category feels closest?",
-    hint: "Pick the closest one. Creators see it on your bounty cards.",
+    hint: "Pick the closest one. Creators see it on your campaign cards.",
     placeholder: "Choose a category",
     required: true,
   },
@@ -245,12 +245,12 @@ export function BrandOnboardingForm({ initial }: { initial?: { businessName?: st
         </div>
 
         <aside className="onboard-preview" aria-live="polite">
-          <h3 style={{ fontSize: "1rem", marginBottom: "0.65rem" }}>Live bounty preview</h3>
+          <h3 style={{ fontSize: "1rem", marginBottom: "0.65rem" }}>Live campaign preview</h3>
           <div className={`bounty-card card ${previewReady ? "is-alive" : "is-ghost"}`}>
             <div className="bounty-card-top">
               <div>
                 <strong className="bounty-card-title">
-                  {data.businessName ? `${data.businessName} reel bounty` : "Your first bounty"}
+                  {data.businessName ? `${data.businessName} reel campaign` : "Your first campaign"}
                 </strong>
                 <div className="muted bounty-card-sub">
                   {data.businessName || "Brand"} · {data.category || "Category"} · {data.city || "City"}

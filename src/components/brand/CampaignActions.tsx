@@ -149,7 +149,7 @@ export function FundButton({ campaignId }: { campaignId: string }) {
           })
         }
       >
-        {pending ? "Funding…" : "Fund bounty"}
+        {pending ? "Funding…" : "Fund campaign"}
       </button>
       {err && <p className="err">{err}</p>}
     </div>

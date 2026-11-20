@@ -31,16 +31,8 @@ export function MarketingShell({
                   lineHeight: 1.65,
                 }}
               >
-                The escrow protocol for performance creator reels. Zero retainer waste, verified Instagram views, and instant UPI settlements.
+                Creator campaigns where brands pay for real results and creators get paid fairly.
               </p>
-              <div style={{ marginTop: "1.25rem", display: "flex", gap: "0.5rem" }}>
-                <span className="chip" style={{ fontSize: "0.75rem", background: "var(--paper-subtle)" }}>
-                  RBI-Compliant Escrow
-                </span>
-                <span className="chip" style={{ fontSize: "0.75rem", background: "var(--paper-subtle)" }}>
-                  Meta Graph API
-                </span>
-              </div>
             </div>
 
             <div>
@@ -53,25 +45,22 @@ export function MarketingShell({
                   <Link href="/for-creators">For Creators</Link>
                 </li>
                 <li>
-                  <Link href="/bounties">Open Bounties</Link>
-                </li>
-                <li>
-                  <Link href="/creators">Creator Directory</Link>
+                  <Link href="/bounties">Open Campaigns</Link>
                 </li>
               </ul>
             </div>
 
             <div>
-              <p>Architecture</p>
+              <p>Company</p>
               <ul>
                 <li>
                   <Link href="/about">About RedCup</Link>
                 </li>
                 <li>
-                  <Link href="/for-brands#escrow">Escrow Mechanics</Link>
+                  <Link href="/for-brands#how-it-works">How payments work</Link>
                 </li>
                 <li>
-                  <Link href="/for-brands#pricing">Fee Structure (15%)</Link>
+                  <Link href="/for-brands#calculator">Pricing</Link>
                 </li>
                 <li>
                   <Link href="/signup?role=brand">Brand Verification</Link>
@@ -83,7 +72,7 @@ export function MarketingShell({
               <p>Legal &amp; Trust</p>
               <ul>
                 <li>
-                  <Link href="/terms">Terms of Service</Link>
+                  <Link href="/terms">Terms of Use</Link>
                 </li>
                 <li>
                   <Link href="/privacy">Privacy Policy</Link>
@@ -92,7 +81,7 @@ export function MarketingShell({
                   <Link href="/data-deletion">Data Deletion</Link>
                 </li>
                 <li>
-                  <Link href="/refunds">Escrow &amp; Refund SLA</Link>
+                  <Link href="/refunds">Refund and Cancellation Policy</Link>
                 </li>
                 <li>
                   <Link href="/contact">Contact Support</Link>
@@ -102,13 +91,13 @@ export function MarketingShell({
           </div>
 
           <div className="site-footer-base">
-            <div>&copy; {new Date().getFullYear()} RedCup Protocol. Registered under Indian commercial guidelines.</div>
+            <div>&copy; {new Date().getFullYear()} RedCup is a brand of Luvante Group LLP · 455 Azadpura, Lalitpur, Uttar Pradesh 284403 · GSTIN 09AANFL1867F1ZZ · <a href="mailto:contact@redcup.in">contact@redcup.in</a> · <a href="tel:+919129620385">+91 9129620385</a></div>
             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <span>100% Escrow Protection</span>
+              <span>Budget held by Razorpay</span>
               <span aria-hidden="true">•</span>
-              <span>Official Instagram Graph API</span>
+              <span>Views checked with Instagram data</span>
               <span aria-hidden="true">•</span>
-              <span>Direct UPI Settlement</span>
+              <span>Creators paid by UPI</span>
             </div>
           </div>
         </div>

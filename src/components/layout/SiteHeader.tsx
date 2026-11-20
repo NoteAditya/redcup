@@ -7,7 +7,7 @@ import { useEffect, useId, useState } from "react";
 const NAV_LINKS = [
   { href: "/for-brands", label: "For Brands" },
   { href: "/for-creators", label: "For Creators" },
-  { href: "/bounties", label: "Open Bounties" },
+  { href: "/bounties", label: "Open Campaigns" },
   { href: "/about", label: "About" },
 ];
 

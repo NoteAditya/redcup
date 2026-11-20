@@ -4,7 +4,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { readDb } from "@/server/db/store";
 import { campaignApproval } from "@/server/access";
 
-export const metadata = { title: "Open Bounties — Live Creator Campaigns" };
+export const metadata = { title: "Open Campaigns — Live Creator Campaigns" };
 export const dynamic = "force-dynamic";
 
 export default async function BountiesPage() {
@@ -20,7 +20,7 @@ export default async function BountiesPage() {
     <MarketingShell>
       <div style={{ maxWidth: "700px", marginBottom: "2.5rem" }}>
         <p className="kicker">Live Directory</p>
-        <h1 style={{ marginBottom: "0.65rem" }}>Open Reel Bounties</h1>
+        <h1 style={{ marginBottom: "0.65rem" }}>Open Reel Campaigns</h1>
         <p className="lede">
           Funded Instagram reel campaigns currently accepting creator applications. Authenticate as a creator to view your personalized eligibility status.
         </p>
@@ -29,7 +29,7 @@ export default async function BountiesPage() {
       <div className="bounty-grid">
         {live.length === 0 && (
           <EmptyState
-            title="No live bounties right now"
+            title="No live campaigns right now"
             body="When a brand funds a campaign after KYC approval, it appears here for eligible creators."
             actionHref="/signup?role=brand"
             actionLabel="Start as a Brand"
