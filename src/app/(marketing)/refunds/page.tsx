@@ -6,7 +6,6 @@ export default function RefundsPage() {
   return (
     <MarketingShell>
       <div style={{ maxWidth: "780px", margin: "2rem auto 4rem" }}>
-        <p className="kicker">Escrow &amp; Payout Terms</p>
         <h1 style={{ marginBottom: "1rem" }}>Refund Policy</h1>
         <p className="muted" style={{ marginBottom: "2rem" }}>Last updated: November 2026</p>
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Clock, ScanEye, Wallet } from "lucide-react";
 import { MarketingShell } from "@/components/layout/MarketingShell";
 
 export const metadata = { title: "About RedCup — Performance Creator Platform" };
@@ -8,7 +9,6 @@ export default function AboutPage() {
     <MarketingShell>
       <div style={{ maxWidth: "760px", margin: "clamp(1.5rem, 4vw, 3rem) 0 clamp(2.5rem, 5vw, 4rem)" }}>
         <div className="kicker">
-          <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--wine)" }} />
           <span>About RedCup</span>
         </div>
         <h1 style={{ marginBottom: "1.15rem", lineHeight: 1.08 }}>
@@ -44,7 +44,7 @@ export default function AboutPage() {
         }}
       >
         <div className="card">
-          <span className="chip chip-ok" style={{ marginBottom: "0.85rem" }}>
+          <span className="chip" style={{ marginBottom: "0.85rem" }}>
             For brands
           </span>
           <h3 style={{ fontSize: "1.25rem" }}>Predictable costs</h3>
@@ -54,7 +54,7 @@ export default function AboutPage() {
         </div>
 
         <div className="card">
-          <span className="chip chip-cup" style={{ marginBottom: "0.85rem" }}>
+          <span className="chip" style={{ marginBottom: "0.85rem" }}>
             For creators
           </span>
           <h3 style={{ fontSize: "1.25rem" }}>Fair, clear pay</h3>
@@ -64,7 +64,7 @@ export default function AboutPage() {
         </div>
 
         <div className="card">
-          <span className="chip chip-warn" style={{ marginBottom: "0.85rem" }}>
+          <span className="chip" style={{ marginBottom: "0.85rem" }}>
             How we check
           </span>
           <h3 style={{ fontSize: "1.25rem" }}>Real views only</h3>
@@ -97,9 +97,9 @@ export default function AboutPage() {
           }}
         >
           <div>
-            <div style={{ fontFamily: "var(--font-outlier)", fontSize: "2rem", color: "var(--cta)", marginBottom: "0.35rem" }}>
-              01
-            </div>
+            <span className="side-card-icon" aria-hidden="true">
+              <Wallet size={24} strokeWidth={1.75} />
+            </span>
             <h4 style={{ marginBottom: "0.35rem" }}>Funded first</h4>
             <p style={{ fontSize: "0.875rem", color: "var(--muted)", margin: 0, lineHeight: 1.6 }}>
               No campaign opens until the brand&apos;s budget is held safely by Razorpay.
@@ -107,9 +107,9 @@ export default function AboutPage() {
           </div>
 
           <div>
-            <div style={{ fontFamily: "var(--font-outlier)", fontSize: "2rem", color: "var(--wine)", marginBottom: "0.35rem" }}>
-              02
-            </div>
+            <span className="side-card-icon" aria-hidden="true">
+              <ScanEye size={24} strokeWidth={1.75} />
+            </span>
             <h4 style={{ marginBottom: "0.35rem" }}>Checked views</h4>
             <p style={{ fontSize: "0.875rem", color: "var(--muted)", margin: 0, lineHeight: 1.6 }}>
               Suspicious views are removed before anyone is paid.
@@ -117,9 +117,9 @@ export default function AboutPage() {
           </div>
 
           <div>
-            <div style={{ fontFamily: "var(--font-outlier)", fontSize: "2rem", color: "var(--ok)", marginBottom: "0.35rem" }}>
-              03
-            </div>
+            <span className="side-card-icon" aria-hidden="true">
+              <Clock size={24} strokeWidth={1.75} />
+            </span>
             <h4 style={{ marginBottom: "0.35rem" }}>On-time payouts</h4>
             <p style={{ fontSize: "0.875rem", color: "var(--muted)", margin: 0, lineHeight: 1.6 }}>
               Creators are paid by UPI about a week after posting.

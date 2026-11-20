@@ -1,21 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
+import { Archivo, Hanken_Grotesk } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { MotionProviders } from "@/components/motion/Providers";
 import "./globals.css";
 import { redcupClerkAppearance } from "@/components/auth/clerkAppearance";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-display",
+// Type system (UI changes, 20 Nov): Archivo (semi-expanded) for headings, Hanken Grotesk for everything else.
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  axes: ["wdth"],
   display: "swap",
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-body",
+const hankenGrotesk = Hanken_Grotesk({
+  variable: "--font-hanken",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${plusJakartaSans.variable}`}
+      className={`${archivo.variable} ${hankenGrotesk.variable}`}
     >
       <body>
         <ClerkProvider appearance={redcupClerkAppearance} afterSignOutUrl="/">

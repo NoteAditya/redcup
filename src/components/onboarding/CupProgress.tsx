@@ -29,7 +29,7 @@ export function CupProgress({
     >
       <div
         style={{
-          fontFamily: "var(--font-mono)",
+          
           fontWeight: 700,
           fontSize: "0.8125rem",
           color: "var(--ink)",

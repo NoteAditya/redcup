@@ -26,7 +26,7 @@ export function StatBars({
               }}
             >
               <span>{i.label.replace(/_/g, " ")}</span>
-              <strong style={{ fontFamily: "var(--font-mono)", color: "var(--ink)" }}>{i.value}</strong>
+              <strong style={{ color: "var(--ink)" }}>{i.value}</strong>
             </div>
             <div
               style={{

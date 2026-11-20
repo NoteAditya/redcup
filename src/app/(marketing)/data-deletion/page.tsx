@@ -16,7 +16,6 @@ export default async function DataDeletionPage({ searchParams }: { searchParams:
   return (
     <MarketingShell>
       <div style={{ maxWidth: "780px", margin: "2rem auto 4rem" }}>
-        <p className="kicker">Data Protection</p>
         <h1 style={{ marginBottom: "1rem" }}>Delete your RedCup data</h1>
 
         {code ? (

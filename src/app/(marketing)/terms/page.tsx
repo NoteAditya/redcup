@@ -6,7 +6,6 @@ export default function TermsPage() {
   return (
     <MarketingShell>
       <div style={{ maxWidth: "780px", margin: "2rem auto 4rem" }}>
-        <p className="kicker">Legal Agreement</p>
         <h1 style={{ marginBottom: "1rem" }}>Terms of Service</h1>
         <p className="muted" style={{ marginBottom: "2rem" }}>Last updated: November 2026</p>
 

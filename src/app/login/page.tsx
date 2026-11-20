@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MarketingShell } from "@/components/layout/MarketingShell";
 import { AuthStage } from "@/components/auth/AuthStage";
 import { SignInForm } from "@/components/auth/AuthForms";
+import { AuthTabs } from "@/components/auth/AuthTabs";
 import { IG_ERRORS, InstagramButton, ProfessionalAccountHelp } from "@/components/auth/InstagramButton";
 
 export const metadata = { title: "Sign In — RedCup" };
@@ -36,7 +37,9 @@ export default async function LoginPage({
             This account has been turned off by RedCup. Contact support if you think this is a mistake.
           </p>
         ) : null}
-        <section aria-labelledby="creator-login" style={{ marginBottom: "1.75rem" }}>
+        <AuthTabs
+          creator={
+        <section aria-labelledby="creator-login">
           <h3 id="creator-login" style={{ fontSize: "1rem", marginBottom: "0.35rem" }}>
             Creators
           </h3>
@@ -60,12 +63,16 @@ export default async function LoginPage({
           ) : null}
           <InstagramButton />
         </section>
-        <section aria-labelledby="brand-login" style={{ paddingTop: "1.25rem", borderTop: "1px solid var(--line)" }}>
+          }
+          brand={
+        <section aria-labelledby="brand-login">
           <h3 id="brand-login" style={{ fontSize: "1rem", marginBottom: "0.85rem" }}>
             Brands
           </h3>
           <SignInForm />
         </section>
+          }
+        />
       </AuthStage>
     </MarketingShell>
   );

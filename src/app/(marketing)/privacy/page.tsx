@@ -109,7 +109,6 @@ export default function PrivacyPage() {
   return (
     <MarketingShell>
       <div style={{ maxWidth: "780px", margin: "2rem auto 4rem" }}>
-        <p className="kicker">Data Protection</p>
         <h1 style={{ marginBottom: "1rem" }}>Privacy Policy</h1>
         <p className="muted" style={{ marginBottom: "2rem" }}>Last updated: 13 November 2026</p>
         <div className="card legal-copy" style={{ padding: "2.5rem", display: "grid", gap: "1.75rem", lineHeight: 1.7 }}>

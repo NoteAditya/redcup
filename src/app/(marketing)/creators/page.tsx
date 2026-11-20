@@ -13,7 +13,6 @@ export default async function CreatorsDirectoryPage() {
   return (
     <MarketingShell>
       <div style={{ maxWidth: "700px", marginBottom: "2.5rem" }}>
-        <p className="kicker">Creator Index</p>
         <h1 style={{ marginBottom: "0.65rem" }}>Verified Instagram Creators</h1>
         <p className="lede">
           Directory of verified Indian creators with authenticated Instagram profiles, audience demographics, and tracked reel performance history.
@@ -58,7 +57,7 @@ export default async function CreatorsDirectoryPage() {
                       color: "var(--ink)",
                       display: "grid",
                       placeItems: "center",
-                      fontFamily: "var(--font-mono)",
+                      
                       fontWeight: 700,
                       fontSize: "0.9375rem",
                     }}
@@ -90,7 +89,7 @@ export default async function CreatorsDirectoryPage() {
                 }}
               >
                 <span>Audience</span>
-                <span style={{ fontWeight: 600, fontFamily: "var(--font-mono)", color: "var(--ink)" }}>
+                <span style={{ fontWeight: 600, color: "var(--ink)" }}>
                   {m ? formatFollowers(m.followers) : "Verified"}
                 </span>
               </div>

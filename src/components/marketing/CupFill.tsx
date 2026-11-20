@@ -34,7 +34,7 @@ export function CupFill({
 
   return (
     <div
-      className="glass"
+      className="calc-card"
       style={{
         padding: "clamp(1.5rem, 3vw, 2.25rem)",
       }}
@@ -60,7 +60,7 @@ export function CupFill({
             You pay
           </span>
           <span
-            className="serif-moment"
+            className="num"
             style={{
               fontSize: "2.1rem",
               fontWeight: 400,
@@ -140,7 +140,7 @@ export function CupFill({
             fontSize: "0.75rem",
             color: "var(--muted)",
             marginTop: "0.45rem",
-            fontFamily: "var(--font-mono)",
+            
           }}
         >
           <span>₹10,000</span>
@@ -169,7 +169,7 @@ export function CupFill({
             <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block" }}>
               Creator budget
             </span>
-            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: "0.9375rem", color: "var(--ink)" }}>
+            <span style={{ fontWeight: 600, fontSize: "0.9375rem", color: "var(--ink)" }}>
               {formatINR(budgetPaise)}
             </span>
           </div>
@@ -178,7 +178,7 @@ export function CupFill({
             <span style={{ fontSize: "0.75rem", color: "var(--muted)", display: "block" }}>
               Platform Fee (15%)
             </span>
-            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: "0.9375rem", color: "var(--ink)" }}>
+            <span style={{ fontWeight: 600, fontSize: "0.9375rem", color: "var(--ink)" }}>
               {formatINR(feePaise)}
             </span>
           </div>

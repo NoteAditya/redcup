@@ -19,7 +19,6 @@ export default async function BountiesPage() {
   return (
     <MarketingShell>
       <div style={{ maxWidth: "700px", marginBottom: "2.5rem" }}>
-        <p className="kicker">Live Directory</p>
         <h1 style={{ marginBottom: "0.65rem" }}>Open Reel Campaigns</h1>
         <p className="lede">
           Funded Instagram reel campaigns currently accepting creator applications. Authenticate as a creator to view your personalized eligibility status.

@@ -90,7 +90,7 @@ export function BloomWorkbench() {
             <div className="rec__cap" />
           </button>
           <div>
-            <div style={{ fontSize: "0.75rem", fontFamily: "var(--font-mono)", color: "var(--color-muted)", textTransform: "uppercase" }}>
+            <div style={{ fontSize: "0.75rem", color: "var(--color-muted)", textTransform: "uppercase" }}>
               {isPlaying ? "Simulating Sequence..." : "Campaign Lifecycle • Tap button to run"}
             </div>
             <strong style={{ fontSize: "1.0625rem", color: "var(--color-ink)", display: "block", marginTop: "0.1rem" }}>
@@ -165,7 +165,7 @@ export function BloomWorkbench() {
                   <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--color-ink)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {lane.label}
                   </span>
-                  <span style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", color: "var(--color-muted)", flexShrink: 0, marginLeft: "0.5rem" }}>
+                  <span style={{ fontSize: "0.6875rem", color: "var(--color-muted)", flexShrink: 0, marginLeft: "0.5rem" }}>
                     {lane.timecode}
                   </span>
                 </div>
@@ -210,7 +210,7 @@ export function BloomWorkbench() {
           <span style={{ fontSize: "0.75rem", color: "var(--color-muted)", display: "block" }}>
             What you pay for
           </span>
-          <div className="serif-moment" style={{ fontSize: "1.5rem", color: "var(--color-accent)", marginTop: "0.2rem" }}>
+          <div className="num" style={{ fontSize: "1.5rem", color: "var(--color-accent)", marginTop: "0.2rem" }}>
             Views Instagram verifies
           </div>
           <div style={{ fontSize: "0.75rem", color: "var(--color-muted)", marginTop: "0.35rem" }}>

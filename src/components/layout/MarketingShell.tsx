@@ -36,13 +36,13 @@ export function MarketingShell({
             </div>
 
             <div>
-              <p>Platform</p>
+              <p>Product</p>
               <ul>
                 <li>
-                  <Link href="/for-brands">For Brands</Link>
+                  <Link href="/for-brands">For brands</Link>
                 </li>
                 <li>
-                  <Link href="/for-creators">For Creators</Link>
+                  <Link href="/for-creators">For creators</Link>
                 </li>
                 <li>
                   <Link href="/bounties">Open Campaigns</Link>
@@ -69,7 +69,7 @@ export function MarketingShell({
             </div>
 
             <div>
-              <p>Legal &amp; Trust</p>
+              <p>Legal</p>
               <ul>
                 <li>
                   <Link href="/terms">Terms of Use</Link>
